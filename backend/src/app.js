@@ -1,13 +1,23 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { env } from "./config/env.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
+import authRoutes from "./modules/auth/auth.routes.js";
+import userRoutes from "./modules/users/user.routes.js";
+import profileRoutes from "./modules/profiles/profile.routes.js";
+import postRoutes from "./modules/posts/post.routes.js";
+import referralRoutes from "./modules/referrals/referral.routes.js";
+import directoryRoutes from "./modules/directory/directory.routes.js";
+import notificationRoutes from "./modules/notifications/notification.routes.js";
+import hofRoutes from "./modules/hallOfFame/hof.routes.js";
 
 const app = express();
 
 /* CORS */
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: env.corsOrigin,
     credentials: true,
   })
 );
@@ -26,25 +36,22 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Alumni Backend API Running 🚀",
+    message: "Alumni Backend API Running ",
   });
 });
 
-/* Routes (to be added later) */
-// app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/alumni", alumniRoutes);
-// app.use("/api/v1/blog", blogRoutes);
-// app.use("/api/v1/referral", referralRoutes);
+/* Routes */
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/profiles", profileRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/referrals", referralRoutes);
+app.use("/api/directory", directoryRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/hall-of-fame", hofRoutes);
 
 /* Global Error Handler */
-app.use((err, req, res, next) => {
-  console.error(err.message);
-
-  res.status(err.statusCode || 500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
-  });
-});
+app.use(errorHandler);
 
 /* 404 Handler */
 app.use((req, res) => {
