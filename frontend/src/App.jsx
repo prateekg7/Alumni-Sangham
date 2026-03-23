@@ -1,12 +1,17 @@
 import React from 'react';
+import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { PerspectiveGrid } from './components/ui/perspective-grid';
 import Grainient from './components/ui/Grainient';
 import { StatsSection } from './components/Stats';
 import { ZoomParallax } from './components/ui/zoom-parallax';
+import { Login } from './components/Login';
+import { AnimatePresence } from 'framer-motion';
 
-function App() {
+function HomePage() {
+  const navigate = useNavigate();
+
   return (
     <div className="relative min-h-screen text-white font-sans selection:bg-blue-500/30 dark pointer-events-none">
       <div className="fixed inset-0 z-0 bg-black pointer-events-auto">
@@ -36,7 +41,7 @@ function App() {
         />
         {/* <PerspectiveGrid /> */}
       </div>
-      <Navbar className="pointer-events-auto" />
+      <Navbar className="pointer-events-auto" onLoginClick={() => navigate('/login')} />
       <main className="relative z-10 pointer-events-none">
         <Hero />
         
@@ -68,6 +73,20 @@ function App() {
         </section>
       </main>
     </div>
+  );
+}
+
+function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<Login onBack={() => navigate('/')} />} />
+      </Routes>
+    </AnimatePresence>
   );
 }
 

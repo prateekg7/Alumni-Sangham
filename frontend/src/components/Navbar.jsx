@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../Assets/iitp-logo.png';
 import { Home, User, Briefcase, FileText } from 'lucide-react';
 
-export function Navbar() {
+export function Navbar({ onLoginClick, className }) {
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
 
@@ -24,7 +24,7 @@ export function Navbar() {
   ];
 
   return (
-    <div className="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-50 flex justify-center w-full px-4 pointer-events-none">
+    <div className={`fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-50 flex justify-center w-full px-4 pointer-events-none ${className || ''}`}>
       <motion.nav
         layout
         initial={{ y: -100, opacity: 0, scale: 0.8 }}
@@ -104,14 +104,14 @@ export function Navbar() {
                 exit={{ width: 0, opacity: 0 }}
                 className="hidden lg:block overflow-hidden"
               >
-                <Button variant="ghost" className="text-white/70 hover:bg-white/10 hover:text-white rounded-full px-5 text-sm font-medium h-9">
+                <Button variant="ghost" className="text-white/70 hover:bg-white/10 hover:text-white rounded-full px-5 text-sm font-medium h-9" onClick={onLoginClick}>
                   Login
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
           <motion.div layout whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button className={`bg-gradient-to-tr from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.3)] rounded-full text-sm font-semibold transition-all ${scrolled ? 'px-4 h-8' : 'px-6 h-9'}`}>
+            <Button className={`bg-gradient-to-tr from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.3)] rounded-full text-sm font-semibold transition-all ${scrolled ? 'px-4 h-8' : 'px-6 h-9'}`} onClick={onLoginClick}>
               Join
             </Button>
           </motion.div>
