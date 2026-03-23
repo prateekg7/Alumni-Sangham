@@ -5,12 +5,13 @@ const hallOfFameSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  batchYear: {
-    type: Number,
-    required: true
-  },
+  
   department: {
     type: String,
+    required: true
+  },
+  batchYear: {
+    type: Number,
     required: true
   },
   currentRole: {
