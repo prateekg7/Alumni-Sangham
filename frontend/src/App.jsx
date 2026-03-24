@@ -7,6 +7,7 @@ import Grainient from './components/ui/Grainient';
 import { StatsSection } from './components/Stats';
 import { ZoomParallax } from './components/ui/zoom-parallax';
 import { Login } from './components/Login';
+import { Register } from './components/Register';
 import { AnimatePresence } from 'framer-motion';
 
 function HomePage() {
@@ -41,7 +42,7 @@ function HomePage() {
         />
         {/* <PerspectiveGrid /> */}
       </div>
-      <Navbar className="pointer-events-auto" onLoginClick={() => navigate('/login')} />
+      <Navbar className="pointer-events-auto" onLoginClick={() => navigate('/login')} onRegisterClick={() => navigate('/register')} />
       <main className="relative z-10 pointer-events-none">
         <Hero />
         
@@ -82,10 +83,15 @@ function App() {
 
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname.startsWith('/login') ? 'login' : location.pathname}>
+      <Routes location={location} key={
+        location.pathname.startsWith('/login') ? 'login' : 
+        location.pathname.startsWith('/register') ? 'register' : location.pathname
+      }>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Navigate to="/login/student" replace />} />
         <Route path="/login/:role" element={<Login onBack={() => navigate('/')} />} />
+        <Route path="/register" element={<Navigate to="/register/student" replace />} />
+        <Route path="/register/:role" element={<Register onBack={() => navigate('/')} />} />
       </Routes>
     </AnimatePresence>
   );
