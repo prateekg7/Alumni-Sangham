@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../Assets/iitp-logo.png';
 import { Home, User, Briefcase, FileText } from 'lucide-react';
 
-export function Navbar({ onLoginClick, className }) {
+export function Navbar({ onLoginClick, onRegisterClick, className }) {
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
 
@@ -111,7 +111,7 @@ export function Navbar({ onLoginClick, className }) {
             )}
           </AnimatePresence>
           <motion.div layout whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button className={`bg-gradient-to-tr from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.3)] rounded-full text-sm font-semibold transition-all ${scrolled ? 'px-4 h-8' : 'px-6 h-9'}`} onClick={onLoginClick}>
+            <Button className={`bg-gradient-to-tr from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.3)] rounded-full text-sm font-semibold transition-all ${scrolled ? 'px-4 h-8' : 'px-6 h-9'}`} onClick={onRegisterClick}>
               Join
             </Button>
           </motion.div>
