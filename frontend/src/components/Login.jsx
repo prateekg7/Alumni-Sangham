@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import Grainient from './ui/Grainient';
 
 export function Login({ onBack }) {
+  const { role } = useParams();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+
+  const activeTab = role === 'alumni' ? 'alumni' : 'student';
 
   return (
     <motion.div 
@@ -88,28 +93,59 @@ export function Login({ onBack }) {
         </div>
 
         {/* Right Side: Form */}
-        <div className="w-full md:w-1/2 bg-[#2c2638] flex flex-col justify-center px-10 md:px-14 py-12 relative z-10 rounded-2xl">
-          <h2 className="text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight">Log in</h2>
-          <p className="text-[#a1a1aa] mb-10 text-sm">
-            Don't have an account? <span className="text-[#A855F7] cursor-pointer hover:underline font-medium">Sign up</span>
-          </p>
+        <div className="w-full md:w-1/2 bg-[#2c2638] flex flex-col px-10 md:px-14 pt-8 pb-12 relative z-10 rounded-2xl">
+          
+          {/* Tab Switcher - Top aligned with left panel image */}
+          <div className="flex items-center w-full border-b border-white/5">
+            <button 
+              onClick={() => navigate('/login/student')}
+              className={`flex-1 relative pb-3 text-lg md:text-xl tracking-wide transition-all duration-300 ${activeTab === 'student' ? 'text-white font-bold drop-shadow-md' : 'text-white/50 font-medium hover:text-white/80'}`}
+            >
+              Student
+              {activeTab === 'student' && (
+                <motion.div 
+                  layoutId="activeTabUnderline"
+                  className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#A855F7] shadow-[0_0_12px_rgba(168,85,247,1)] rounded-full"
+                />
+              )}
+            </button>
+            <button 
+              onClick={() => navigate('/login/alumni')}
+              className={`flex-1 relative pb-3 text-lg md:text-xl tracking-wide transition-all duration-300 ${activeTab === 'alumni' ? 'text-white font-bold drop-shadow-md' : 'text-white/50 font-medium hover:text-white/80'}`}
+            >
+              Alumni
+              {activeTab === 'alumni' && (
+                <motion.div 
+                  layoutId="activeTabUnderline"
+                  className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#A855F7] shadow-[0_0_12px_rgba(168,85,247,1)] rounded-full"
+                />
+              )}
+            </button>
+          </div>
 
-          <form className="flex flex-col gap-5 w-full">
-            {/* Email */}
-            <div className="w-full">
-              <input 
-                type="email" 
-                placeholder="Email" 
-                className="w-full bg-[#36353E] border border-white/5 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg px-4 py-3.5 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
-              />
-            </div>
+          {/* Form Container */}
+          <div className="w-full mt-auto mb-auto">
+            <h2 className="text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight">Log in</h2>
+            <p className="text-[#a1a1aa] mb-8 text-sm">
+              Don't have an account? <span className="text-[#A855F7] cursor-pointer hover:underline font-medium">Sign up</span>
+            </p>
 
-            {/* Password */}
-            <div className="w-full relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                placeholder="Enter your password" 
-                className="w-full bg-[#36353E] border border-white/5 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg px-4 py-3.5 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A] pr-12"
+            <form className="flex flex-col gap-4 w-full">
+              {/* Email */}
+              <div className="w-full">
+                <input 
+                  type="email" 
+                  placeholder="Email" 
+                  className="w-full bg-[#36353E] border border-white/5 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg px-4 py-3.5 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                />
+              </div>
+
+              {/* Password */}
+              <div className="w-full relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Enter your password" 
+                  className="w-full bg-[#36353E] border border-white/5 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg px-4 py-3.5 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A] pr-12"
               />
               <button 
                 type="button"
@@ -142,6 +178,7 @@ export function Login({ onBack }) {
               Log in
             </button>
           </form>
+          </div>
         </div>
       </motion.div>
     </motion.div>

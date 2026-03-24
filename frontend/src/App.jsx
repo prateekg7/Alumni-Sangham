@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
+import { useLocation, useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { PerspectiveGrid } from './components/ui/perspective-grid';
@@ -82,9 +82,10 @@ function App() {
 
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location} key={location.pathname.startsWith('/login') ? 'login' : location.pathname}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login onBack={() => navigate('/')} />} />
+        <Route path="/login" element={<Navigate to="/login/student" replace />} />
+        <Route path="/login/:role" element={<Login onBack={() => navigate('/')} />} />
       </Routes>
     </AnimatePresence>
   );
