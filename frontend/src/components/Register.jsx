@@ -139,14 +139,22 @@ export function Register({ onBack }) {
               {activeTab === 'student' ? (
                 <>
                   <input type="email" placeholder="University Email (.edu)" className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
-                  <input type="text" placeholder="Expected Graduation Year" className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
+                  <div className="flex gap-4 w-full">
+                    <input type="text" placeholder="Department / Major" className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
+                    <input type="text" placeholder="Expected Grad Year" className="w-[120px] bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
+                  </div>
+                  <input type="tel" placeholder="Phone Number" className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
                 </>
               ) : (
                 <>
                   <input type="email" placeholder="Personal or Work Email" className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
                   <div className="flex gap-4 w-full">
-                    <input type="text" placeholder="Grad Year" className="w-full md:w-1/3 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
-                    <input type="text" placeholder="Current Company" className="w-full md:w-2/3 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
+                    <input type="text" placeholder="Department" className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
+                    <input type="text" placeholder="Grad Year" className="w-[100px] bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
+                  </div>
+                  <div className="flex gap-4 w-full">
+                    <input type="text" placeholder="Current Company" className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
+                    <input type="tel" placeholder="Phone" className="w-[150px] bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]" />
                   </div>
                 </>
               )}

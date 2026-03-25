@@ -1,6 +1,12 @@
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useRef } from 'react';
-import { Globe, LayoutDashboard, Newspaper, Share2, Mail, Star, Bell, ShieldCheck } from 'lucide-react';
+import Globe from 'lucide-react/dist/esm/icons/globe.js';
+import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard.js';
+import Newspaper from 'lucide-react/dist/esm/icons/newspaper.js';
+import Share2 from 'lucide-react/dist/esm/icons/share-2.js';
+import Mail from 'lucide-react/dist/esm/icons/mail.js';
+import Star from 'lucide-react/dist/esm/icons/star.js';
+import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check.js';
 
 const HOF_CARDS = [
   { name: 'Sundar Pichai', role: 'CEO, Alphabet Inc.', src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop' },
@@ -80,7 +86,8 @@ export function ZoomParallax() {
 
   return (
     <div ref={container} className="relative h-[350vh]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center pointer-events-none">
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center pointer-events-none relative">
+        <div className="absolute inset-0 z-0 bg-black/70 backdrop-blur-sm pointer-events-none" />
 
         {/* ── Heading (Platform Features badge) ── */}
         <motion.div
@@ -151,7 +158,13 @@ export function ZoomParallax() {
                        {HOF_CARDS.map(hof => (
                          <div key={hof.name} className="shrink-0 w-64 md:w-80 bg-black/40 border border-white/10 p-5 md:p-6 rounded-3xl backdrop-blur-xl group/card hover:-translate-y-2 transition-transform duration-300 hover:border-amber-400/30 hover:shadow-[0_0_40px_-10px_rgba(251,191,36,0.2)]">
                            <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 rounded-full overflow-hidden border-2 border-amber-500/30 group-hover/card:border-amber-400 transition-colors">
-                             <img src={hof.src} className="w-full h-full object-cover" alt={hof.name} />
+                             <img
+                               src={hof.src}
+                               alt={hof.name}
+                               loading="lazy"
+                               decoding="async"
+                               className="w-full h-full object-cover"
+                             />
                            </div>
                            <h3 className="text-lg md:text-xl font-bold text-white text-center group-hover/card:text-amber-300 transition-colors">{hof.name}</h3>
                            <p className="text-amber-400/80 text-xs md:text-sm text-center font-medium mt-1 md:mt-2">{hof.role}</p>

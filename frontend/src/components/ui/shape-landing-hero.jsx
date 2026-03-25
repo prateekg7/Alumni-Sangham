@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Circle } from "lucide-react";
+import Circle from "lucide-react/dist/esm/icons/circle.js";
 import { cn } from "@/lib/utils";
 
 function ElegantShape({
