@@ -19,8 +19,8 @@ const profileSchema = new mongoose.Schema(
     city: { type: String, default: null },
     country: { type: String, default: null },
     location: {
-      type: { type: String, enum: ["Point"], default: "Point" },
-      coordinates: { type: [Number], default: undefined },
+      type: { type: String, enum: ["Point"] },
+      coordinates: { type: [Number] },
     },
     showEmail: { type: Boolean, default: false },
     showInDirectory: { type: Boolean, default: true },

@@ -1,4 +1,4 @@
-import User from "../auth/auth.model.js";
+import User from "../auth/user.model.js";
 
 export const getUsers = async () => User.find().select("-passwordHash");
 
