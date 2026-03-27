@@ -5,6 +5,21 @@ import { AnimatePresence } from 'framer-motion';
 const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
 const Login = lazy(() => import('./components/Login').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./components/Register').then((m) => ({ default: m.Register })));
+const AuthenticatedLayout = lazy(() =>
+  import('./layouts/AuthenticatedLayout').then((m) => ({ default: m.AuthenticatedLayout })),
+);
+const DashboardPage = lazy(() =>
+  import('./pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
+const DirectoryPage = lazy(() =>
+  import('./pages/AuthenticatedPages').then((m) => ({ default: m.DirectoryPage })),
+);
+const BlogPage = lazy(() =>
+  import('./pages/AuthenticatedPages').then((m) => ({ default: m.BlogPage })),
+);
+const ProfilePage = lazy(() =>
+  import('./pages/AuthenticatedPages').then((m) => ({ default: m.ProfilePage })),
+);
 
 function App() {
   const location = useLocation();
@@ -26,6 +41,13 @@ function App() {
           <Route path="/login/:role" element={<Login onBack={() => navigate('/')} />} />
           <Route path="/register" element={<Navigate to="/register/student" replace />} />
           <Route path="/register/:role" element={<Register onBack={() => navigate('/')} />} />
+          <Route element={<AuthenticatedLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/directory" element={<DirectoryPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/profile/me" element={<ProfilePage />} />
+            <Route path="/profile/:profileId" element={<ProfilePage />} />
+          </Route>
         </Routes>
       </Suspense>
     </AnimatePresence>
