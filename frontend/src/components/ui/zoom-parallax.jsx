@@ -8,22 +8,14 @@ import Mail from 'lucide-react/dist/esm/icons/mail.js';
 import Star from 'lucide-react/dist/esm/icons/star.js';
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check.js';
 
-const HOF_CARDS = [
-  { name: 'Sundar Pichai', role: 'CEO, Alphabet Inc.', src: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop' },
-  { name: 'Arvind Krishna', role: 'CEO, IBM', src: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop' },
-  { name: 'N. R. Narayana Murthy', role: 'Founder, Infosys', src: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=400&fit=crop' },
-  { name: 'Vinod Khosla', role: 'Founder, Khosla Ventures', src: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop' },
-  { name: 'Thomas Kurian', role: 'CEO, Google Cloud', src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop' }
-];
-
 const CARDS = [
   // Block 1 (Left Tall): x: 0 to 1/3, y: 0 to 2/3
   {
     id: 'block1',
     gridArea: '1 / 1 / 3 / 2', // rows 1-2, col 1
-    gradient: 'from-violet-600/40 to-purple-900/30',
-    border: 'border-violet-400/30',
-    accent: 'text-violet-300',
+    gradient: 'from-blue-600/20 to-blue-950/60',
+    border: 'border-blue-400/20',
+    accent: 'text-white',
     features: [
       { icon: Globe,       label: 'Alumni Directory',   desc: 'Interactive world map connecting alumni globally.' },
       { icon: ShieldCheck, label: 'Verified Profiles',   desc: 'Automated identity checks for every member.' },
@@ -33,9 +25,9 @@ const CARDS = [
   {
     id: 'block2',
     gridArea: '1 / 2 / 2 / 4', // row 1, cols 2-3
-    gradient: 'from-cyan-600/40 to-sky-900/30',
-    border: 'border-cyan-400/30',
-    accent: 'text-cyan-300',
+    gradient: 'from-sky-600/20 to-sky-950/60',
+    border: 'border-sky-400/20',
+    accent: 'text-white',
     features: [
       { icon: LayoutDashboard, label: 'Role Dashboards',  desc: 'Tailored views for students, alumni, and admins.' },
     ],
@@ -47,9 +39,9 @@ const CARDS = [
   {
     id: 'block3',
     gridArea: '3 / 1 / 4 / 3', // row 3, cols 1-2
-    gradient: 'from-amber-500/40 to-orange-900/30',
-    border: 'border-amber-400/30',
-    accent: 'text-amber-300',
+    gradient: 'from-cyan-600/20 to-cyan-950/60',
+    border: 'border-cyan-400/20',
+    accent: 'text-white',
     features: [
       { icon: Newspaper, label: 'Blog & Jobs', desc: 'Unified feed for articles and internships.' },
       { icon: Share2,    label: 'Referrals',   desc: 'Request job referrals in one click.' },
@@ -59,12 +51,12 @@ const CARDS = [
   {
     id: 'block4',
     gridArea: '2 / 3 / 4 / 4', // rows 2-3, col 3
-    gradient: 'from-rose-600/40 to-pink-900/30',
-    border: 'border-rose-400/30',
-    accent: 'text-rose-300',
+    gradient: 'from-indigo-600/20 to-indigo-950/60',
+    border: 'border-indigo-400/20',
+    accent: 'text-white',
     features: [
       { icon: Mail, label: 'Email Connect', desc: 'Privacy-preserving email relay outreach.' },
-      { icon: Star, label: 'Hall of Fame',  desc: 'Showcase distinguished achievements.' },
+      { icon: Star, label: 'Distinguished',  desc: 'Showcase outstanding alumni achievements.' },
     ],
   },
 ];
@@ -83,6 +75,9 @@ export function ZoomParallax() {
   // Heading fades out fast
   const headingOp = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
   const headingY  = useTransform(scrollYProgress, [0, 0.15], [0, -20]);
+
+  // Fades out the center portal content as it zooms towards the camera
+  const portalOp = useTransform(scrollYProgress, [0.1, 0.6], [1, 0]);
 
   return (
     <div ref={container} className="relative h-[350vh]">
@@ -136,43 +131,20 @@ export function ZoomParallax() {
               </div>
             ))}
             
-            {/* ── THE PORTAL (Hall of Fame) ── */}
-            {/* 
-              This cell gets physically larger on the screen relative to the grid scaling.
-              By applying overflow-hidden, it acts as a mask.
-              Inside it, the motion.div uses a static scale(0.18) so the Hall of Fame fits inside the cell natively at scroll 0,
-              and naturally scales up to ~1.0 size when the grid zooms 5x!
-            */}
-            <div className="col-start-2 row-start-2 relative rounded-[2rem] md:rounded-[3rem] overflow-hidden pointer-events-auto w-full h-full flex items-center justify-center border border-white/5 shadow-[0_0_40px_rgba(251,191,36,0.1)] bg-black/40 backdrop-blur-sm z-20 group">
+            {/* ── THE PORTAL (Gateway to Hall of Fame) ── */}
+            <div className="col-start-2 row-start-2 relative rounded-[2rem] md:rounded-[3rem] overflow-hidden pointer-events-none w-full h-full border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)] z-20 group">
                <motion.div 
-                 style={{ transform: 'scale(0.18)' }}
-                 className="absolute flex flex-col items-center w-[100vw] shrink-0"
+                 style={{ opacity: portalOp }}
+                 className="absolute inset-0 bg-gradient-to-br from-zinc-800/40 to-zinc-950/60 backdrop-blur-md flex flex-col items-center justify-center gap-4 md:gap-6 p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/10"
                >
-                  {/* The actual Hall of Fame Content */}
-                  <div className="w-full flex flex-col justify-center items-center pointer-events-auto">
-                    <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-600 mb-8 drop-shadow-2xl text-center">
-                      Hall of Fame
-                    </h2>
-                    
-                    <div className="w-full max-w-7xl overflow-hidden pb-8 flex items-center justify-center gap-6 px-4 md:px-24">
-                       {HOF_CARDS.map(hof => (
-                         <div key={hof.name} className="shrink-0 w-64 md:w-80 bg-black/40 border border-white/10 p-5 md:p-6 rounded-3xl backdrop-blur-xl group/card hover:-translate-y-2 transition-transform duration-300 hover:border-amber-400/30 hover:shadow-[0_0_40px_-10px_rgba(251,191,36,0.2)]">
-                           <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 rounded-full overflow-hidden border-2 border-amber-500/30 group-hover/card:border-amber-400 transition-colors">
-                             <img
-                               src={hof.src}
-                               alt={hof.name}
-                               loading="lazy"
-                               decoding="async"
-                               className="w-full h-full object-cover"
-                             />
-                           </div>
-                           <h3 className="text-lg md:text-xl font-bold text-white text-center group-hover/card:text-amber-300 transition-colors">{hof.name}</h3>
-                           <p className="text-amber-400/80 text-xs md:text-sm text-center font-medium mt-1 md:mt-2">{hof.role}</p>
-                           <button className="mt-4 md:mt-6 w-full py-2 md:py-2.5 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-white text-xs md:text-sm font-semibold transition-colors">View Profile</button>
-                         </div>
-                       ))}
-                    </div>
-                  </div>
+                 <Star className="w-10 h-10 md:w-14 md:h-14 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-widest text-center uppercase drop-shadow-2xl leading-tight">
+                   Hall of Fame
+                 </h2>
+                 <div className="h-[2px] w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+                 <span className="text-white/80 text-[10px] md:text-xs uppercase font-extrabold tracking-[0.3em] md:tracking-[0.4em] text-center drop-shadow-md">
+                   Scroll to enter
+                 </span>
                </motion.div>
             </div>
 
