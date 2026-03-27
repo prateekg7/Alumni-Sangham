@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -85,5 +85,109 @@
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .auth-shell {
+    background: #0f0e17;
+    color: #e8e6f0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .auth-page-title {
+    color: #e8e6f0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .auth-card {
+    border-radius: 0.5rem;
+    border: 1px solid #2a2940;
+    background: #1a1925;
+    padding: 1.25rem;
+  }
+
+  .auth-card-hover {
+    transition: background-color 160ms ease, border-color 160ms ease;
+  }
+
+  .auth-card-hover:hover {
+    background: #242336;
+  }
+
+  .auth-muted {
+    color: #5d5b71;
+  }
+
+  .auth-secondary {
+    color: #9694a8;
+  }
+
+  .auth-divider {
+    border-color: #2a2940;
+  }
+
+  .auth-input {
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid #2a2940;
+    background: #1a1925;
+    color: #e8e6f0;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .auth-input::placeholder {
+    color: #5d5b71;
+  }
+
+  .auth-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 1px #6c63ff;
+    border-color: #6c63ff;
+  }
+
+  .auth-btn-primary {
+    border-radius: 0.375rem;
+    border: 1px solid transparent;
+    background: #6c63ff;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .auth-btn-primary:hover {
+    background: #5a52d9;
+  }
+
+  .auth-btn-secondary {
+    border-radius: 0.375rem;
+    border: 1px solid #2a2940;
+    background: #1a1925;
+    color: #e8e6f0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .auth-btn-secondary:hover {
+    background: #242336;
+  }
+
+  .auth-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1rem;
   }
 }
