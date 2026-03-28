@@ -15,6 +15,7 @@ import GraduationCap from 'lucide-react/dist/esm/icons/graduation-cap.js';
 import Handshake from 'lucide-react/dist/esm/icons/handshake.js';
 import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid.js';
 import Link2 from 'lucide-react/dist/esm/icons/link-2.js';
+import Mail from 'lucide-react/dist/esm/icons/mail.js';
 import MapPin from 'lucide-react/dist/esm/icons/map-pin.js';
 import MessageSquareText from 'lucide-react/dist/esm/icons/message-square-text.js';
 import Newspaper from 'lucide-react/dist/esm/icons/newspaper.js';
@@ -24,6 +25,7 @@ import Send from 'lucide-react/dist/esm/icons/send.js';
 import Share2 from 'lucide-react/dist/esm/icons/share-2.js';
 import SlidersHorizontal from 'lucide-react/dist/esm/icons/sliders-horizontal.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
+import SquarePen from 'lucide-react/dist/esm/icons/square-pen.js';
 import UserRound from 'lucide-react/dist/esm/icons/user-round.js';
 import X from 'lucide-react/dist/esm/icons/x.js';
 import { Button } from '@/components/ui/button';
@@ -281,6 +283,70 @@ function fieldByLabel(fields, label) {
   return String(v);
 }
 
+function splitTagString(value) {
+  if (!value) {
+    return [];
+  }
+
+  return String(value)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function uniqStrings(values) {
+  return [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))];
+}
+
+function buildProfileInterestTags(profile) {
+  return uniqStrings([
+    ...(Array.isArray(profile.interests) ? profile.interests : []),
+    ...(Array.isArray(profile.skills) ? profile.skills : []),
+    ...(Array.isArray(profile.supportModes) ? profile.supportModes : []),
+    ...splitTagString(fieldByLabel(profile.roleFields, 'Target roles')),
+    ...splitTagString(fieldByLabel(profile.roleFields, 'Focus areas')),
+    profile.domain,
+    profile.chapter,
+  ]).slice(0, 10);
+}
+
+function buildProfileFacts(profile) {
+  if (profile.role === 'Student') {
+    return [
+      { label: 'Program', value: fieldByLabel(profile.roleFields, 'Program') || profile.department || 'Student' },
+      { label: 'Class of', value: fieldByLabel(profile.roleFields, 'Graduation year') || '—' },
+      { label: 'Cumulative GPA', value: fieldByLabel(profile.roleFields, 'CGPA') || '—' },
+      { label: 'Target role', value: splitTagString(fieldByLabel(profile.roleFields, 'Target roles'))[0] || '—' },
+    ];
+  }
+
+  return [
+    { label: 'Company', value: fieldByLabel(profile.roleFields, 'Current company') || '—' },
+    { label: 'Role', value: fieldByLabel(profile.roleFields, 'Current role') || '—' },
+    { label: 'Experience', value: fieldByLabel(profile.roleFields, 'Experience') || '—' },
+    {
+      label: 'Open to',
+      value:
+        (Array.isArray(profile.supportModes) && profile.supportModes[0]) ||
+        splitTagString(fieldByLabel(profile.roleFields, 'Mentorship'))[0] ||
+        profile.domain ||
+        'Networking',
+    },
+  ];
+}
+
+function buildNarrativeMeta(profile) {
+  return uniqStrings([
+    profile.role,
+    profile.baseLabel,
+    profile.region,
+    profile.chapter,
+    profile.domain,
+    profile.emailVisible ? 'Visible email' : '',
+    'Public resume',
+  ]).slice(0, 6);
+}
+
 function FieldList({ heading, icon: Icon, fields }) {
   return (
     <div className="rounded-[24px] bg-[#101216] p-5">
@@ -382,11 +448,17 @@ function DocumentsPanel({ profile, isOwnProfile, onResumeUploaded }) {
   };
 
   return (
-    <SurfaceCard
-      title="Documents"
-      subtitle="Your resume is explicitly public so anyone viewing this profile can open it directly."
-      action={
-        isOwnProfile ? (
+    <section className="space-y-6" id="documents">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h3 className="text-[1.8rem] font-semibold tracking-tight text-white">Portfolio documents</h3>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-white/45">
+            {isOwnProfile
+              ? 'Your resume stays public to everyone who opens this profile. Upload updated files here without changing the profile layout.'
+              : `${profile.name.split(' ')[0]}'s resume is publicly visible and can be opened directly from this profile.`}
+          </p>
+        </div>
+        {isOwnProfile ? (
           <>
             <input
               ref={fileRef}
@@ -400,43 +472,657 @@ function DocumentsPanel({ profile, isOwnProfile, onResumeUploaded }) {
               variant="ghost"
               disabled={uploadBusy}
               onClick={triggerPick}
-              className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-white/78 hover:bg-[#1f232a] hover:text-white disabled:opacity-50"
+              className="h-10 rounded-xl border border-[#2a3040] bg-[#171b22] px-4 text-white/78 hover:bg-[#1d2129] hover:text-white disabled:opacity-50"
             >
               <Plus className="mr-2 h-4 w-4" />
               {uploadBusy ? 'Uploading…' : 'Add your resume'}
             </Button>
           </>
-        ) : (
-          <div className="rounded-full bg-[#171a20] px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/40">
-            Public documents
-          </div>
-        )
-      }
-    >
-      {uploadError ? <div className="mb-3 text-sm text-rose-300">{uploadError}</div> : null}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {profile.documents.map((document) => (
-          <DocumentTile key={`${document.title}-${document.updatedAt}`} document={document} />
-        ))}
+        ) : null}
+      </div>
+
+      {uploadError ? <div className="text-sm text-rose-300">{uploadError}</div> : null}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {profile.documents.map((document) => {
+          const fileHref = document.fileUrl ? resolvePublicAssetUrl(document.fileUrl) : '';
+          const isResume = document.type === 'Resume';
+
+          return (
+            <div
+              key={`${document.title}-${document.updatedAt}`}
+              className="flex items-center justify-between gap-4 rounded-2xl border border-[#2a3040]/50 bg-[#161a21] p-4"
+            >
+              <div className="flex min-w-0 items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#20242d] text-[#c0c1ff]">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">{document.title}</p>
+                  <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-white/28">
+                    {document.updatedAt || 'On profile'}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-white/42">{document.visibility}</p>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                {fileHref ? (
+                  <>
+                    <a
+                      href={fileHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#20242d] text-white/58 transition hover:text-white"
+                      aria-label={`Open ${document.title}`}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </a>
+                    <a
+                      href={fileHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#20242d] text-[#c0c1ff] transition hover:text-white"
+                      aria-label={`Download ${document.title}`}
+                    >
+                      {isResume ? <Download className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                    </a>
+                  </>
+                ) : (
+                  <div className="rounded-xl bg-[#20242d] px-3 py-2 text-xs text-white/40">No file</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
 
         {isOwnProfile ? (
           <button
             type="button"
             disabled={uploadBusy}
             onClick={triggerPick}
-            className="flex min-h-[250px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#232730] bg-[#101216] p-6 text-center transition hover:border-[#343a46] hover:bg-[#15181e] disabled:opacity-50"
+            className="flex min-h-[156px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#31384a] bg-[#12161d] p-6 text-center transition hover:border-[#44e2cd]/40 hover:bg-[#171b22] disabled:opacity-50"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#171a20] text-white/72">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#1d2230] text-[#44e2cd]">
               <Plus className="h-6 w-6" />
             </div>
-            <div className="mt-4 text-xl font-semibold text-white">Add your resume</div>
-            <div className="mt-2 max-w-xs text-sm leading-relaxed text-white/42">
-              PDF or Word from your device. Anyone with your public profile link can open it.
+            <div className="mt-4 text-sm font-semibold tracking-wide text-white">Drop new files here</div>
+            <div className="mt-2 text-[11px] uppercase tracking-[0.24em] text-white/28">
+              PDF, DOCX up to 10MB
             </div>
           </button>
         ) : null}
       </div>
-    </SurfaceCard>
+    </section>
+  );
+}
+
+function ProfileHeroSidebar({ profile, isOwnProfile, onEdit }) {
+  const email = fieldByLabel(profile.personalFields, 'Email');
+  const linkedinUrl = fieldByLabel(profile.personalFields, 'LinkedIn');
+  const portfolioUrl = fieldByLabel(profile.personalFields, 'Portfolio');
+  const avatarSrc = profile.photoUrl ? resolvePublicAssetUrl(profile.photoUrl) : '';
+  const socialButtons = [
+    { href: linkedinUrl, icon: Link2, label: 'Open LinkedIn' },
+    { href: portfolioUrl, icon: Globe, label: 'Open portfolio' },
+  ].filter((item) => item.href);
+
+  return (
+    <section className="space-y-6">
+      <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+        <div className="group relative">
+          <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#44e2cd] to-[#8083ff] opacity-30 blur transition duration-500 group-hover:opacity-55" />
+          <div className="relative flex h-40 w-40 items-center justify-center rounded-full border border-[#2d3340] bg-[#171b22] p-1">
+            {avatarSrc ? (
+              <img src={avatarSrc} alt={profile.name} className="h-full w-full rounded-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-[#c0c1ff] to-[#8083ff] text-4xl font-semibold text-[#101419]">
+                {profile.initials}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-6 space-y-2">
+          <h1 className="font-headline text-4xl font-black tracking-tight text-[#e0e2ea]">{profile.name}</h1>
+          <p className="text-base font-medium text-[#c7c4d7]">{profile.headline}</p>
+        </div>
+
+        <div className="mt-5 flex flex-wrap justify-center gap-3 lg:justify-start">
+          {email ? (
+            <div className="flex items-center gap-2 rounded-full border border-[#2d3340] bg-[#171b22] px-3 py-1.5 text-sm text-[#c7c4d7]">
+              <Mail className="h-4 w-4 text-[#44e2cd]" />
+              <span>{email}</span>
+            </div>
+          ) : null}
+          <div className="flex items-center gap-2 rounded-full border border-[#2d3340] bg-[#171b22] px-3 py-1.5 text-sm text-[#c7c4d7]">
+            <MapPin className="h-4 w-4 text-[#c0c1ff]" />
+            <span>{profile.location}</span>
+          </div>
+        </div>
+
+        {socialButtons.length || isOwnProfile ? (
+          <div className="mt-5 flex items-center gap-3">
+            {socialButtons.map((item) => {
+              const Icon = item.icon;
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={item.label}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#1c2025] text-[#c7c4d7] transition hover:text-[#44e2cd]"
+                >
+                  <Icon className="h-4.5 w-4.5" />
+                </a>
+              );
+            })}
+
+            {isOwnProfile ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#1c2025] px-4 py-2 text-sm font-medium text-[#e0e2ea] transition hover:text-[#44e2cd]"
+              >
+                <SquarePen className="h-4 w-4" />
+                Edit
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function ProfileStrengthPanel({ checklist, profileProgress, profileComplete, completeProfile }) {
+  const nextItem = checklist.find((item) => !item.done)?.label;
+
+  return (
+    <section className="rounded-2xl border border-[#2d3340]/40 bg-[#171b22] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)]">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-[#e0e2ea]">Profile Strength</h3>
+        <span className="text-sm font-semibold text-[#44e2cd]">{profileProgress}%</span>
+      </div>
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#101419]">
+        <div className="h-full rounded-full bg-gradient-to-r from-[#c0c1ff] to-[#44e2cd]" style={{ width: `${profileProgress}%` }} />
+      </div>
+      <div className="mt-4 rounded-xl border border-[#2d3340]/40 bg-[#101419] p-3 text-sm leading-6 text-[#c7c4d7]">
+        {profileComplete
+          ? 'Your profile is complete and visible across the alumni network.'
+          : nextItem
+            ? `Complete "${nextItem}" next to strengthen visibility for referrals and discovery.`
+            : 'Keep your resume and details current so the profile stays high trust.'}
+      </div>
+      {!profileComplete ? (
+        <Button
+          type="button"
+          onClick={completeProfile}
+          className="mt-4 h-10 rounded-xl border-0 bg-[#c0c1ff] px-4 text-sm font-semibold text-[#07006c] hover:bg-[#d4d5ff]"
+        >
+          Finalize profile
+        </Button>
+      ) : null}
+    </section>
+  );
+}
+
+function PublicProfilePanel({ profile, viewerRole }) {
+  const canRequestReferral =
+    viewerRole === 'student' && profile.role === 'Alumni' && Boolean(profile.referralTarget);
+
+  if (canRequestReferral) {
+    return <ReferralActionCard profile={profile} />;
+  }
+
+  return (
+    <section className="rounded-2xl border border-[#2d3340]/40 bg-[#171b22] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)]">
+      <div className="inline-flex items-center gap-2 rounded-full border border-[#31384a] bg-[#101419] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-[#c0c1ff]">
+        <Eye className="h-3.5 w-3.5" />
+        Public profile
+      </div>
+      <div className="mt-4 text-lg font-semibold text-[#e0e2ea]">
+        {profile.role === 'Student' ? 'Review-ready student view' : 'Network-ready alumni view'}
+      </div>
+      <p className="mt-3 text-sm leading-6 text-[#c7c4d7]">
+        {profile.role === 'Student'
+          ? 'Only public student information is visible here. Profile completion, internal readiness, and owner-only controls stay hidden from viewers.'
+          : 'This view is designed for discovery. Resume, focus, and visible networking context are public; internal owner controls stay private.'}
+      </p>
+    </section>
+  );
+}
+
+function ProfileCorePanel({ profile }) {
+  const facts = buildProfileFacts(profile);
+  const title = profile.role === 'Student' ? 'Academic Core' : 'Professional Snapshot';
+
+  return (
+    <section className="space-y-5">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">{title}</h3>
+      <div className="grid grid-cols-2 gap-5">
+        {facts.map((fact) => (
+          <div key={fact.label} className="space-y-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#7b8093]">{fact.label}</p>
+            <p className="text-sm font-medium text-[#e0e2ea]">{fact.value}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProfileNarrativeSection({ profile }) {
+  const meta = buildNarrativeMeta(profile);
+
+  return (
+    <section className="space-y-6" id="about">
+      <div className="inline-flex items-center rounded-full border border-[#44e2cd]/20 bg-[#44e2cd]/10 px-4 py-1">
+        <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#44e2cd]">The Narrative</span>
+      </div>
+      <div className="max-w-3xl">
+        <p className="text-xl font-light leading-relaxed text-[#e0e2ea] md:text-2xl">
+          {profile.about}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-3">
+        {meta.map((item) => (
+          <span
+            key={item}
+            className="rounded-full border border-[#2d3340] bg-[#171b22] px-4 py-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#c7c4d7]"
+          >
+            {item}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProfileTimelineSection({ profile }) {
+  return (
+    <section className="space-y-8" id="projects">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h3 className="text-[1.8rem] font-semibold tracking-tight text-white">{profile.trackTitle || 'Recent Endeavors'}</h3>
+          {profile.trackSubtitle ? <p className="mt-2 text-sm leading-7 text-white/45">{profile.trackSubtitle}</p> : null}
+        </div>
+        <span className="text-[11px] uppercase tracking-[0.24em] text-white/28">Scroll to explore</span>
+      </div>
+
+      <div className="relative space-y-10 pl-8 before:absolute before:bottom-2 before:left-0 before:top-2 before:w-[2px] before:bg-gradient-to-b before:from-[#c0c1ff] before:via-[#44e2cd] before:to-transparent before:content-['']">
+        {profile.trackItems.map((item) => (
+          <div key={item.title} className="group relative">
+            <div
+              className="absolute -left-[37px] top-1.5 h-4 w-4 rounded-full ring-4 ring-[#0f0e17]"
+              style={{ backgroundColor: item.accent, boxShadow: `0 0 18px ${item.accent}66` }}
+            />
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <h4 className="text-xl font-semibold text-[#e0e2ea] transition-colors group-hover:text-[#c0c1ff]">{item.title}</h4>
+                <span className="text-[11px] uppercase tracking-[0.22em] text-white/26">{item.note}</span>
+              </div>
+              <p className="max-w-2xl text-sm leading-7 text-[#c7c4d7]">{item.meta}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProfileInterestsSection({ profile }) {
+  const tags = buildProfileInterestTags(profile);
+
+  if (!tags.length) {
+    return null;
+  }
+
+  return (
+    <section className="space-y-6" id="interests">
+      <h3 className="text-[1.8rem] font-semibold tracking-tight text-white">Core Interests</h3>
+      <div className="flex flex-wrap gap-3">
+        {tags.map((tag, index) => {
+          const hoverClass =
+            index % 3 === 0
+              ? 'hover:border-[#44e2cd] hover:text-[#44e2cd]'
+              : index % 3 === 1
+                ? 'hover:border-[#c0c1ff] hover:text-[#c0c1ff]'
+                : 'hover:border-[#ddb7ff] hover:text-[#ddb7ff]';
+
+          return (
+            <div
+              key={tag}
+              className={cn(
+                'rounded-full border border-[#2d3340] bg-[#171b22] px-5 py-2.5 text-sm font-medium text-[#e0e2ea] transition-all',
+                hoverClass,
+              )}
+            >
+              {tag}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+const profileEditInputClass =
+  'mt-1 w-full rounded-xl border border-[#2d3340] bg-[#11151c] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-[#44e2cd]/50 focus:outline-none focus:ring-1 focus:ring-[#44e2cd]/30';
+
+function ProfileEditorPanel({ profile, sessionUser, open, onClose, onSaved }) {
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState('');
+  const [form, setForm] = React.useState(null);
+  const isAlumni = profile.role === 'Alumni';
+
+  React.useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const loc = profile.location || '';
+    const parts = loc.split(',').map((item) => item.trim());
+    setForm({
+      fullName: profile.name || '',
+      phone: fieldByLabel(profile.personalFields, 'Phone'),
+      city: parts[0] || '',
+      country: parts.slice(1).join(', ') || '',
+      linkedinUrl: fieldByLabel(profile.personalFields, 'LinkedIn'),
+      portfolioUrl: fieldByLabel(profile.personalFields, 'Portfolio'),
+      headline: profile.headline || '',
+      about: profile.about || '',
+      showEmail: Boolean(profile.emailVisible),
+      skills: (Array.isArray(profile.skills) ? profile.skills : []).join(', '),
+      interests: (Array.isArray(profile.interests) ? profile.interests : []).join(', '),
+      region: profile.region || '',
+      chapter: profile.chapter || '',
+      domain: profile.domain || '',
+      referralOpen: Boolean(profile.referralOpen),
+      supportModes: (Array.isArray(profile.supportModes) ? profile.supportModes : []).join(', '),
+      department: profile.department || '',
+      currentCompany: fieldByLabel(profile.roleFields, 'Current company'),
+      currentJobTitle: fieldByLabel(profile.roleFields, 'Current role'),
+      yearsExperience: fieldByLabel(profile.roleFields, 'Experience'),
+      focus: fieldByLabel(profile.roleFields, 'Focus areas'),
+      program: fieldByLabel(profile.roleFields, 'Program'),
+      cgpa: fieldByLabel(profile.roleFields, 'CGPA'),
+      targetRoles: fieldByLabel(profile.roleFields, 'Target roles'),
+      preferredLocations: fieldByLabel(profile.roleFields, 'Preferred locations'),
+      referralGoal: fieldByLabel(profile.roleFields, 'Referral goal'),
+      expectedGradYear: fieldByLabel(profile.roleFields, 'Graduation year'),
+    });
+    setSaveError('');
+  }, [open, profile]);
+
+  if (!open || !form) {
+    return null;
+  }
+
+  const updateField = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const saveProfile = async () => {
+    if (!sessionUser?.id) {
+      return;
+    }
+
+    setSaving(true);
+    setSaveError('');
+
+    try {
+      const payload = {
+        fullName: form.fullName.trim(),
+        city: form.city.trim() || null,
+        country: form.country.trim() || null,
+        linkedinUrl: form.linkedinUrl.trim() || null,
+        portfolioUrl: form.portfolioUrl.trim() || null,
+        headline: form.headline.trim() || null,
+        about: form.about.trim() || null,
+        showEmail: Boolean(form.showEmail),
+        skills: splitTagString(form.skills),
+        interests: splitTagString(form.interests),
+      };
+
+      if (isAlumni) {
+        Object.assign(payload, {
+          currentCompany: form.currentCompany.trim() || null,
+          currentJobTitle: form.currentJobTitle.trim() || null,
+          yearsExperience: form.yearsExperience.trim() || null,
+          department: form.department.trim() || null,
+          focus: form.focus.trim() || null,
+          supportModes: splitTagString(form.supportModes),
+          domain: form.domain.trim() || null,
+          chapter: form.chapter.trim() || null,
+          region: form.region.trim() || null,
+          referralOpen: Boolean(form.referralOpen),
+        });
+      } else {
+        Object.assign(payload, {
+          program: form.program.trim() || null,
+          cgpa: form.cgpa.trim() || null,
+          targetRoles: form.targetRoles.trim() || null,
+          preferredLocations: form.preferredLocations.trim() || null,
+          referralGoal: form.referralGoal.trim() || null,
+        });
+      }
+
+      await patchMyProfile(payload);
+
+      const userPatch = { phone: form.phone.trim() || null };
+      if (!isAlumni) {
+        const yearValue = String(form.expectedGradYear || '').trim();
+        if (yearValue) {
+          const yearNumber = Number(yearValue);
+          if (!Number.isFinite(yearNumber)) {
+            setSaveError('Graduation year must be a valid number');
+            setSaving(false);
+            return;
+          }
+          userPatch.expectedGradYear = yearNumber;
+        } else {
+          userPatch.expectedGradYear = null;
+        }
+      }
+
+      await patchUser(sessionUser.id, userPatch);
+      await onSaved?.();
+      onClose?.();
+    } catch (error) {
+      setSaveError(error.message || 'Could not save profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-[#2d3340]/50 bg-[#171b22] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.28)]">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-[11px] uppercase tracking-[0.24em] text-white/28">Profile edit mode</div>
+          <h3 className="mt-3 text-[1.8rem] font-semibold tracking-tight text-white">Shape your public profile</h3>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-white/45">
+            These fields power your public profile, directory presence, and referral context. Resume visibility stays public by design.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={saving}
+            onClick={onClose}
+            className="h-10 rounded-xl border border-[#2d3340] bg-[#11151c] px-4 text-white/78 hover:bg-[#1b2029] hover:text-white"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            disabled={saving}
+            onClick={saveProfile}
+            className="h-10 rounded-xl border-0 bg-[#c0c1ff] px-4 text-sm font-semibold text-[#07006c] hover:bg-[#d5d6ff] disabled:opacity-60"
+          >
+            {saving ? 'Saving…' : 'Save profile'}
+          </Button>
+        </div>
+      </div>
+
+      {saveError ? <div className="mt-4 text-sm text-rose-300">{saveError}</div> : null}
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+        <div className="space-y-4">
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            Full name
+            <input className={profileEditInputClass} value={form.fullName} onChange={(e) => updateField('fullName', e.target.value)} />
+          </label>
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            Headline
+            <input className={profileEditInputClass} value={form.headline} onChange={(e) => updateField('headline', e.target.value)} />
+          </label>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              Phone
+              <input className={profileEditInputClass} value={form.phone} onChange={(e) => updateField('phone', e.target.value)} />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              City
+              <input className={profileEditInputClass} value={form.city} onChange={(e) => updateField('city', e.target.value)} />
+            </label>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              Country
+              <input className={profileEditInputClass} value={form.country} onChange={(e) => updateField('country', e.target.value)} />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              Show email publicly
+              <div className="mt-1 flex h-[42px] items-center rounded-xl border border-[#2d3340] bg-[#11151c] px-3 text-sm text-white">
+                <input
+                  type="checkbox"
+                  checked={form.showEmail}
+                  onChange={(e) => updateField('showEmail', e.target.checked)}
+                  className="mr-3 rounded border-[#2d3340] bg-[#101419] text-[#44e2cd] focus:ring-[#44e2cd]"
+                />
+                Visible on public profile
+              </div>
+            </label>
+          </div>
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            LinkedIn URL
+            <input className={profileEditInputClass} value={form.linkedinUrl} onChange={(e) => updateField('linkedinUrl', e.target.value)} />
+          </label>
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            Portfolio URL
+            <input className={profileEditInputClass} value={form.portfolioUrl} onChange={(e) => updateField('portfolioUrl', e.target.value)} />
+          </label>
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            Public statement
+            <textarea className={`${profileEditInputClass} min-h-[140px] resize-y`} value={form.about} onChange={(e) => updateField('about', e.target.value)} />
+          </label>
+        </div>
+
+        <div className="space-y-4">
+          {isAlumni ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Department
+                  <input className={profileEditInputClass} value={form.department} onChange={(e) => updateField('department', e.target.value)} />
+                </label>
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Domain
+                  <input className={profileEditInputClass} value={form.domain} onChange={(e) => updateField('domain', e.target.value)} />
+                </label>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Current company
+                  <input className={profileEditInputClass} value={form.currentCompany} onChange={(e) => updateField('currentCompany', e.target.value)} />
+                </label>
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Current role
+                  <input className={profileEditInputClass} value={form.currentJobTitle} onChange={(e) => updateField('currentJobTitle', e.target.value)} />
+                </label>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Experience
+                  <input className={profileEditInputClass} value={form.yearsExperience} onChange={(e) => updateField('yearsExperience', e.target.value)} />
+                </label>
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Chapter
+                  <input className={profileEditInputClass} value={form.chapter} onChange={(e) => updateField('chapter', e.target.value)} />
+                </label>
+              </div>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Region
+                <input className={profileEditInputClass} value={form.region} onChange={(e) => updateField('region', e.target.value)} />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Focus areas
+                <input className={profileEditInputClass} value={form.focus} onChange={(e) => updateField('focus', e.target.value)} />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Support modes (comma separated)
+                <input className={profileEditInputClass} value={form.supportModes} onChange={(e) => updateField('supportModes', e.target.value)} />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Referral availability
+                <div className="mt-1 flex h-[42px] items-center rounded-xl border border-[#2d3340] bg-[#11151c] px-3 text-sm text-white">
+                  <input
+                    type="checkbox"
+                    checked={form.referralOpen}
+                    onChange={(e) => updateField('referralOpen', e.target.checked)}
+                    className="mr-3 rounded border-[#2d3340] bg-[#101419] text-[#44e2cd] focus:ring-[#44e2cd]"
+                  />
+                  Open to referral requests
+                </div>
+              </label>
+            </>
+          ) : (
+            <>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Program
+                  <input className={profileEditInputClass} value={form.program} onChange={(e) => updateField('program', e.target.value)} />
+                </label>
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Graduation year
+                  <input className={profileEditInputClass} value={form.expectedGradYear} onChange={(e) => updateField('expectedGradYear', e.target.value)} inputMode="numeric" />
+                </label>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  CGPA
+                  <input className={profileEditInputClass} value={form.cgpa} onChange={(e) => updateField('cgpa', e.target.value)} />
+                </label>
+                <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                  Target roles
+                  <input className={profileEditInputClass} value={form.targetRoles} onChange={(e) => updateField('targetRoles', e.target.value)} />
+                </label>
+              </div>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Preferred locations
+                <input className={profileEditInputClass} value={form.preferredLocations} onChange={(e) => updateField('preferredLocations', e.target.value)} />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Referral goal
+                <input className={profileEditInputClass} value={form.referralGoal} onChange={(e) => updateField('referralGoal', e.target.value)} />
+              </label>
+            </>
+          )}
+
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            Skills (comma separated)
+            <input className={profileEditInputClass} value={form.skills} onChange={(e) => updateField('skills', e.target.value)} />
+          </label>
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            Core interests (comma separated)
+            <input className={profileEditInputClass} value={form.interests} onChange={(e) => updateField('interests', e.target.value)} />
+          </label>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1143,10 +1829,19 @@ function ReferralRequestsView({ userRole, requestTarget }) {
                 </div>
                 <div className="mt-4 text-sm leading-relaxed text-white/44">{request.meta}</div>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <Button variant="ghost" className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-sm text-white/76 hover:bg-[#1f232a] hover:text-white">
-                    <Eye className="mr-2 h-4 w-4" />
-                    View resume
-                  </Button>
+                  {request.profileKey ? (
+                    <Button asChild variant="ghost" className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-sm text-white/76 hover:bg-[#1f232a] hover:text-white">
+                      <Link to={`/profile/${request.profileKey}`}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View profile
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-sm text-white/76 hover:bg-[#1f232a] hover:text-white">
+                      <Eye className="mr-2 h-4 w-4" />
+                      View resume
+                    </Button>
+                  )}
                   <Button variant="ghost" className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-sm text-white/76 hover:bg-[#1f232a] hover:text-white">
                     Ask for more context
                   </Button>
@@ -2028,6 +2723,7 @@ export function ProfilePage() {
   const {
     user,
     profileComplete,
+    profileProgress,
     completeProfile,
     refreshSession,
   } = useOutletContext();
@@ -2037,6 +2733,7 @@ export function ProfilePage() {
   const isOwnProfile = !params.profileId || params.profileId === 'me';
   const [baseProfile, setBaseProfile] = React.useState(null);
   const [profileLoading, setProfileLoading] = React.useState(true);
+  const [editorOpen, setEditorOpen] = React.useState(false);
 
   const reloadProfile = React.useCallback(async () => {
     try {
@@ -2051,6 +2748,18 @@ export function ProfilePage() {
       /* ignore */
     }
   }, [refreshSession]);
+
+  React.useEffect(() => {
+    setEditorOpen(false);
+  }, [isOwnProfile, params.profileId]);
+
+  React.useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    document.title = baseProfile ? `Alumni Profile | ${baseProfile.name}` : 'Alumni Profile';
+  }, [baseProfile]);
 
   React.useEffect(() => {
     if (referralsTab) {
@@ -2117,72 +2826,73 @@ export function ProfilePage() {
     ? baseProfile.checklist.map((item) => ({ ...item, done: true }))
     : baseProfile.checklist;
 
-  const canRequestReferral =
-    viewerRole === 'student' && baseProfile.role === 'Alumni' && !isOwnProfile && Boolean(baseProfile.referralTarget);
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-[0.24em] text-white/30">Profile</div>
-          <h1 className="mt-3 text-4xl font-semibold text-white md:text-5xl" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {isOwnProfile ? 'My Profile' : baseProfile.name}
-          </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/50 md:text-base">
-            {isOwnProfile
-              ? 'The profile is split into shared identity, public resume visibility, and role-specific sections so the same surface works for both alumni and students.'
-              : 'This public profile exposes shared basics, a visible resume, and role-specific context to help the community discover and trust the person quickly.'}
-          </p>
-        </div>
+    <div className="space-y-10">
+      <div className="flex items-center justify-between gap-4">
+        <div className="text-[11px] uppercase tracking-[0.28em] text-white/28">Profile</div>
+        {isOwnProfile ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setEditorOpen((current) => !current)}
+            className="h-10 rounded-xl border border-[#2d3340] bg-[#171b22] px-4 text-white/78 hover:bg-[#1d2129] hover:text-white md:hidden"
+          >
+            <SquarePen className="mr-2 h-4 w-4" />
+            {editorOpen ? 'Close editor' : 'Edit profile'}
+          </Button>
+        ) : null}
+      </div>
 
-        <div className="flex flex-wrap gap-2">
-          <div className="rounded-full bg-[#171a20] px-4 py-2 text-sm text-white/72">{baseProfile.role}</div>
-          <div className="rounded-full bg-[#171a20] px-4 py-2 text-sm text-white/52">{baseProfile.roleSummary}</div>
-          <div className="rounded-full bg-[#171a20] px-4 py-2 text-sm text-white/52">Resume visible to viewers</div>
-          {canRequestReferral ? (
-            <Button asChild className="h-11 rounded-2xl border-0 bg-gradient-to-r from-[#c9beff] to-[#8f7bff] px-5 text-sm font-semibold text-[#140f28] hover:from-[#ddd6ff] hover:to-[#a293ff]">
-              <Link
-                to="/profile/me?tab=referrals"
-                state={{
-                  requestTarget: {
-                    id: baseProfile.id,
-                    alumniUserId: baseProfile.alumniUserId,
-                    name: baseProfile.name,
-                    headline: baseProfile.headline,
-                    openings: baseProfile.referralTarget.openings,
-                  },
-                }}
-              >
-                <Handshake className="mr-2 h-4 w-4" />
-                Request referral
-              </Link>
-            </Button>
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)]">
+        <aside className="space-y-10 lg:sticky lg:top-6 lg:self-start">
+          <ProfileHeroSidebar
+            profile={baseProfile}
+            isOwnProfile={isOwnProfile}
+            onEdit={() => setEditorOpen(true)}
+          />
+
+          {isOwnProfile ? (
+            <ProfileStrengthPanel
+              checklist={checklist}
+              profileProgress={profileProgress}
+              profileComplete={profileComplete}
+              completeProfile={completeProfile}
+            />
+          ) : (
+            <PublicProfilePanel profile={baseProfile} viewerRole={viewerRole} />
+          )}
+
+          <ProfileCorePanel profile={baseProfile} />
+        </aside>
+
+        <div className="space-y-16">
+          {isOwnProfile ? (
+            <ProfileEditorPanel
+              profile={baseProfile}
+              sessionUser={user}
+              open={editorOpen}
+              onClose={() => setEditorOpen(false)}
+              onSaved={reloadProfile}
+            />
           ) : null}
+
+          <ProfileNarrativeSection profile={baseProfile} />
+          <ProfileTimelineSection profile={baseProfile} />
+          <ProfileInterestsSection profile={baseProfile} />
+          <DocumentsPanel profile={baseProfile} isOwnProfile={isOwnProfile} onResumeUploaded={reloadProfile} />
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_360px]">
-        <PersonalInformationPanel
-          profile={baseProfile}
-          isOwnProfile={isOwnProfile}
-          sessionUser={isOwnProfile ? user : null}
-          onProfileUpdated={reloadProfile}
-        />
-        <DocumentsPanel profile={baseProfile} isOwnProfile={isOwnProfile} onResumeUploaded={reloadProfile} />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)_320px]">
-        <IdentityCard profile={baseProfile} />
-        <TrackPanel profile={baseProfile} />
-        <CompletionPanel
-          checklist={checklist}
-          isOwnProfile={isOwnProfile}
-          viewerRole={viewerRole}
-          profile={baseProfile}
-          completeProfile={completeProfile}
-          profileComplete={profileComplete}
-        />
-      </div>
+      {isOwnProfile ? (
+        <button
+          type="button"
+          onClick={() => setEditorOpen((current) => !current)}
+          className="fixed bottom-8 right-8 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#c0c1ff] to-[#8083ff] text-[#07006c] shadow-[0_18px_40px_rgba(0,0,0,0.4)] transition hover:scale-105 md:flex"
+          aria-label={editorOpen ? 'Close profile editor' : 'Open profile editor'}
+        >
+          <SquarePen className="h-5 w-5" />
+        </button>
+      ) : null}
     </div>
   );
 }

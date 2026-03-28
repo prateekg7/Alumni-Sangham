@@ -54,7 +54,16 @@ export const getReferralBoard = async (userId, role) => {
 
   if (role === "alumni") {
     const rows = await ReferralRequest.find({ alumniId: userId }).sort({ createdAt: -1 }).limit(50);
+    const requesterIds = rows.map((row) => row.requesterId);
+    const requesterProfiles = await Profile.find({ userId: { $in: requesterIds } }).select("userId displaySlug");
+    const profileKeyByRequesterId = new Map(
+      requesterProfiles.map((profile) => [
+        String(profile.userId),
+        profile.displaySlug || String(profile.userId),
+      ])
+    );
     const requests = rows.map((r) => ({
+      profileKey: profileKeyByRequesterId.get(String(r.requesterId)) || String(r.requesterId),
       name: r.requesterName,
       target: `${r.targetRole} · ${r.targetCompany}`,
       status: statusLabel(r.status),

@@ -21,6 +21,36 @@ function roleTitleCase(role) {
   return "Alumni";
 }
 
+function splitList(value) {
+  if (!value) return [];
+  return String(value)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function buildInterests(profile, role, skills, supportModes) {
+  const explicit =
+    Array.isArray(profile.interests) && profile.interests.length
+      ? profile.interests
+      : [];
+
+  const fallback =
+    role === "student"
+      ? [
+          ...splitList(profile.targetRoles),
+          ...skills,
+          profile.program || profile.department,
+        ]
+      : [
+          profile.domain || profile.industry,
+          ...supportModes,
+          ...skills,
+        ];
+
+  return Array.from(new Set([...explicit, ...fallback].map((item) => String(item || "").trim()).filter(Boolean))).slice(0, 10);
+}
+
 /** Alumni directory row — matches frontend directory card shape */
 export function toDirectoryCard(profile, user) {
   const id = profile.displaySlug || String(profile._id);
@@ -114,6 +144,19 @@ export function toFullProfile(profile, user, { isOwner = false, profileCompleteO
 
   const emailVisible = isOwner || profile.showEmail;
   const email = emailVisible ? user?.email || "—" : "Hidden";
+  const supportModes =
+    Array.isArray(profile.supportModes) && profile.supportModes.length
+      ? profile.supportModes
+      : role === "alumni"
+        ? ["Mentorship"]
+        : [];
+  const skills =
+    Array.isArray(profile.skills) && profile.skills.length
+      ? profile.skills
+      : role === "student"
+        ? ["Projects", "Problem Solving"]
+        : ["Networking"];
+  const interests = buildInterests(profile, role, skills, supportModes);
 
   const personalFields = [
     { label: "Full name", value: name },
@@ -150,9 +193,9 @@ export function toFullProfile(profile, user, { isOwner = false, profileCompleteO
       { label: "Experience", value: profile.yearsExperience || "—" },
       {
         label: "Focus areas",
-        value: profile.focus || (Array.isArray(profile.skills) ? profile.skills.join(", ") : "—"),
+        value: profile.focus || skills.join(", ") || "—",
       },
-      { label: "Mentorship", value: profile.supportModes?.join(", ") || "—" },
+      { label: "Mentorship", value: supportModes.join(", ") || "—" },
       {
         label: "Referral support",
         value: profile.referralOpen
@@ -215,10 +258,19 @@ export function toFullProfile(profile, user, { isOwner = false, profileCompleteO
     memberCode: profile.memberCode || (role === "student" ? "STD-MEMBER" : "ALM-MEMBER"),
     memberSince: profile.memberSinceLabel || "Member",
     baseLabel: profile.baseLabel || (role === "student" ? "Campus" : "Chapter"),
+    photoUrl: profile.photoUrl || null,
     about:
       profile.about ||
       `${name} is part of the alumni network. Complete your profile to tell the community more.`,
     department: profile.department || "",
+    chapter: profile.chapter || "",
+    region: profile.region || "",
+    domain: profile.domain || profile.industry || "",
+    skills,
+    supportModes,
+    interests,
+    referralOpen: Boolean(profile.referralOpen),
+    emailVisible,
     personalFields,
     roleFields,
     documents,
