@@ -67,7 +67,7 @@ export const register = async (payload) => {
       industry: payload.industry ?? null,
     });
   } catch (profileErr) {
-    console.error("❌ Profile creation failed:", profileErr.message, profileErr.errors);
+    console.error(" Profile creation failed:", profileErr.message, profileErr.errors);
     await User.findByIdAndDelete(user._id); // rollback
     throw new ApiError(500, "Registration failed while creating profile. Please try again.");
   }
@@ -160,7 +160,7 @@ export const logout = async (incomingRefreshToken) => {
   try {
     decoded = jwt.verify(incomingRefreshToken, env.jwtRefreshSecret);
   } catch {
-    return; // expired already — nothing to revoke
+    return; 
   }
 
   const user = await User.findById(decoded.id).select("+refreshTokens");

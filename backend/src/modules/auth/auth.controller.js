@@ -40,6 +40,9 @@ export const refreshTokens = asyncHandler(async (req, res) => {
 
 export const logoutUser = asyncHandler(async (req, res) => {
   const incomingToken = req.cookies?.refreshToken;
+  if (!incomingToken) {
+    throw new ApiError(401, "Refresh token missing");
+  }
   await authService.logout(incomingToken);
 
   res

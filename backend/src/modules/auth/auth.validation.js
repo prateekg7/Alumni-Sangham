@@ -52,7 +52,7 @@ export const validateRegister = (payload) => {
 
 export const validateLogin = (payload) => {
   const { email, password } = payload ?? {};
-  if (!email || !password) {
-    throw new ApiError(400, "email and password are required");
+  if(!email?.trim() || !password?.trim()){
+      throw new ApiError(400, "email and password are required");
   }
 };
