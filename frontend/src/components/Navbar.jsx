@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../Assets/iitp-logo.png';
@@ -9,7 +10,17 @@ import FileText from 'lucide-react/dist/esm/icons/file-text.js';
 
 const layoutTransition = { type: 'spring', stiffness: 200, damping: 28, mass: 0.8 };
 
+const HASH_TO_TAB = {
+  '': 'Home',
+  home: 'Home',
+  about: 'About',
+  features: 'Features',
+  'hall-of-fame': 'Hall of Fame',
+};
+
 export function Navbar({ onLoginClick, onRegisterClick, className }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
 
@@ -21,12 +32,45 @@ export function Navbar({ onLoginClick, onRegisterClick, className }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      return;
+    }
+    const key = (location.hash || '').replace(/^#/, '');
+    const next = HASH_TO_TAB[key];
+    if (next) {
+      setActiveTab(next);
+    }
+  }, [location.pathname, location.hash]);
+
   const navItems = [
-    { name: 'Home', url: '#home', icon: Home },
-    { name: 'About', url: '#about', icon: User },
-    { name: 'Features', url: '#features', icon: Briefcase },
-    { name: 'Hall of Fame', url: '#hall-of-fame', icon: FileText }
+    { name: 'Home', hash: 'home', icon: Home },
+    { name: 'About', hash: 'about', icon: User },
+    { name: 'Features', hash: 'features', icon: Briefcase },
+    { name: 'Hall of Fame', hash: 'hall-of-fame', icon: FileText },
   ];
+
+  const scrollToSection = (hash) => {
+    const el = document.getElementById(hash);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleNavClick = (event, item) => {
+    event.preventDefault();
+    setActiveTab(item.name);
+    if (location.pathname !== '/') {
+      navigate({ pathname: '/', hash: item.hash });
+      return;
+    }
+    if (window.location.hash === `#${item.hash}`) {
+      scrollToSection(item.hash);
+      return;
+    }
+    navigate({ pathname: '/', hash: item.hash }, { replace: true });
+    window.requestAnimationFrame(() => scrollToSection(item.hash));
+  };
 
   return (
     <div className={`fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-50 flex justify-center w-full px-4 pointer-events-none ${className || ''}`}>
@@ -74,8 +118,8 @@ export function Navbar({ onLoginClick, onRegisterClick, className }) {
             return (
               <a
                 key={item.name}
-                href={item.url}
-                onClick={() => setActiveTab(item.name)}
+                href={`/#${item.hash}`}
+                onClick={(e) => handleNavClick(e, item)}
                 className={`relative flex items-center justify-center px-4 py-2 rounded-full cursor-pointer text-sm font-semibold transition-colors duration-200
                   ${isActive ? 'text-white' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
               >

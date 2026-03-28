@@ -5,10 +5,13 @@ import {
   getUsers,
   updateUserById,
 } from "./user.controller.js";
+import { authGuard } from "../../middlewares/auth.middleware.js";
+import { roleGuard } from "../../middlewares/role.middleware.js";
 
 const router = Router();
 
-router.get("/", getUsers);
+router.use(authGuard);
+router.get("/", roleGuard("admin"), getUsers);
 router.get("/:id", getUserById);
 router.patch("/:id", updateUserById);
 router.delete("/:id", deleteUserById);

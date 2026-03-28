@@ -40,10 +40,9 @@ export const refreshTokens = asyncHandler(async (req, res) => {
 
 export const logoutUser = asyncHandler(async (req, res) => {
   const incomingToken = req.cookies?.refreshToken;
-  if (!incomingToken) {
-    throw new ApiError(401, "Refresh token missing");
+  if (incomingToken) {
+    await authService.logout(incomingToken);
   }
-  await authService.logout(incomingToken);
 
   res
     .status(200)
@@ -54,8 +53,8 @@ export const logoutUser = asyncHandler(async (req, res) => {
 // ─── me ──────────────────────────────────────────────────────────────────────
 
 export const getMe = asyncHandler(async (req, res) => {
-  const user = await authService.getMe(req.user.id);
-  res.status(200).json(new ApiResponse(200, user, "User fetched"));
+  const session = await authService.getSession(req.user.id);
+  res.status(200).json(new ApiResponse(200, session, "User fetched"));
 });
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

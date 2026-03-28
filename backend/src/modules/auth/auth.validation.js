@@ -51,8 +51,11 @@ export const validateRegister = (payload) => {
 };
 
 export const validateLogin = (payload) => {
-  const { email, password } = payload ?? {};
-  if(!email?.trim() || !password?.trim()){
-      throw new ApiError(400, "email and password are required");
+  const { email, password, expectedRole } = payload ?? {};
+  if (!email?.trim() || !password?.trim()) {
+    throw new ApiError(400, "email and password are required");
+  }
+  if (expectedRole && !ROLE_VALUES.includes(expectedRole)) {
+    throw new ApiError(400, `expectedRole must be one of: ${ROLE_VALUES.join(", ")}`);
   }
 };

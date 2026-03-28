@@ -252,7 +252,7 @@ export function Hero() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative h-[400vh]">
+    <div ref={containerRef} id="home" className="relative h-[400vh] scroll-mt-28">
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         <motion.canvas
           ref={canvasRef}

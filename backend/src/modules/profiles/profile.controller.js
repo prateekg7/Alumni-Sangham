@@ -1,28 +1,31 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import ApiResponse  from "../../utils/ApiResponse.js";
+import ApiResponse from "../../utils/ApiResponse.js";
+import ApiError from "../../utils/ApiError.js";
 import * as profileService from "./profile.service.js";
 
-export const getProfiles = asyncHandler(async (req, res) => {
-  const data = await profileService.getProfiles();
-  res.status(200).json(ApiResponse({ message: "Profiles fetched", data }));
+export const getMyProfile = asyncHandler(async (req, res) => {
+  const data = await profileService.getMyProfile(req.user.id);
+  res.status(200).json(new ApiResponse(200, data, "Profile fetched"));
 });
 
-export const getProfileById = asyncHandler(async (req, res) => {
-  const data = await profileService.getProfileById(req.params.id);
-  res.status(200).json(ApiResponse({ message: "Profile fetched", data }));
+export const updateMyProfile = asyncHandler(async (req, res) => {
+  const data = await profileService.updateMyProfile(req.user.id, req.body);
+  res.status(200).json(new ApiResponse(200, data, "Profile updated"));
 });
 
-export const createProfile = asyncHandler(async (req, res) => {
-  const data = await profileService.createProfile(req.body);
-  res.status(201).json(ApiResponse({ message: "Profile created", data }));
+export const getPublicProfile = asyncHandler(async (req, res) => {
+  const data = await profileService.getPublicProfile(req.params.profileKey);
+  res.status(200).json(new ApiResponse(200, data, "Profile fetched"));
 });
 
-export const updateProfileById = asyncHandler(async (req, res) => {
-  const data = await profileService.updateProfileById(req.params.id, req.body);
-  res.status(200).json(ApiResponse({ message: "Profile updated", data }));
-});
-
-export const deleteProfileById = asyncHandler(async (req, res) => {
-  const data = await profileService.deleteProfileById(req.params.id);
-  res.status(200).json(ApiResponse({ message: "Profile deleted", data }));
+export const uploadMyResume = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, "Select a PDF or Word file to upload");
+  }
+  const fileUrl = `/uploads/resumes/${req.file.filename}`;
+  const data = await profileService.addResumeDocument(req.user.id, {
+    fileUrl,
+    originalName: req.file.originalname,
+  });
+  res.status(200).json(new ApiResponse(200, data, "Resume uploaded"));
 });

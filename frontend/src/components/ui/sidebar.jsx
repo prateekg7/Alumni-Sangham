@@ -66,8 +66,9 @@ export function SidebarLink({ link, active = false, compact = false, className, 
   ) : null;
 
   if (link.href) {
+    const to = link.hash ? { pathname: link.href, hash: link.hash } : link.href;
     return (
-      <Link to={link.href} className={classes} onClick={onClick}>
+      <Link to={to} className={classes} onClick={onClick}>
         {indicator}
         {content}
       </Link>

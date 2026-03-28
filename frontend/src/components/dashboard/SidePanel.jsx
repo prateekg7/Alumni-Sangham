@@ -15,7 +15,7 @@ const baseLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="h-[18px] w-[18px] stroke-[1.5]" /> },
   { label: 'Networking', href: '/directory', icon: <Users className="h-[18px] w-[18px] stroke-[1.5]" /> },
   { label: 'Posts & Jobs', href: '/blog', icon: <Newspaper className="h-[18px] w-[18px] stroke-[1.5]" /> },
-  { label: 'Hall of Fame', href: '/#hall-of-fame', icon: <Trophy className="h-[18px] w-[18px] stroke-[1.5]" /> },
+  { label: 'Hall of Fame', href: '/', hash: 'hall-of-fame', icon: <Trophy className="h-[18px] w-[18px] stroke-[1.5]" /> },
 ];
 
 const roleLinks = {
@@ -52,7 +52,7 @@ function LogoIcon() {
   );
 }
 
-export function SidePanel({ isDesktop, sidebarOpen, onClose, onCompose, user }) {
+export function SidePanel({ isDesktop, sidebarOpen, onClose, onCompose, user, onLogout }) {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const roleKey = user.role.toLowerCase() === 'student' ? 'student' : 'alumni';
@@ -168,6 +168,24 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, onCompose, user }) 
               Settings
             </motion.span>
           </Link>
+
+          {onLogout ? (
+            <button
+              type="button"
+              className="mx-3 mt-1 w-[calc(100%-1.5rem)] rounded-md px-4 py-3 text-left text-sm text-[#9694A8] transition hover:bg-[#242336] hover:text-[#E8E6F0]"
+              onClick={() => {
+                onLogout();
+                onClose();
+              }}
+            >
+              <motion.span
+                animate={{ opacity: panelExpanded ? 1 : 0 }}
+                className="inline-block overflow-hidden whitespace-nowrap"
+              >
+                Log out
+              </motion.span>
+            </button>
+          ) : null}
         </div>
       </SidebarBody>
     </Sidebar>

@@ -12,6 +12,19 @@ export default defineConfig({
   },
   server: {
     host: '127.0.0.1',
+    /** Use 5174 if 5173 is busy; backend CORS allows any localhost / 127.0.0.1 port in development. */
+    port: 5173,
+    strictPort: false,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
+    },
     watch: {
       ignored: ['**/dist/**', '**/public/frames/**'],
     },

@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { env } from "./config/env.js";
+import { corsAllowedOrigins, env } from "./config/env.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import ApiResponse from "./utils/ApiResponse.js";
 import ApiError from "./utils/ApiError.js";
@@ -14,17 +14,40 @@ import referralRoutes from "./modules/referrals/referral.routes.js";
 import directoryRoutes from "./modules/directory/directory.routes.js";
 import notificationRoutes from "./modules/notifications/notification.routes.js";
 import hofRoutes from "./modules/hallOfFame/hof.routes.js";
+import collegeRoutes from "./modules/college/college.routes.js";
 const app = express();
 app.disable("x-powered-by");
-/* CORS */
+
+function isLocalDevOrigin(origin) {
+  try {
+    const u = new URL(origin);
+    return u.hostname === "localhost" || u.hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
+
+/* CORS — localhost/127.0.0.1:any-port allowed in non-production (fixes Vite on 5173, 5174, etc.) */
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || origin === env.corsOrigin) {
+      if (!origin) {
         callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+        return;
       }
+      if (env.nodeEnv !== "production" && isLocalDevOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+      if (corsAllowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      if (corsAllowedOrigins.length === 0 && env.nodeEnv !== "production") {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
@@ -56,6 +79,7 @@ app.use("/api/referrals", referralRoutes);
 app.use("/api/directory", directoryRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/hall-of-fame", hofRoutes);
+app.use("/api/college-records", collegeRoutes);
 
 /* 404 Handler */
 app.use((req, res, next) => {

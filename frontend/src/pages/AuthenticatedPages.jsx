@@ -29,11 +29,35 @@ import X from 'lucide-react/dist/esm/icons/x.js';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
-  getDirectoryProfiles,
-  getProfileById,
-  getReferralBoard,
-  getSelfProfile,
-} from '@/lib/profile-data';
+  createDiscussionPost,
+  createReferralRequest,
+  fetchDirectory,
+  fetchDiscussionFeed,
+  fetchMyProfile,
+  fetchPublicProfile,
+  fetchReferralBoard,
+  patchMyProfile,
+  patchUser,
+  resolvePublicAssetUrl,
+  uploadResume,
+} from '@/lib/api';
+
+function formatRelativeTime(iso) {
+  if (!iso) {
+    return 'Recently';
+  }
+  const d = new Date(iso);
+  const diff = Date.now() - d.getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) {
+    return 'Just now';
+  }
+  if (h < 24) {
+    return `${h}h ago`;
+  }
+  const days = Math.floor(h / 24);
+  return `${days}d ago`;
+}
 
 const communityPosts = [
   {
@@ -245,6 +269,18 @@ function SurfaceCard({ title, subtitle, action, className, children }) {
   );
 }
 
+function fieldByLabel(fields, label) {
+  const row = fields?.find((f) => f.label === label);
+  if (!row) {
+    return '';
+  }
+  const v = row.value;
+  if (v === '—' || v === 'Hidden') {
+    return '';
+  }
+  return String(v);
+}
+
 function FieldList({ heading, icon: Icon, fields }) {
   return (
     <div className="rounded-[24px] bg-[#101216] p-5">
@@ -266,6 +302,28 @@ function FieldList({ heading, icon: Icon, fields }) {
 
 function DocumentTile({ document }) {
   const isResume = document.type === 'Resume';
+  const fileHref = document.fileUrl ? resolvePublicAssetUrl(document.fileUrl) : '';
+
+  const actionBtn = (
+    <Button
+      variant="ghost"
+      className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-white/76 hover:bg-[#1f232a] hover:text-white"
+      disabled={!fileHref}
+      asChild={Boolean(fileHref)}
+    >
+      {fileHref ? (
+        <a href={fileHref} target="_blank" rel="noopener noreferrer">
+          {isResume ? <Download className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+          {document.actionLabel}
+        </a>
+      ) : (
+        <span>
+          {isResume ? <Download className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+          {document.actionLabel}
+        </span>
+      )}
+    </Button>
+  );
 
   return (
     <div className="overflow-hidden rounded-[22px] border border-[#171a20] bg-[#101216]">
@@ -289,26 +347,65 @@ function DocumentTile({ document }) {
         </div>
         <p className="text-sm leading-relaxed text-white/46">{document.summary}</p>
         <div className="rounded-2xl bg-[#171a20] px-3 py-2 text-xs text-white/48">{document.visibility}</div>
-        <Button variant="ghost" className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-white/76 hover:bg-[#1f232a] hover:text-white">
-          {isResume ? <Download className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-          {document.actionLabel}
-        </Button>
+        {actionBtn}
       </div>
     </div>
   );
 }
 
-function DocumentsPanel({ profile, isOwnProfile }) {
+function DocumentsPanel({ profile, isOwnProfile, onResumeUploaded }) {
+  const fileRef = React.useRef(null);
+  const [uploadBusy, setUploadBusy] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState('');
+
+  const triggerPick = () => {
+    setUploadError('');
+    fileRef.current?.click();
+  };
+
+  const onFile = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) {
+      return;
+    }
+    setUploadBusy(true);
+    setUploadError('');
+    try {
+      await uploadResume(file);
+      await onResumeUploaded?.();
+    } catch (e) {
+      setUploadError(e.message || 'Upload failed');
+    } finally {
+      setUploadBusy(false);
+    }
+  };
+
   return (
     <SurfaceCard
       title="Documents"
       subtitle="Your resume is explicitly public so anyone viewing this profile can open it directly."
       action={
         isOwnProfile ? (
-          <Button variant="ghost" className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-white/78 hover:bg-[#1f232a] hover:text-white">
-            <Plus className="mr-2 h-4 w-4" />
-            Add your resume
-          </Button>
+          <>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="hidden"
+              onChange={onFile}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={uploadBusy}
+              onClick={triggerPick}
+              className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-white/78 hover:bg-[#1f232a] hover:text-white disabled:opacity-50"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {uploadBusy ? 'Uploading…' : 'Add your resume'}
+            </Button>
+          </>
         ) : (
           <div className="rounded-full bg-[#171a20] px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/40">
             Public documents
@@ -316,22 +413,25 @@ function DocumentsPanel({ profile, isOwnProfile }) {
         )
       }
     >
+      {uploadError ? <div className="mb-3 text-sm text-rose-300">{uploadError}</div> : null}
       <div className="grid gap-4 sm:grid-cols-2">
         {profile.documents.map((document) => (
-          <DocumentTile key={document.title} document={document} />
+          <DocumentTile key={`${document.title}-${document.updatedAt}`} document={document} />
         ))}
 
         {isOwnProfile ? (
           <button
             type="button"
-            className="flex min-h-[250px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#232730] bg-[#101216] p-6 text-center transition hover:border-[#343a46] hover:bg-[#15181e]"
+            disabled={uploadBusy}
+            onClick={triggerPick}
+            className="flex min-h-[250px] flex-col items-center justify-center rounded-[22px] border border-dashed border-[#232730] bg-[#101216] p-6 text-center transition hover:border-[#343a46] hover:bg-[#15181e] disabled:opacity-50"
           >
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#171a20] text-white/72">
               <Plus className="h-6 w-6" />
             </div>
             <div className="mt-4 text-xl font-semibold text-white">Add your resume</div>
             <div className="mt-2 max-w-xs text-sm leading-relaxed text-white/42">
-              Uploading a resume keeps it visible to anyone who opens your public profile.
+              PDF or Word from your device. Anyone with your public profile link can open it.
             </div>
           </button>
         ) : null}
@@ -438,6 +538,7 @@ function ReferralActionCard({ profile }) {
           state={{
             requestTarget: {
               id: profile.id,
+              alumniUserId: profile.alumniUserId,
               name: profile.name,
               headline: profile.headline,
               openings: profile.referralTarget.openings,
@@ -489,7 +590,125 @@ function CompletionPanel({ checklist, isOwnProfile, viewerRole, profile, complet
   );
 }
 
-function PersonalInformationPanel({ profile, isOwnProfile }) {
+const profileInputClass =
+  'mt-1 w-full rounded-xl border border-[#232730] bg-[#0d0f12] px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-[#4f81ff]/50 focus:outline-none focus:ring-1 focus:ring-[#4f81ff]/40';
+
+function PersonalInformationPanel({ profile, isOwnProfile, sessionUser, onProfileUpdated }) {
+  const [editing, setEditing] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState('');
+  const [form, setForm] = React.useState(null);
+
+  const isAlumni = profile.role === 'Alumni';
+
+  const openEdit = () => {
+    const loc = profile.location || '';
+    const parts = loc.split(',').map((s) => s.trim());
+    const base = {
+      fullName: profile.name,
+      phone: fieldByLabel(profile.personalFields, 'Phone'),
+      city: parts[0] || '',
+      country: parts.slice(1).join(', ') || '',
+      linkedinUrl: fieldByLabel(profile.personalFields, 'LinkedIn'),
+      portfolioUrl: fieldByLabel(profile.personalFields, 'Portfolio'),
+      headline: profile.headline || '',
+      about: profile.about || '',
+    };
+    if (isAlumni) {
+      Object.assign(base, {
+        currentCompany: fieldByLabel(profile.roleFields, 'Current company'),
+        currentJobTitle: fieldByLabel(profile.roleFields, 'Current role'),
+        yearsExperience: fieldByLabel(profile.roleFields, 'Experience'),
+        department: profile.department || '',
+        focus: fieldByLabel(profile.roleFields, 'Focus areas'),
+      });
+    } else {
+      Object.assign(base, {
+        program: fieldByLabel(profile.roleFields, 'Program'),
+        cgpa: fieldByLabel(profile.roleFields, 'CGPA'),
+        targetRoles: fieldByLabel(profile.roleFields, 'Target roles'),
+        preferredLocations: fieldByLabel(profile.roleFields, 'Preferred locations'),
+        referralGoal: fieldByLabel(profile.roleFields, 'Referral goal'),
+        expectedGradYear: fieldByLabel(profile.roleFields, 'Graduation year'),
+      });
+    }
+    setForm(base);
+    setEditing(true);
+    setSaveError('');
+  };
+
+  const cancelEdit = () => {
+    setEditing(false);
+    setForm(null);
+    setSaveError('');
+  };
+
+  const updateField = (key, value) => {
+    setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+  };
+
+  const saveProfile = async () => {
+    if (!form || !sessionUser?.id) {
+      return;
+    }
+    setSaving(true);
+    setSaveError('');
+    try {
+      const payload = {
+        fullName: form.fullName.trim(),
+        city: form.city.trim() || null,
+        country: form.country.trim() || null,
+        linkedinUrl: form.linkedinUrl.trim() || null,
+        portfolioUrl: form.portfolioUrl.trim() || null,
+        headline: form.headline.trim() || null,
+        about: form.about.trim() || null,
+      };
+      if (isAlumni) {
+        Object.assign(payload, {
+          currentCompany: form.currentCompany.trim() || null,
+          currentJobTitle: form.currentJobTitle.trim() || null,
+          yearsExperience: form.yearsExperience.trim() || null,
+          department: form.department.trim() || null,
+          focus: form.focus.trim() || null,
+        });
+      } else {
+        Object.assign(payload, {
+          program: form.program.trim() || null,
+          cgpa: form.cgpa.trim() || null,
+          targetRoles: form.targetRoles.trim() || null,
+          preferredLocations: form.preferredLocations.trim() || null,
+          referralGoal: form.referralGoal.trim() || null,
+        });
+      }
+      await patchMyProfile(payload);
+
+      const userPatch = { phone: form.phone.trim() || null };
+      if (!isAlumni) {
+        const y = String(form.expectedGradYear || '').trim();
+        if (y) {
+          const n = Number(y);
+          if (!Number.isFinite(n)) {
+            setSaveError('Graduation year must be a valid number');
+            setSaving(false);
+            return;
+          }
+          userPatch.expectedGradYear = n;
+        } else {
+          userPatch.expectedGradYear = null;
+        }
+      }
+      await patchUser(sessionUser.id, userPatch);
+
+      setEditing(false);
+      setForm(null);
+      await onProfileUpdated?.();
+    } catch (e) {
+      setSaveError(e.message || 'Could not save profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <SurfaceCard
       title="Personal information"
@@ -499,33 +718,256 @@ function PersonalInformationPanel({ profile, isOwnProfile }) {
           : 'This is the public information the profile owner chose to expose for community discovery.'
       }
       action={
-        <div className="rounded-full bg-[#171a20] px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/42">
-          {isOwnProfile ? 'Editable profile' : 'Public view'}
-        </div>
+        isOwnProfile ? (
+          <div className="flex flex-wrap gap-2">
+            {editing ? (
+              <>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={saving}
+                  onClick={cancelEdit}
+                  className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-white/78 hover:bg-[#1f232a] hover:text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  disabled={saving}
+                  onClick={saveProfile}
+                  className="h-10 rounded-2xl border-0 bg-gradient-to-r from-[#c9beff] to-[#8f7bff] px-4 text-sm font-semibold text-[#140f28] hover:from-[#ddd6ff] hover:to-[#a293ff] disabled:opacity-50"
+                >
+                  {saving ? 'Saving…' : 'Save changes'}
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={openEdit}
+                className="h-10 rounded-2xl border border-[#171a20] bg-[#171a20] px-4 text-white/78 hover:bg-[#1f232a] hover:text-white"
+              >
+                Edit profile
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-full bg-[#171a20] px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/42">
+            Public view
+          </div>
+        )
       }
     >
-      <div className="grid gap-4 xl:grid-cols-2">
-        <FieldList heading="Shared basics" icon={UserRound} fields={profile.personalFields} />
-        <FieldList
-          heading={profile.role === 'Alumni' ? 'Alumni-specific details' : 'Student-specific details'}
-          icon={profile.role === 'Alumni' ? Building2 : GraduationCap}
-          fields={profile.roleFields}
-        />
-      </div>
+      {saveError ? <div className="mb-4 text-sm text-rose-300">{saveError}</div> : null}
 
-      <div className="mt-4 rounded-[24px] bg-[#101216] p-5">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/28">
-          <Sparkles className="h-4 w-4" />
-          Public statement
+      {editing && form ? (
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              Full name
+              <input
+                className={profileInputClass}
+                value={form.fullName}
+                onChange={(e) => updateField('fullName', e.target.value)}
+              />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              Phone
+              <input
+                className={profileInputClass}
+                value={form.phone}
+                onChange={(e) => updateField('phone', e.target.value)}
+              />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              City
+              <input className={profileInputClass} value={form.city} onChange={(e) => updateField('city', e.target.value)} />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+              Country
+              <input
+                className={profileInputClass}
+                value={form.country}
+                onChange={(e) => updateField('country', e.target.value)}
+              />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40 md:col-span-2">
+              LinkedIn URL
+              <input
+                className={profileInputClass}
+                value={form.linkedinUrl}
+                onChange={(e) => updateField('linkedinUrl', e.target.value)}
+              />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40 md:col-span-2">
+              Portfolio URL
+              <input
+                className={profileInputClass}
+                value={form.portfolioUrl}
+                onChange={(e) => updateField('portfolioUrl', e.target.value)}
+              />
+            </label>
+            <label className="block text-xs uppercase tracking-[0.2em] text-white/40 md:col-span-2">
+              Headline
+              <input
+                className={profileInputClass}
+                value={form.headline}
+                onChange={(e) => updateField('headline', e.target.value)}
+              />
+            </label>
+          </div>
+
+          {isAlumni ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Department
+                <input
+                  className={profileInputClass}
+                  value={form.department}
+                  onChange={(e) => updateField('department', e.target.value)}
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Current company
+                <input
+                  className={profileInputClass}
+                  value={form.currentCompany}
+                  onChange={(e) => updateField('currentCompany', e.target.value)}
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Current role
+                <input
+                  className={profileInputClass}
+                  value={form.currentJobTitle}
+                  onChange={(e) => updateField('currentJobTitle', e.target.value)}
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Experience
+                <input
+                  className={profileInputClass}
+                  value={form.yearsExperience}
+                  onChange={(e) => updateField('yearsExperience', e.target.value)}
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40 md:col-span-2">
+                Focus areas
+                <input className={profileInputClass} value={form.focus} onChange={(e) => updateField('focus', e.target.value)} />
+              </label>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Program
+                <input
+                  className={profileInputClass}
+                  value={form.program}
+                  onChange={(e) => updateField('program', e.target.value)}
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Graduation year
+                <input
+                  className={profileInputClass}
+                  value={form.expectedGradYear}
+                  onChange={(e) => updateField('expectedGradYear', e.target.value)}
+                  inputMode="numeric"
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                CGPA
+                <input className={profileInputClass} value={form.cgpa} onChange={(e) => updateField('cgpa', e.target.value)} />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+                Target roles
+                <input
+                  className={profileInputClass}
+                  value={form.targetRoles}
+                  onChange={(e) => updateField('targetRoles', e.target.value)}
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40 md:col-span-2">
+                Preferred locations
+                <input
+                  className={profileInputClass}
+                  value={form.preferredLocations}
+                  onChange={(e) => updateField('preferredLocations', e.target.value)}
+                />
+              </label>
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/40 md:col-span-2">
+                Referral goal
+                <input
+                  className={profileInputClass}
+                  value={form.referralGoal}
+                  onChange={(e) => updateField('referralGoal', e.target.value)}
+                />
+              </label>
+            </div>
+          )}
+
+          <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
+            Public statement
+            <textarea
+              className={`${profileInputClass} min-h-[120px] resize-y`}
+              value={form.about}
+              onChange={(e) => updateField('about', e.target.value)}
+            />
+          </label>
         </div>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">{profile.about}</p>
-      </div>
+      ) : (
+        <>
+          <div className="grid gap-4 xl:grid-cols-2">
+            <FieldList heading="Shared basics" icon={UserRound} fields={profile.personalFields} />
+            <FieldList
+              heading={profile.role === 'Alumni' ? 'Alumni-specific details' : 'Student-specific details'}
+              icon={profile.role === 'Alumni' ? Building2 : GraduationCap}
+              fields={profile.roleFields}
+            />
+          </div>
+
+          <div className="mt-4 rounded-[24px] bg-[#101216] p-5">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/28">
+              <Sparkles className="h-4 w-4" />
+              Public statement
+            </div>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/58">{profile.about}</p>
+          </div>
+        </>
+      )}
     </SurfaceCard>
   );
 }
 
 function ReferralRequestsView({ userRole, requestTarget }) {
-  const board = getReferralBoard(userRole);
+  const [board, setBoard] = React.useState({
+    title: '',
+    description: '',
+    checklist: [],
+    requests: [],
+  });
+  const [sendError, setSendError] = React.useState('');
+  const [sending, setSending] = React.useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchReferralBoard();
+        if (!cancelled && data) {
+          setBoard(data);
+        }
+      } catch {
+        if (!cancelled) {
+          setBoard((prev) => ({ ...prev, requests: [] }));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userRole]);
+
   const [draft, setDraft] = React.useState(() => {
     if (!requestTarget) {
       return '';
@@ -601,10 +1043,40 @@ function ReferralRequestsView({ userRole, requestTarget }) {
                 />
               </div>
 
+              {sendError ? <div className="mt-3 text-sm text-red-400">{sendError}</div> : null}
+
               <div className="mt-5 flex flex-wrap gap-3">
-                <Button className="h-11 rounded-2xl border-0 bg-gradient-to-r from-[#c9beff] to-[#8f7bff] px-5 text-sm font-semibold text-[#140f28] hover:from-[#ddd6ff] hover:to-[#a293ff]">
+                <Button
+                  type="button"
+                  disabled={sending || !requestTarget?.alumniUserId}
+                  onClick={async () => {
+                    setSendError('');
+                    if (!requestTarget?.alumniUserId) {
+                      setSendError('Open this alumni from the directory so the request can be routed correctly.');
+                      return;
+                    }
+                    setSending(true);
+                    try {
+                      await createReferralRequest({
+                        alumniUserId: requestTarget.alumniUserId,
+                        coverNote: draft,
+                        targetRole: requestTarget.openings?.[0] || 'Referral',
+                        targetCompany: 'See referral note',
+                      });
+                      const data = await fetchReferralBoard();
+                      if (data) {
+                        setBoard(data);
+                      }
+                    } catch (e) {
+                      setSendError(e?.message || 'Could not send request');
+                    } finally {
+                      setSending(false);
+                    }
+                  }}
+                  className="h-11 rounded-2xl border-0 bg-gradient-to-r from-[#c9beff] to-[#8f7bff] px-5 text-sm font-semibold text-[#140f28] hover:from-[#ddd6ff] hover:to-[#a293ff] disabled:opacity-60"
+                >
                   <Send className="mr-2 h-4 w-4" />
-                  Send request
+                  {sending ? 'Sending…' : 'Send request'}
                 </Button>
                 <Button variant="ghost" className="h-11 rounded-2xl border border-[#171a20] bg-[#171a20] px-5 text-sm text-white/78 hover:bg-[#1f232a] hover:text-white">
                   <Download className="mr-2 h-4 w-4" />
@@ -700,7 +1172,26 @@ function ReferralRequestsView({ userRole, requestTarget }) {
 
 export function DirectoryPage() {
   const { user } = useOutletContext();
-  const profiles = React.useMemo(() => getDirectoryProfiles(), []);
+  const [profiles, setProfiles] = React.useState([]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await fetchDirectory();
+        if (!cancelled && Array.isArray(data)) {
+          setProfiles(data);
+        }
+      } catch {
+        if (!cancelled) {
+          setProfiles([]);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const viewerIsStudent = user.role.toLowerCase() === 'student';
   const [query, setQuery] = React.useState('');
   const [selectedRegions, setSelectedRegions] = React.useState([]);
@@ -1291,10 +1782,53 @@ export function BlogPage() {
   const activeTab = searchParams.get('tab') === 'jobs' ? 'jobs' : 'posts';
   const draftText = typeof location.state?.draftText === 'string' ? location.state.draftText.trim() : '';
   const [composerText, setComposerText] = React.useState(draftText);
+  const [feedPosts, setFeedPosts] = React.useState(communityPosts);
+  const [postError, setPostError] = React.useState('');
+  const [posting, setPosting] = React.useState(false);
 
   React.useEffect(() => {
     setComposerText(draftText);
   }, [draftText]);
+
+  React.useEffect(() => {
+    if (activeTab !== 'posts') {
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await fetchDiscussionFeed();
+        if (cancelled || !Array.isArray(data)) {
+          return;
+        }
+
+        const mapped = data.map((p) => ({
+          id: p._id,
+          community: p.community || 'r/alumni-network',
+          author: p.authorName,
+          authorMeta: p.authorMeta || '',
+          time: formatRelativeTime(p.createdAt),
+          title: p.title,
+          body: p.body,
+          upvotes: p.upvotes ?? 0,
+          comments: p.commentsCount ?? 0,
+          tag: p.tag || 'Update',
+        }));
+
+        setFeedPosts(mapped.length ? mapped : communityPosts);
+      } catch {
+        if (!cancelled) {
+          setFeedPosts(communityPosts);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab]);
 
   if (activeTab === 'jobs') {
     return (
@@ -1378,7 +1912,54 @@ export function BlogPage() {
                       Resume-aware
                     </Pill>
                   </div>
-                  <Button className="auth-btn-primary h-10 px-4">Post</Button>
+                  <div className="flex flex-col items-end gap-2">
+                    {postError ? <div className="text-xs text-red-400">{postError}</div> : null}
+                    <Button
+                      type="button"
+                      disabled={posting}
+                      onClick={async () => {
+                        setPostError('');
+                        const text = composerText.trim();
+                        if (!text) {
+                          return;
+                        }
+                        setPosting(true);
+                        try {
+                          const firstLine = text.split('\n').find((line) => line.trim()) || 'Post';
+                          await createDiscussionPost({
+                            title: firstLine.slice(0, 200),
+                            body: text,
+                            community: 'r/alumni-network',
+                            tag: 'Update',
+                          });
+                          setComposerText('');
+                          const data = await fetchDiscussionFeed();
+                          if (Array.isArray(data)) {
+                            const mapped = data.map((p) => ({
+                              id: p._id,
+                              community: p.community || 'r/alumni-network',
+                              author: p.authorName,
+                              authorMeta: p.authorMeta || '',
+                              time: formatRelativeTime(p.createdAt),
+                              title: p.title,
+                              body: p.body,
+                              upvotes: p.upvotes ?? 0,
+                              comments: p.commentsCount ?? 0,
+                              tag: p.tag || 'Update',
+                            }));
+                            setFeedPosts(mapped.length ? mapped : communityPosts);
+                          }
+                        } catch (e) {
+                          setPostError(e?.message || 'Could not publish');
+                        } finally {
+                          setPosting(false);
+                        }
+                      }}
+                      className="auth-btn-primary h-10 px-4 disabled:opacity-60"
+                    >
+                      {posting ? 'Posting…' : 'Post'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1398,7 +1979,7 @@ export function BlogPage() {
           </SectionCard>
 
           <div className="space-y-4">
-            {communityPosts.map((post) => (
+            {feedPosts.map((post) => (
               <RedditPostCard key={post.id} post={post} />
             ))}
           </div>
@@ -1448,19 +2029,82 @@ export function ProfilePage() {
     user,
     profileComplete,
     completeProfile,
+    refreshSession,
   } = useOutletContext();
 
   const referralsTab = searchParams.get('tab') === 'referrals';
   const viewerRole = user.role.toLowerCase();
   const isOwnProfile = !params.profileId || params.profileId === 'me';
-  const baseProfile = isOwnProfile ? getSelfProfile(user) : getProfileById(params.profileId);
+  const [baseProfile, setBaseProfile] = React.useState(null);
+  const [profileLoading, setProfileLoading] = React.useState(true);
+
+  const reloadProfile = React.useCallback(async () => {
+    try {
+      const data = await fetchMyProfile();
+      setBaseProfile(data || null);
+    } catch {
+      /* keep existing profile */
+    }
+    try {
+      await refreshSession?.();
+    } catch {
+      /* ignore */
+    }
+  }, [refreshSession]);
+
+  React.useEffect(() => {
+    if (referralsTab) {
+      setProfileLoading(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    (async () => {
+      setProfileLoading(true);
+      try {
+        const data = isOwnProfile ? await fetchMyProfile() : await fetchPublicProfile(params.profileId);
+        if (!cancelled) {
+          setBaseProfile(data || null);
+        }
+      } catch {
+        if (!cancelled) {
+          setBaseProfile(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setProfileLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwnProfile, params.profileId, referralsTab]);
+
+  if (referralsTab) {
+    return (
+      <ReferralRequestsView
+        userRole={viewerRole}
+        requestTarget={location.state?.requestTarget || null}
+      />
+    );
+  }
+
+  if (profileLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-sm text-white/50">
+        Loading profile…
+      </div>
+    );
+  }
 
   if (!baseProfile) {
     return (
       <StubPanel
         eyebrow="Profile"
         title="Profile not found"
-        description="This demo route does not have a profile wired to it yet. Use the directory to jump into the available alumni fixtures."
+        description="This profile is not available. Use the directory to open a public alumni profile."
       >
         <Button asChild className="h-11 rounded-2xl border-0 bg-gradient-to-r from-[#c9beff] to-[#8f7bff] px-5 text-sm font-semibold text-[#140f28] hover:from-[#ddd6ff] hover:to-[#a293ff]">
           <Link to="/directory">Go to directory</Link>
@@ -1472,15 +2116,6 @@ export function ProfilePage() {
   const checklist = isOwnProfile && profileComplete
     ? baseProfile.checklist.map((item) => ({ ...item, done: true }))
     : baseProfile.checklist;
-
-  if (referralsTab) {
-    return (
-      <ReferralRequestsView
-        userRole={viewerRole}
-        requestTarget={location.state?.requestTarget || null}
-      />
-    );
-  }
 
   const canRequestReferral =
     viewerRole === 'student' && baseProfile.role === 'Alumni' && !isOwnProfile && Boolean(baseProfile.referralTarget);
@@ -1511,6 +2146,7 @@ export function ProfilePage() {
                 state={{
                   requestTarget: {
                     id: baseProfile.id,
+                    alumniUserId: baseProfile.alumniUserId,
                     name: baseProfile.name,
                     headline: baseProfile.headline,
                     openings: baseProfile.referralTarget.openings,
@@ -1526,8 +2162,13 @@ export function ProfilePage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_360px]">
-        <PersonalInformationPanel profile={baseProfile} isOwnProfile={isOwnProfile} />
-        <DocumentsPanel profile={baseProfile} isOwnProfile={isOwnProfile} />
+        <PersonalInformationPanel
+          profile={baseProfile}
+          isOwnProfile={isOwnProfile}
+          sessionUser={isOwnProfile ? user : null}
+          onProfileUpdated={reloadProfile}
+        />
+        <DocumentsPanel profile={baseProfile} isOwnProfile={isOwnProfile} onResumeUploaded={reloadProfile} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)_320px]">

@@ -6,8 +6,16 @@ import { generateAccessToken, generateRefreshToken } from "../../utils/generateT
 import { validateLogin, validateRegister } from "./auth.validation.js";
 import { env } from "../../config/env.js";
 import ApiError from "../../utils/ApiError.js";
+import { toSessionUser } from "../../utils/profile.mapper.js";
 
 const BCRYPT_ROUNDS = 12;
+
+function batchLabelFromYear(year) {
+  if (year === undefined || year === null || year === "") return null;
+  const n = Number(year);
+  if (!Number.isFinite(n)) return null;
+  return `Batch '${String(n).slice(-2)}`;
+}
 const MAX_SESSIONS = 5;
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -37,34 +45,58 @@ export const register = async (payload) => {
 
   const passwordHash = await bcrypt.hash(payload.password, BCRYPT_ROUNDS);
 
+  const expectedGradYear =
+    payload.expectedGradYear !== undefined && payload.expectedGradYear !== ""
+      ? Number(payload.expectedGradYear)
+      : null;
+  const gradYear =
+    payload.gradYear !== undefined && payload.gradYear !== "" ? Number(payload.gradYear) : null;
+
+  const batchLabel =
+    batchLabelFromYear(payload.role === "student" ? expectedGradYear : gradYear) ?? null;
+
   const user = await User.create({
     firstName: payload.firstName,
     lastName: payload.lastName,
+    batchLabel,
     email: payload.email.toLowerCase(),
     passwordHash,
     role: payload.role,
     phone: payload.phone || null,
-    department: payload.department || null,
-    expectedGradYear: payload.expectedGradYear || null,
-    gradYear: payload.gradYear || null,
+    department: payload.department || "General",
+    expectedGradYear: Number.isFinite(expectedGradYear) ? expectedGradYear : null,
+    gradYear: Number.isFinite(gradYear) ? gradYear : null,
     currentCompany: payload.currentCompany || null,
   });
+
+  const fullName = `${payload.firstName} ${payload.lastName}`.trim();
+  const dept = payload.department || "General";
 
   try {
     await Profile.create({
       userId: user._id,
       role: payload.role,
-      fullName: `${payload.firstName} ${payload.lastName}`,
-      department: payload.department || null,
-      // Student fields
+      fullName,
+      department: dept,
+      program: payload.role === "student" ? dept : null,
+      currentCompany: payload.currentCompany ?? null,
+      currentJobTitle: payload.currentJobTitle ?? null,
+      headline:
+        payload.role === "alumni" && payload.currentCompany
+          ? `Alumni · ${payload.currentCompany}`
+          : payload.role === "student"
+            ? `Student · ${dept}`
+            : null,
+      about:
+        payload.role === "alumni"
+          ? `${fullName} is an alumni member of the network.`
+          : `${fullName} is a student member of the network.`,
       rollNumber: payload.rollNumber ?? null,
       enrollmentNumber: payload.enrollmentNumber ?? null,
       currentYear: payload.currentYear ?? null,
-      // Alumni fields
-      batchYear: payload.batchYear ?? null,
-      currentJobTitle: payload.currentJobTitle ?? null,
-      currentCompany: payload.currentCompany ?? null,
+      batchYear: payload.batchYear ?? gradYear ?? expectedGradYear ?? null,
       industry: payload.industry ?? null,
+      showInDirectory: payload.role === "alumni",
     });
   } catch (profileErr) {
     console.error(" Profile creation failed:", profileErr.message, profileErr.errors);
@@ -99,6 +131,10 @@ export const login = async (payload) => {
 
   const isMatch = await bcrypt.compare(payload.password, user.passwordHash);
   if (!isMatch) throw new ApiError(401, "Invalid email or password");
+
+  if (payload.expectedRole && payload.expectedRole !== user.role) {
+    throw new ApiError(403, `This account is registered as ${user.role}. Use the ${user.role} login tab.`);
+  }
 
   user.lastLoginAt = new Date();
 
@@ -175,9 +211,10 @@ export const logout = async (incomingRefreshToken) => {
 
 // ─── me ──────────────────────────────────────────────────────────────────────
 
-/** Return the authenticated user. req.user.id is set by authGuard from the JWT. */
-export const getMe = async (userId) => {
-  const user = await User.findById(userId);
+/** Session payload for the authenticated layout (matches frontend `user` context shape). */
+export const getSession = async (userId) => {
+  const user = await User.findById(userId).select("-passwordHash -refreshTokens");
   if (!user) throw new ApiError(404, "User not found");
-  return user;
+  const profile = await Profile.findOne({ userId: user._id });
+  return toSessionUser(user, profile);
 };

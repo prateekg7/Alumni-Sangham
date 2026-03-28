@@ -44,6 +44,7 @@ const HOF_MEMBERS = [
 
 export function HallOfFame({ sectionId = 'hall-of-fame' }) {
   const navigate = useNavigate();
+  const openDirectory = () => navigate('/directory');
 
   const bentoItems = HOF_MEMBERS.map((member, i) => ({
     id: i,
@@ -52,18 +53,20 @@ export function HallOfFame({ sectionId = 'hall-of-fame' }) {
     description: member.achievement,
     icon: <Award className="w-5 h-5" />,
     image: member.image,
-    onClick: () => navigate(`/alumni/${member.name.toLowerCase().replace(' ', '-')}`)
+    onClick: openDirectory,
   }));
 
-  const backgroundItems = HOF_MEMBERS.map(m => ({
+  const backgroundItems = HOF_MEMBERS.map((m) => ({
     src: m.image,
-    onClick: () => navigate(`/alumni/${m.name.toLowerCase().replace(' ', '-')}`)
+    onClick: openDirectory,
   }));
+
+  const idAttr = sectionId != null && sectionId !== '' ? { id: sectionId } : {};
 
   return (
     <SmoothScroll>
       <section
-        id={sectionId}
+        {...idAttr}
         className="w-full min-h-[150vh] pb-[20vh] bg-black/90 relative flex flex-col items-center justify-center overflow-hidden"
       >
         <StaggeredGrid 

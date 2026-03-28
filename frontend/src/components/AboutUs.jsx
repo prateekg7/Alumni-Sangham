@@ -3,9 +3,10 @@ import adminPov from '../../Assets/admin-pov.jpg';
 import admin from '../../Assets/admin.jpg';
 
 export function AboutUs({ sectionId = 'about' }) {
+  const idAttr = sectionId != null && sectionId !== '' ? { id: sectionId } : {};
   return (
     <section
-      id={sectionId}
+      {...idAttr}
       className="w-full relative isolate overflow-visible bg-black/70 backdrop-blur-sm pointer-events-auto py-20 md:py-32 px-6 md:px-16 lg:px-24"
     >
       <div

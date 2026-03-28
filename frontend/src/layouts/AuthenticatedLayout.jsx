@@ -1,28 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Menu from 'lucide-react/dist/esm/icons/menu.js';
 import { SidePanel } from '@/components/dashboard/SidePanel';
 import { ComposeDialog } from '@/components/dashboard/ComposeDialog';
+import {
+  clearSession,
+  fetchSession,
+  getAccessToken,
+  logoutRequest,
+  patchMyProfile,
+  setAccessToken,
+} from '@/lib/api';
 
-const DEMO_USERS = {
-  alumni: {
-    name: 'Ryan Crawford',
-    role: 'Alumni',
-    batchLabel: "Batch '19",
-    email: 'ryan.crawford@alumni.iitp.ac.in',
-    initials: 'RC',
-  },
-  student: {
-    name: 'Aarav Sinha',
-    role: 'Student',
-    batchLabel: "Batch '27",
-    email: 'aarav.sinha@iitp.ac.in',
-    initials: 'AS',
-  },
-};
+function mapSessionToUser(session) {
+  if (!session) {
+    return null;
+  }
+  const roleLower = String(session.role || 'alumni').toLowerCase();
+  return {
+    id: session.id,
+    name: session.name,
+    email: session.email,
+    role: roleLower === 'student' ? 'Student' : 'Alumni',
+    batchLabel: session.batchLabel || '',
+    initials: session.initials || '?',
+    profileComplete: Boolean(session.profileComplete),
+    profileProgress: typeof session.profileProgress === 'number' ? session.profileProgress : 0,
+  };
+}
 
 export function AuthenticatedLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(() => {
     if (typeof window === 'undefined') {
@@ -32,43 +41,55 @@ export function AuthenticatedLayout() {
     return window.matchMedia('(min-width: 768px)').matches;
   });
   const [composerOpen, setComposerOpen] = useState(false);
-  const [role] = useState(() => {
-    if (typeof window === 'undefined') {
-      return 'alumni';
+  const [authReady, setAuthReady] = useState(false);
+  const [sessionUser, setSessionUser] = useState(null);
+
+  const user = sessionUser;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        if (!getAccessToken()) {
+          if (!cancelled) {
+            setSessionUser(null);
+          }
+          return;
+        }
+        const session = await fetchSession();
+        if (!cancelled) {
+          setSessionUser(mapSessionToUser(session));
+        }
+      } catch {
+        clearSession();
+        if (!cancelled) {
+          setSessionUser(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setAuthReady(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!authReady) {
+      return;
     }
-
-    const storedRole = window.localStorage.getItem('alumni-sangham-demo-role');
-    return storedRole === 'student' ? 'student' : 'alumni';
-  });
-  const [profileComplete, setProfileComplete] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false;
+    if (!user) {
+      navigate('/login/student', { replace: true, state: { from: location.pathname } });
     }
-
-    return window.localStorage.getItem(`alumni-sangham-profile-complete:${role}`) === 'true';
-  });
-
-  const profileProgress = profileComplete ? 100 : role === 'student' ? 72 : 81;
-  const user = {
-    ...DEMO_USERS[role],
-    profileComplete,
-    profileProgress,
-  };
+  }, [authReady, user, navigate, location.pathname]);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname, location.search]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.localStorage.setItem(
-      `alumni-sangham-profile-complete:${role}`,
-      profileComplete ? 'true' : 'false',
-    );
-  }, [profileComplete, role]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -88,6 +109,53 @@ export function AuthenticatedLayout() {
     media.addEventListener('change', sync);
     return () => media.removeEventListener('change', sync);
   }, []);
+
+  const completeProfile = useCallback(async () => {
+    try {
+      await patchMyProfile({ profileComplete: true });
+      setSessionUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              profileComplete: true,
+              profileProgress: 100,
+            }
+          : prev,
+      );
+    } catch {
+      setSessionUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              profileComplete: true,
+              profileProgress: 100,
+            }
+          : prev,
+      );
+    }
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logoutRequest();
+    } catch {
+      clearSession();
+      setAccessToken(null);
+    }
+    setSessionUser(null);
+    navigate('/', { replace: true });
+  }, [navigate]);
+
+  if (!authReady || !user) {
+    return (
+      <div className="fixed inset-0 bg-[#030303] flex items-center justify-center z-[200]">
+        <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const profileComplete = user.profileComplete;
+  const profileProgress = user.profileProgress;
 
   return (
     <div className="auth-shell min-h-screen">
@@ -121,6 +189,7 @@ export function AuthenticatedLayout() {
         onClose={() => setSidebarOpen(false)}
         onCompose={() => setComposerOpen(true)}
         user={user}
+        onLogout={handleLogout}
       />
 
       <main className="relative z-10 ml-0 min-h-screen p-4 pb-20 pt-20 transition-[margin] duration-300 md:ml-20 md:p-6 md:pb-6 md:pt-6">
@@ -129,8 +198,16 @@ export function AuthenticatedLayout() {
             user,
             profileComplete,
             profileProgress,
-            completeProfile: () => setProfileComplete(true),
+            completeProfile,
             openSidebar: () => setSidebarOpen(true),
+            refreshSession: async () => {
+              try {
+                const session = await fetchSession();
+                setSessionUser(mapSessionToUser(session));
+              } catch {
+                /* ignore */
+              }
+            },
           }}
         />
       </main>

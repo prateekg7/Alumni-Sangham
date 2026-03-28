@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, startTransition, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { StatsSection } from '../components/Stats';
@@ -30,7 +30,7 @@ function cancelIdle(id) {
   window.clearTimeout(id);
 }
 
-function DeferredSection({ id, placeholderClassName, rootMargin, children }) {
+function DeferredSection({ id, placeholderClassName, rootMargin, className, children }) {
   const sectionRef = useRef(null);
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -56,7 +56,7 @@ function DeferredSection({ id, placeholderClassName, rootMargin, children }) {
   }, [rootMargin, shouldRender]);
 
   return (
-    <div id={id} ref={sectionRef} className="relative w-full">
+    <div id={id} ref={sectionRef} className={`relative w-full ${className || ''}`}>
       {shouldRender ? children : <div className={placeholderClassName} aria-hidden="true" />}
     </div>
   );
@@ -64,6 +64,7 @@ function DeferredSection({ id, placeholderClassName, rootMargin, children }) {
 
 export function HomePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showBackground, setShowBackground] = useState(false);
 
   useEffect(() => {
@@ -73,6 +74,20 @@ export function HomePage() {
 
     return () => cancelIdle(idleId);
   }, []);
+
+  useEffect(() => {
+    const raw = (location.hash || '').replace(/^#/, '');
+    if (!raw) {
+      return undefined;
+    }
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(raw);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [location.hash, location.key]);
 
   return (
     <div className="relative min-h-screen text-white font-sans selection:bg-blue-500/30 dark pointer-events-none">
@@ -118,6 +133,7 @@ export function HomePage() {
         <StatsSection />
         <DeferredSection
           id="about"
+          className="scroll-mt-28"
           rootMargin="400px 0px"
           placeholderClassName="min-h-screen md:min-h-[1100px] bg-black/70 backdrop-blur-sm"
         >
@@ -129,11 +145,12 @@ export function HomePage() {
               />
             }
           >
-            <AboutUs sectionId={undefined} />
+            <AboutUs sectionId={null} />
           </Suspense>
         </DeferredSection>
         <DeferredSection
           id="features"
+          className="scroll-mt-28"
           rootMargin="600px 0px"
           placeholderClassName="h-[350vh] bg-black/70 backdrop-blur-sm"
         >
@@ -145,13 +162,14 @@ export function HomePage() {
         </DeferredSection>
         <DeferredSection
           id="hall-of-fame"
+          className="scroll-mt-28"
           rootMargin="500px 0px"
           placeholderClassName="min-h-screen bg-black/70 backdrop-blur-sm"
         >
           <Suspense
             fallback={<div className="min-h-screen bg-black/70 backdrop-blur-sm" aria-hidden="true" />}
           >
-            <HallOfFame sectionId={undefined} />
+            <HallOfFame sectionId={null} />
           </Suspense>
         </DeferredSection>
       </main>

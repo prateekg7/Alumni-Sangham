@@ -29,6 +29,7 @@ const spotlightCards = [
     chartPath: 'M0,74 C18,58 32,56 52,68 C71,80 86,92 102,84 C122,74 136,50 154,46 C174,42 191,54 208,38 C226,22 244,12 266,18',
     chartGlow: '#8f7cff',
     chip: 'Directory',
+    to: '/directory',
   },
   {
     name: 'Referral Requests',
@@ -42,6 +43,7 @@ const spotlightCards = [
     chartPath: 'M0,72 C22,84 36,88 58,78 C78,68 92,46 110,42 C130,38 150,50 170,46 C188,42 210,26 228,22 C244,18 254,24 266,10',
     chartGlow: '#f8b65e',
     chip: 'Referrals',
+    to: '/profile/me?tab=referrals',
   },
   {
     name: 'Hall of Fame',
@@ -55,6 +57,8 @@ const spotlightCards = [
     chartPath: 'M0,24 C22,22 46,34 64,50 C82,66 102,72 122,62 C142,52 158,32 176,34 C198,36 216,62 238,68 C250,72 258,70 266,74',
     chartGlow: '#a16aff',
     chip: 'Spotlight',
+    to: '/',
+    hash: 'hall-of-fame',
   },
 ];
 
@@ -119,9 +123,9 @@ function ChartLine({ path, color }) {
 function SpotlightCard({ card }) {
   const Icon = card.icon;
   const positive = card.deltaTone === 'up';
-
-  return (
-    <div className="group rounded-[28px] border border-[#252a33] bg-[#17191f] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.32)] transition hover:-translate-y-1 hover:border-[#313641] hover:bg-[#1a1d24]">
+  const linkTo = card.hash ? { pathname: card.to, hash: card.hash } : card.to;
+  const inner = (
+    <>
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br shadow-lg', card.iconClass)}>
@@ -132,12 +136,9 @@ function SpotlightCard({ card }) {
             <div className="mt-1 text-xl font-semibold text-white">{card.name}</div>
           </div>
         </div>
-        <button
-          type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[#2b3038] bg-[#21242b] text-white/70 transition hover:bg-[#2a2e37] hover:text-white"
-        >
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[#2b3038] bg-[#21242b] text-white/70 transition group-hover:bg-[#2a2e37] group-hover:text-white">
           <ArrowUpRight className="h-4 w-4" />
-        </button>
+        </span>
       </div>
 
       <div className="mt-8 flex items-end justify-between gap-4">
@@ -163,7 +164,16 @@ function SpotlightCard({ card }) {
         </div>
         <ChartLine path={card.chartPath} color={card.chartGlow} />
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <Link
+      to={linkTo}
+      className="group block rounded-[28px] border border-[#252a33] bg-[#17191f] p-5 shadow-[0_18px_48px_rgba(0,0,0,0.32)] transition hover:-translate-y-1 hover:border-[#313641] hover:bg-[#1a1d24]"
+    >
+      {inner}
+    </Link>
   );
 }
 

@@ -11,7 +11,7 @@ const referralRequestSchema = new mongoose.Schema(
     alumniCompany: { type: String, required: true },
     targetCompany: { type: String, required: true },
     targetRole: { type: String, required: true },
-    resumeUrl: { type: String, required: true },
+    resumeUrl: { type: String, default: null },
     coverNote: { type: String, required: true },
     linkedinUrl: { type: String, default: null },
     status: { type: String, enum: ["pending", "accepted", "declined"], default: "pending" },

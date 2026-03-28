@@ -1,5 +1,6 @@
 import { useScroll, useTransform, motion } from 'framer-motion';
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Globe from 'lucide-react/dist/esm/icons/globe.js';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard.js';
 import Newspaper from 'lucide-react/dist/esm/icons/newspaper.js';
@@ -17,8 +18,18 @@ const CARDS = [
     border: 'border-blue-400/20',
     accent: 'text-white',
     features: [
-      { icon: Globe,       label: 'Alumni Directory',   desc: 'Interactive world map connecting alumni globally.' },
-      { icon: ShieldCheck, label: 'Verified Profiles',   desc: 'Automated identity checks for every member.' },
+      {
+        icon: Globe,
+        label: 'Alumni Directory',
+        desc: 'Interactive world map connecting alumni globally.',
+        navigateTo: '/directory',
+      },
+      {
+        icon: ShieldCheck,
+        label: 'Verified Profiles',
+        desc: 'Automated identity checks for every member.',
+        navigateTo: '/register',
+      },
     ],
   },
   // Block 2 (Top Wide): x: 1/3 to 1, y: 0 to 1/3
@@ -29,7 +40,12 @@ const CARDS = [
     border: 'border-sky-400/20',
     accent: 'text-white',
     features: [
-      { icon: LayoutDashboard, label: 'Role Dashboards',  desc: 'Tailored views for students, alumni, and admins.' },
+      {
+        icon: LayoutDashboard,
+        label: 'Role Dashboards',
+        desc: 'Tailored views for students, alumni, and admins.',
+        navigateTo: '/dashboard',
+      },
     ],
   },
   // Center gap: x: 1/3 to 2/3, y: 1/3 to 2/3
@@ -43,8 +59,18 @@ const CARDS = [
     border: 'border-cyan-400/20',
     accent: 'text-white',
     features: [
-      { icon: Newspaper, label: 'Blog & Jobs', desc: 'Unified feed for articles and internships.' },
-      { icon: Share2,    label: 'Referrals',   desc: 'Request job referrals in one click.' },
+      {
+        icon: Newspaper,
+        label: 'Blog & Jobs',
+        desc: 'Unified feed for articles and internships.',
+        navigateTo: '/blog',
+      },
+      {
+        icon: Share2,
+        label: 'Referrals',
+        desc: 'Request job referrals in one click.',
+        navigateTo: '/profile/me?tab=referrals',
+      },
     ],
   },
   // Block 4 (Right Tall): x: 2/3 to 1, y: 1/3 to 1
@@ -55,14 +81,43 @@ const CARDS = [
     border: 'border-indigo-400/20',
     accent: 'text-white',
     features: [
-      { icon: Mail, label: 'Email Connect', desc: 'Privacy-preserving email relay outreach.' },
-      { icon: Star, label: 'Distinguished',  desc: 'Showcase outstanding alumni achievements.' },
+      {
+        icon: Mail,
+        label: 'Email Connect',
+        desc: 'Privacy-preserving email relay outreach.',
+        navigateTo: '/directory',
+      },
+      {
+        icon: Star,
+        label: 'Distinguished',
+        desc: 'Showcase outstanding alumni achievements.',
+        navigateTo: '/',
+        navigateHash: 'hall-of-fame',
+      },
     ],
   },
 ];
 
 export function ZoomParallax() {
+  const navigate = useNavigate();
   const container = useRef(null);
+
+  const goFeature = (f) => {
+    if (!f?.navigateTo) {
+      return;
+    }
+    if (f.navigateHash) {
+      navigate({ pathname: f.navigateTo, hash: f.navigateHash });
+      return;
+    }
+    if (f.navigateTo.includes('?')) {
+      const [path, query] = f.navigateTo.split('?');
+      const params = new URLSearchParams(query);
+      navigate({ pathname: path, search: `?${params.toString()}` });
+      return;
+    }
+    navigate(f.navigateTo);
+  };
 
   const { scrollYProgress } = useScroll({
     target: container,
@@ -115,16 +170,23 @@ export function ZoomParallax() {
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-tr from-white/0 via-white/5 to-white/0" />
 
                 <div className="space-y-6 relative z-10">
-                  {card.features.map((f, fi) => {
+                  {card.features.map((f) => {
                     const Icon = f.icon;
                     return (
-                      <div key={f.label}>
+                      <button
+                        key={f.label}
+                        type="button"
+                        onClick={() => goFeature(f)}
+                        className="w-full rounded-2xl border border-transparent p-2 text-left transition hover:border-white/15 hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50"
+                      >
                         <div className={`flex items-center gap-3 mb-2 ${card.accent}`}>
                           <Icon size={20} strokeWidth={2.2} />
                           <span className="text-xs md:text-sm font-bold tracking-widest uppercase">{f.label}</span>
                         </div>
-                        <p className="text-sm border-l-2 border-white/10 pl-3 md:text-base text-white/70 leading-relaxed font-light">{f.desc}</p>
-                      </div>
+                        <p className="text-sm border-l-2 border-white/10 pl-3 md:text-base text-white/70 leading-relaxed font-light">
+                          {f.desc}
+                        </p>
+                      </button>
                     );
                   })}
                 </div>

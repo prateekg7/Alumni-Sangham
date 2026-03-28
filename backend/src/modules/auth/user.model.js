@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
+    batchLabel: { type: String, default: null, trim: true },
     email: { type: String, unique: true, required: true, trim: true },
     passwordHash: { type: String, default: null, select: false },
     role: { type: String, required: true, enum: ["student", "alumni", "admin"] },
