@@ -2086,35 +2086,31 @@ export function DirectoryPage() {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[34px] bg-[#0c0d10] px-6 py-7 shadow-[0_36px_100px_rgba(0,0,0,0.38)] md:px-8 md:py-8">
+      <section className="overflow-hidden rounded-[28px] bg-[#f8faff] px-6 py-7 border border-blue-100 shadow-[0_2px_12px_-4px_rgba(59,130,246,0.08)] md:px-8 md:py-8">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#14161b] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
-              <Globe className="h-3.5 w-3.5" />
-              Networking
-            </div>
-            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-white md:text-5xl" style={{ fontFamily: 'Syne, sans-serif' }}>
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl" style={{ fontFamily: 'Syne, sans-serif' }}>
               Networking directory
             </h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/52 md:text-base">
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-500 md:text-base">
               A filter-first alumni directory built for fast discovery. Students and alumni can search by region, domain, support style, and skills, then open any profile to inspect their public resume and networking context.
             </p>
           </div>
 
           <div className="w-full max-w-xl">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/28" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search alumni, companies, cities, chapters, or skills..."
-                className="h-14 w-full rounded-[24px] border border-[#121418] bg-[#121418] pl-12 pr-14 text-sm text-white outline-none transition placeholder:text-white/24 focus:bg-[#161920]"
+                className="h-14 w-full rounded-2xl border border-gray-200 bg-white pl-12 pr-14 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm"
               />
               {query ? (
                 <button
                   type="button"
                   onClick={() => setQuery('')}
-                  className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#1a1d24] text-white/42 transition hover:text-white"
+                  className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:text-gray-900"
                   aria-label="Clear search"
                 >
                   <X className="h-4 w-4" />
@@ -2122,77 +2118,49 @@ export function DirectoryPage() {
               ) : null}
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
-              <div className="rounded-full bg-[#14161b] px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/42">
+              <div className="rounded-full bg-gray-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gray-500 border border-gray-200">
                 {profiles.length} alumni listed
               </div>
-              <div className="rounded-full bg-[#14161b] px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/42">
+              <div className="rounded-full bg-gray-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gray-500 border border-gray-200">
                 Public resume on every profile
-              </div>
-              <div className="rounded-full bg-[#14161b] px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/42">
-                {viewerIsStudent ? 'Students can request referrals' : 'Alumni can scout peers and chapters'}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
-          <section className="rounded-[30px] bg-[#0f1013] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.26)]">
-            <div className="flex items-center gap-2 text-sm font-medium text-white/58">
-              <SlidersHorizontal className="h-4 w-4" />
-              Filter alumni
-            </div>
-            <p className="mt-2 text-sm leading-6 text-white/42">
-              Narrow the list by geography, practice area, support style, and skill signals.
-            </p>
-
-            <div className="mt-5 rounded-[22px] bg-[#121418] p-4">
-              <button
-                type="button"
-                onClick={() => setReferralOnly((current) => !current)}
-                className={cn(
-                  'flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-left transition',
-                  referralOnly ? 'bg-[#1f2230] text-[#cec3ff]' : 'bg-[#171a20] text-white/62 hover:bg-[#1b1f27]',
-                )}
-              >
-                <span>
-                  <span className="block text-sm font-semibold">Referral friendly</span>
-                  <span className="mt-1 block text-xs uppercase tracking-[0.18em] text-current/70">Show alumni open to referral asks</span>
-                </span>
-                <Handshake className="h-4 w-4" />
-              </button>
+      <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="xl:sticky xl:top-6 xl:self-start bg-[#f8faff] rounded-[28px] border border-blue-100 shadow-[0_2px_12px_-4px_rgba(59,130,246,0.08)] overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-6 tracking-tight">
+              <SlidersHorizontal className="h-5 w-5" />
+              Filters
             </div>
 
-            <div className="mt-5 space-y-5">
+            <div className="space-y-8">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/28">Location</div>
-                <div className="mt-3 space-y-2">
+                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Region</div>
+                <div className="space-y-3">
                   {regionOptions.map((region) => {
                     const checked = selectedRegions.includes(region.label);
-
                     return (
                       <button
                         key={region.label}
                         type="button"
                         onClick={() => toggleSelection(setSelectedRegions, region.label)}
-                        className={cn(
-                          'flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-left transition',
-                          checked ? 'bg-[#171d2a] text-white' : 'bg-[#121418] text-white/62 hover:bg-[#171a20]',
-                        )}
+                        className="flex w-full items-center justify-between text-left group"
                       >
                         <span className="flex items-center gap-3">
                           <span
                             className={cn(
-                              'flex h-4 w-4 items-center justify-center rounded-[5px] border',
-                              checked ? 'border-[#8f7cff] bg-[#8f7cff]' : 'border-[#2a2e37] bg-transparent',
+                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
+                              checked ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
                             )}
                           >
-                            {checked ? <span className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
+                            {checked ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
                           </span>
-                          <span className="text-sm">{region.label}</span>
+                          <span className={cn('text-sm', checked ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{region.label}</span>
                         </span>
-                        <span className="text-xs uppercase tracking-[0.18em] text-white/28">{region.count}</span>
                       </button>
                     );
                   })}
@@ -2200,22 +2168,28 @@ export function DirectoryPage() {
               </div>
 
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/28">Domain</div>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Industry</div>
+                <div className="space-y-3">
                   {domainOptions.map((domain) => {
                     const active = selectedDomains.includes(domain.label);
-
                     return (
                       <button
                         key={domain.label}
                         type="button"
                         onClick={() => toggleSelection(setSelectedDomains, domain.label)}
-                        className={cn(
-                          'rounded-full px-4 py-2 text-sm transition',
-                          active ? 'bg-[#20253a] text-[#d4ccff]' : 'bg-[#121418] text-white/58 hover:bg-[#171a20] hover:text-white/82',
-                        )}
+                        className="flex w-full items-center justify-between text-left group"
                       >
-                        {domain.label}
+                        <span className="flex items-center gap-3">
+                          <span
+                            className={cn(
+                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
+                              active ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
+                            )}
+                          >
+                            {active ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
+                          </span>
+                          <span className={cn('text-sm', active ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{domain.label}</span>
+                        </span>
                       </button>
                     );
                   })}
@@ -2223,246 +2197,198 @@ export function DirectoryPage() {
               </div>
 
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/28">Open to</div>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Support Style</div>
+                <div className="space-y-3">
                   {supportModeOptions.map((mode) => {
                     const active = selectedSupportModes.includes(mode.label);
-
                     return (
                       <button
                         key={mode.label}
                         type="button"
                         onClick={() => toggleSelection(setSelectedSupportModes, mode.label)}
-                        className={cn(
-                          'rounded-full px-4 py-2 text-sm transition',
-                          active ? 'bg-[#1b2837] text-[#bfe0ff]' : 'bg-[#121418] text-white/58 hover:bg-[#171a20] hover:text-white/82',
-                        )}
+                        className="flex w-full items-center justify-between text-left group"
                       >
-                        {mode.label}
+                        <span className="flex items-center gap-3">
+                          <span
+                            className={cn(
+                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
+                              active ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
+                            )}
+                          >
+                            {active ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
+                          </span>
+                          <span className={cn('text-sm', active ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{mode.label}</span>
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
-
+              
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/28">Skills</div>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Skills</div>
+                <div className="space-y-3">
                   {skillOptions.map((skill) => {
                     const active = selectedSkills.includes(skill.label);
-
                     return (
                       <button
                         key={skill.label}
                         type="button"
                         onClick={() => toggleSelection(setSelectedSkills, skill.label)}
-                        className={cn(
-                          'rounded-full px-4 py-2 text-sm transition',
-                          active ? 'bg-[#22202d] text-[#e4d8ff]' : 'bg-[#121418] text-white/58 hover:bg-[#171a20] hover:text-white/82',
-                        )}
+                        className="flex w-full items-center justify-between text-left group"
                       >
-                        {skill.label}
+                        <span className="flex items-center gap-3">
+                          <span
+                            className={cn(
+                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
+                              active ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
+                            )}
+                          >
+                            {active ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
+                          </span>
+                          <span className={cn('text-sm', active ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{skill.label}</span>
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section className="rounded-[30px] bg-[#0f1013] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
-            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-white/28">Discovery notes</div>
-            <div className="mt-4 space-y-3">
-              <div className="rounded-[22px] bg-[#121418] p-4">
-                <div className="text-sm font-semibold text-white">Alumni only</div>
-                <p className="mt-2 text-sm leading-6 text-white/42">
+          <div className="h-px bg-blue-100/60 w-full" />
+
+          <div className="p-6 bg-[#f0f5ff]">
+            <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#93a3b8] mb-4">Discovery notes</div>
+            <div className="space-y-3">
+              <div className="rounded-2xl bg-white p-4 border border-blue-50 shadow-sm">
+                <div className="text-sm font-bold text-gray-900">Alumni only</div>
+                <p className="mt-1 text-[13px] leading-relaxed text-gray-500">
                   This surface is intentionally alumni-only. Students and alumni both search here, but every result routes into a public alumni profile.
                 </p>
               </div>
-              <div className="rounded-[22px] bg-[#121418] p-4">
-                <div className="text-sm font-semibold text-white">Public resume visibility</div>
-                <p className="mt-2 text-sm leading-6 text-white/42">
-                  Resume access is consistent across the network, so profile viewers can inspect the document before reaching out.
+              <div className="rounded-2xl bg-white p-4 border border-blue-50 shadow-sm">
+                <div className="text-sm font-bold text-gray-900">Public resume</div>
+                <p className="mt-1 text-[13px] leading-relaxed text-gray-500">
+                  Resume access is consistent across the network, so viewers can inspect the document before reaching out.
                 </p>
               </div>
-              <div className="rounded-[22px] bg-[#121418] p-4">
-                <div className="text-sm font-semibold text-white">{viewerIsStudent ? 'Referral workflow' : 'Networking workflow'}</div>
-                <p className="mt-2 text-sm leading-6 text-white/42">
+              <div className="rounded-2xl bg-white p-4 border border-blue-50 shadow-sm">
+                <div className="text-sm font-bold text-gray-900">{viewerIsStudent ? 'Referral workflow' : 'Networking workflow'}</div>
+                <p className="mt-1 text-[13px] leading-relaxed text-gray-500">
                   {viewerIsStudent
                     ? 'When an alumni is open to referrals, the profile view exposes the referral request path directly.'
                     : 'Open any alumni profile to inspect role history, chapter context, and shared documents before connecting.'}
                 </p>
               </div>
             </div>
-          </section>
+          </div>
         </aside>
 
         <div className="space-y-5">
-          <section className="rounded-[30px] bg-[#0f1013] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <div className="text-xs uppercase tracking-[0.24em] text-white/28">Results</div>
-                <div className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                  {filteredProfiles.length} alumni match{filteredProfiles.length === 1 ? '' : 'es'}
-                </div>
-                <p className="mt-3 max-w-3xl text-sm leading-6 text-white/46">
-                  Search results prioritize quick signal reading: who the alumnus is, where they are, what they help with, and whether they are currently referral friendly.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                {chapterPreview.map((chapter) => (
-                  <div key={chapter.label} className="rounded-[20px] bg-[#121418] px-4 py-3">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/26">Chapter</div>
-                    <div className="mt-2 text-sm font-semibold text-white">{chapter.label}</div>
-                    <div className="mt-1 text-xs text-white/38">{chapter.count} alumni</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {activeFilters.length ? (
-                activeFilters.map((filter) => (
-                  <button
-                    key={`${filter.type}-${filter.label}`}
-                    type="button"
-                    onClick={() => removeActiveFilter(filter)}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#141922] px-3 py-2 text-xs uppercase tracking-[0.18em] text-white/58 transition hover:text-white"
-                  >
-                    {filter.label}
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                ))
-              ) : (
-                <div className="rounded-full bg-[#121418] px-3 py-2 text-xs uppercase tracking-[0.18em] text-white/34">
-                  No filters applied
-                </div>
-              )}
-
-              {(activeFilters.length || query) ? (
-                <Button
-                  variant="ghost"
-                  onClick={clearAllFilters}
-                  className="h-9 rounded-full border-0 bg-[#171a20] px-4 text-xs uppercase tracking-[0.18em] text-white/72 hover:bg-[#1d2129] hover:text-white"
+          {(activeFilters.length > 0 || query) ? (
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-xs text-gray-500 mr-2 uppercase font-bold tracking-wider">Active filters:</span>
+              {activeFilters.map((filter) => (
+                <button
+                  key={`${filter.type}-${filter.label}`}
+                  type="button"
+                  onClick={() => removeActiveFilter(filter)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 shadow-sm"
                 >
-                  Reset all
-                </Button>
-              ) : null}
+                  {filter.label}
+                  <X className="h-3 w-3" />
+                </button>
+              ))}
+              <Button
+                variant="ghost"
+                onClick={clearAllFilters}
+                className="h-8 rounded-full px-3 text-xs font-semibold text-blue-600 hover:bg-blue-50"
+              >
+                Clear all
+              </Button>
             </div>
-          </section>
+          ) : null}
 
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredProfiles.length ? (
               filteredProfiles.map((profile) => (
                 <Link
                   key={profile.id}
                   to={`/profile/${profile.id}`}
-                  className="group block rounded-[30px] bg-[#0f1013] p-5 shadow-[0_18px_54px_rgba(0,0,0,0.24)] transition hover:bg-[#12151b]"
+                  className="group flex flex-col h-full rounded-[20px] bg-white p-5 border border-blue-50/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-blue-100"
                 >
-                  <article className="relative overflow-hidden rounded-[24px] bg-[#111317] p-5">
-                    <div className="absolute inset-y-6 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-[#8f7cff] via-[#5f88ff] to-[#89d8ff]" />
-
-                    <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                      <div className="flex gap-4 pl-2">
-                        <div className={cn('flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-gradient-to-br text-base font-semibold text-white', profile.avatarTone)}>
-                          {profile.initials}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h2 className="text-2xl font-semibold tracking-tight text-white">{profile.name}</h2>
-                            <span className="rounded-full bg-[#171a20] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/40">
-                              {profile.batchLabel}
-                            </span>
-                          </div>
-                          <div className="mt-2 text-sm text-white/56">{profile.title} at {profile.company}</div>
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <div className="inline-flex items-center gap-2 rounded-full bg-[#171a20] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-white/42">
-                              <MapPin className="h-3.5 w-3.5" />
-                              {profile.location}
-                            </div>
-                            <div className="inline-flex items-center gap-2 rounded-full bg-[#171a20] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-white/42">
-                              <BriefcaseBusiness className="h-3.5 w-3.5" />
-                              {profile.domain}
-                            </div>
-                            <div className="inline-flex items-center gap-2 rounded-full bg-[#171a20] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-white/42">
-                              <Link2 className="h-3.5 w-3.5" />
-                              Public resume
-                            </div>
-                            {profile.referralOpen ? (
-                              <div className="inline-flex items-center gap-2 rounded-full bg-[#1d2230] px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-[#cfc3ff]">
-                                <Handshake className="h-3.5 w-3.5" />
-                                Referral open
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="inline-flex items-center gap-2 self-start rounded-full bg-[#171a20] px-4 py-2 text-sm text-white/76 transition group-hover:text-white">
-                        View profile
-                        <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </div>
+                  <div className="flex flex-col items-center mb-3 relative pt-1">
+                    {profile.batchLabel ? (
+                      <span className="absolute right-0 top-0 rounded-[8px] bg-[#EEF2FF] text-[#6366F1] px-2 py-0.5 text-[10px] font-bold tracking-wide">
+                        '{String(profile.batchLabel).replace(/\D/g, '').slice(-2) || String(profile.batchLabel)}
+                      </span>
+                    ) : null}
+                    <div className="w-[55%] max-w-[120px] aspect-square flex shrink-0 items-center justify-center rounded-full bg-blue-50/50 overflow-hidden text-blue-600 text-4xl font-bold shadow-sm ring-4 ring-white">
+                      {profile.avatarUrl || profile.profileImage || profile.image || profile.avatar || profile.picture ? (
+                        <img 
+                          src={profile.avatarUrl || profile.profileImage || profile.image || profile.avatar || profile.picture} 
+                          alt={profile.name} 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        profile.initials
+                      )}
                     </div>
+                  </div>
 
-                    <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_240px]">
-                      <div className="rounded-[22px] bg-[#0d0f13] p-4">
-                        <div className="text-xs uppercase tracking-[0.22em] text-white/26">What they help with</div>
-                        <p className="mt-3 text-sm leading-7 text-white/58">{profile.focus}</p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {profile.supportModes.map((mode) => (
-                            <span key={mode} className="rounded-full bg-[#171a20] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/42">
-                              {mode}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="rounded-[22px] bg-[#0d0f13] p-4">
-                        <div className="grid gap-3 text-sm text-white/58">
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="text-white/32">Chapter</span>
-                            <span className="font-medium text-white/78">{profile.chapter}</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="text-white/32">Region</span>
-                            <span className="font-medium text-white/78">{profile.region}</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span className="text-white/32">Experience</span>
-                            <span className="font-medium text-white/78">{profile.years}</span>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="mb-4 flex-1 space-y-1.5 text-center flex flex-col items-center">
+                    <h2 className="text-[17px] font-bold text-gray-900 tracking-tight leading-snug group-hover:text-blue-600 transition-colors">
+                      {profile.name}
+                    </h2>
+                    <div className="flex items-start gap-1.5 text-gray-500 text-[13px] font-medium leading-relaxed justify-center text-center">
+                      <BriefcaseBusiness className="h-[14px] w-[14px] shrink-0 mt-0.5 text-gray-400" />
+                      <span className="line-clamp-2">{profile.title}<br/><span className="font-bold text-gray-600">{profile.company}</span></span>
                     </div>
-
-                    <div className="mt-5 flex flex-wrap gap-2 pl-2">
-                      {profile.skills.map((skill) => (
-                        <span key={skill} className="rounded-full bg-[#171a20] px-3 py-1 text-xs text-white/46">
-                          {skill}
-                        </span>
-                      ))}
+                    <div className="flex items-center gap-1.5 text-gray-500 text-[12px] font-medium justify-center">
+                      <MapPin className="h-[14px] w-[14px] shrink-0 text-gray-400" />
+                      <span className="line-clamp-1">{profile.location}</span>
                     </div>
-                  </article>
+                  </div>
+
+                  {profile.focus && (
+                    <div className="mb-3 text-center">
+                      <div className="text-[10px] uppercase font-bold tracking-widest text-[#9CA3AF] mb-1">Helps with</div>
+                      <p className="text-[12px] text-gray-500 italic line-clamp-2 leading-relaxed font-medium">
+                        "{profile.focus}"
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-auto flex items-center gap-2">
+                    <button className="flex-1 bg-[#111827] border border-[#111827] text-white font-semibold text-sm py-2 rounded-[10px] transition hover:bg-gray-800 text-center">
+                      Send Referral
+                    </button>
+                    <button className="flex items-center justify-center h-[38px] w-[38px] border border-gray-200 rounded-[10px] text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 shrink-0">
+                      <ArrowDown className="h-4 w-4" />
+                    </button>
+                  </div>
                 </Link>
               ))
             ) : (
-              <section className="rounded-[30px] bg-[#0f1013] p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#14161b] text-white/52">
-                  <Search className="h-7 w-7" />
-                </div>
-                <div className="mt-5 text-2xl font-semibold text-white">No alumni match this filter set</div>
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-white/46">
-                  Try widening the search terms, removing one or two chips, or switching off the referral-only filter to bring more alumni back into the list.
-                </p>
-                <Button
-                  variant="ghost"
-                  onClick={clearAllFilters}
-                  className="mt-5 h-11 rounded-2xl border-0 bg-[#171a20] px-5 text-sm text-white/78 hover:bg-[#1f232a] hover:text-white"
-                >
-                  Reset filters
-                </Button>
-              </section>
+              <div className="col-span-full">
+                <section className="rounded-3xl bg-white border border-gray-100 p-12 text-center shadow-sm">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-400">
+                    <Search className="h-7 w-7" />
+                  </div>
+                  <div className="mt-5 text-xl font-bold text-gray-900">No alumni match this filter set</div>
+                  <p className="mx-auto mt-2 text-sm text-gray-500 max-w-md">
+                    Try widening the search terms or removing some filters to bring more alumni back into the list.
+                  </p>
+                  <Button
+                    variant="ghost"
+                    onClick={clearAllFilters}
+                    className="mt-6 h-10 rounded-xl bg-gray-50 border border-gray-200 px-5 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  >
+                    Reset filters
+                  </Button>
+                </section>
+              </div>
             )}
           </div>
         </div>
