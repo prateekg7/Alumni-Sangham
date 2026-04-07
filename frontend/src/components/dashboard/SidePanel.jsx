@@ -1,191 +1,79 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import CirclePlus from 'lucide-react/dist/esm/icons/circle-plus.js';
-import Handshake from 'lucide-react/dist/esm/icons/handshake.js';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard.js';
-import Newspaper from 'lucide-react/dist/esm/icons/newspaper.js';
-import Settings from 'lucide-react/dist/esm/icons/settings.js';
-import SquarePen from 'lucide-react/dist/esm/icons/square-pen.js';
-import Trophy from 'lucide-react/dist/esm/icons/trophy.js';
-import Users from 'lucide-react/dist/esm/icons/users.js';
-import { motion } from 'framer-motion';
-import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
+import MessageSquare from 'lucide-react/dist/esm/icons/message-square.js';
+import PieChart from 'lucide-react/dist/esm/icons/pie-chart.js';
+import Heart from 'lucide-react/dist/esm/icons/heart.js';
+import Calendar from 'lucide-react/dist/esm/icons/calendar.js';
+import Clock from 'lucide-react/dist/esm/icons/clock.js';
+import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up.js';
+import { Sidebar, SidebarBody } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
-const baseLinks = [
-  { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="h-[18px] w-[18px] stroke-[1.5]" /> },
-  { label: 'Networking', href: '/directory', icon: <Users className="h-[18px] w-[18px] stroke-[1.5]" /> },
-  { label: 'Posts & Jobs', href: '/blog', icon: <Newspaper className="h-[18px] w-[18px] stroke-[1.5]" /> },
-  { label: 'Hall of Fame', href: '/', hash: 'hall-of-fame', icon: <Trophy className="h-[18px] w-[18px] stroke-[1.5]" /> },
+const navLinks = [
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Messages', href: '/blog', icon: MessageSquare },
+  { label: 'Analytics', href: '/', icon: PieChart },
+  { label: 'Saved', href: '/saved', icon: Heart },
+  { label: 'Calendar', href: '/events', icon: Calendar },
+  { label: 'History', href: '/directory', icon: Clock },
 ];
 
-const roleLinks = {
-  alumni: [
-    { label: 'Create Post', action: 'compose', icon: <CirclePlus className="h-[18px] w-[18px] stroke-[1.5]" /> },
-    { label: 'Referral Requests', href: '/profile/me?tab=referrals', icon: <Handshake className="h-[18px] w-[18px] stroke-[1.5]" /> },
-  ],
-  student: [
-    { label: 'Write Article', action: 'compose', icon: <SquarePen className="h-[18px] w-[18px] stroke-[1.5]" /> },
-    { label: 'My Requests', href: '/profile/me?tab=referrals', icon: <Handshake className="h-[18px] w-[18px] stroke-[1.5]" /> },
-  ],
-};
-
-function Logo() {
-  return (
-    <Link to="/dashboard" className="relative z-20 flex items-center space-x-3 py-1 text-sm font-normal text-[#E8E6F0]">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#2A2940] bg-[#0F0E17] text-xs font-semibold text-[#6C63FF]">
-        AC
-      </div>
-      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="whitespace-pre font-medium text-[#E8E6F0]">
-        Alumni Sangham
-      </motion.span>
-    </Link>
-  );
-}
-
-function LogoIcon() {
-  return (
-    <Link to="/dashboard" className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-[#E8E6F0]">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#2A2940] bg-[#0F0E17] text-xs font-semibold text-[#6C63FF]">
-        AC
-      </div>
-    </Link>
-  );
-}
-
-export function SidePanel({ isDesktop, sidebarOpen, onClose, onCompose, user, onLogout }) {
+export function SidePanel({ isDesktop, sidebarOpen, onClose, user, onLogout }) {
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const roleKey = user.role.toLowerCase() === 'student' ? 'student' : 'alumni';
-  const [hovered, setHovered] = useState(false);
-  const panelExpanded = isDesktop ? hovered : sidebarOpen;
 
   const isActive = (href) => {
-    if (href === '/directory') {
-      return location.pathname === '/directory';
-    }
-
-    if (href.includes('?tab=referrals')) {
-      return location.pathname === '/profile/me' && searchParams.get('tab') === 'referrals';
-    }
-
     return location.pathname === href;
   };
 
   return (
     <Sidebar
       mobileOpen={sidebarOpen}
-      expanded={panelExpanded}
-      onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
-      onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
+      expanded={false}
     >
-      <SidebarBody className="justify-between gap-8">
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {panelExpanded ? <Logo /> : <LogoIcon />}
+      <SidebarBody className="flex flex-col justify-between h-full bg-[#18181A] border-r border-[#202228] w-[80px] fixed left-0 top-0 bottom-0 z-50 py-6">
+        <div className="flex flex-col items-center gap-10 w-full">
+          
+          {/* Logo Area */}
+          <Link to="/dashboard" className="flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#242427] flex items-center justify-center shadow-md border border-[#3e3e42]">
+               <span className="text-white font-black text-lg">A</span>
+            </div>
+          </Link>
 
-          <div className="mt-6 rounded-lg border border-[#2A2940] bg-[#0F0E17] p-4">
-            <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#5D5B71]">Workspace</div>
-            <motion.div
-              animate={{ opacity: panelExpanded ? 1 : 0, height: panelExpanded ? 'auto' : 0 }}
-              className="overflow-hidden"
-            >
-              <div className="mt-2 text-sm font-semibold text-[#E8E6F0]">IIT Patna alumni network</div>
-              <div className="mt-1 text-sm text-[#9694A8]">Profiles, referrals, posts, jobs, and community discovery.</div>
-            </motion.div>
-          </div>
-
-          <div className="mt-8 flex flex-1 flex-col gap-1 overflow-y-auto">
-            {baseLinks.map((item) => (
-              <SidebarLink
-                key={item.label}
-                link={item}
-                active={isActive(item.href)}
-                compact={!panelExpanded}
-                onClick={onClose}
-              />
-            ))}
-
-            <div className="mx-3 my-3 h-px bg-[#2A2940]" />
-
-            {roleLinks[roleKey].map((item) => (
-              <SidebarLink
-                key={item.label}
-                link={item}
-                active={false}
-                compact={!panelExpanded}
-                onClick={
-                  item.action === 'compose'
-                    ? () => {
-                        onCompose();
-                        onClose();
-                      }
-                    : onClose
-                }
-              />
-            ))}
+          {/* Navigation */}
+          <div className="flex flex-col gap-8 w-full items-center">
+            {navLinks.map((item) => {
+              const active = isActive(item.href);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={onClose}
+                  className="group relative flex justify-center w-full"
+                >
+                  <Icon 
+                    className={cn(
+                      "h-[22px] w-[22px] transition-colors stroke-[2.5]", 
+                      active ? "text-[#F5CE00]" : "text-[#4d4d50] hover:text-[#7f7f85]"
+                    )} 
+                  />
+                  {/* Tooltip */}
+                  <div className="absolute left-12 scale-0 rounded bg-[#2a2a2d] px-2 py-1 text-xs font-semibold text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
+                    {item.label}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
-        <div>
-          <SidebarLink
-            link={{
-              label: user.name,
-              href: '/profile/me',
-              icon: (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6C63FF]/15 text-[10px] font-semibold text-[#6C63FF]">
-                  {user.initials}
-                </div>
-              ),
-            }}
-            active={location.pathname === '/profile/me' && searchParams.get('tab') !== 'referrals'}
-            compact={!panelExpanded}
-            className="bg-[#0F0E17]"
-            onClick={onClose}
-          />
-
-          <motion.div
-            animate={{ opacity: panelExpanded ? 1 : 0, height: panelExpanded ? 'auto' : 0 }}
-            className="mx-3 mt-3 overflow-hidden rounded-lg border border-[#2A2940] bg-[#0F0E17]"
-          >
-            <div className="p-3">
-              <div className="text-sm font-semibold text-[#E8E6F0]">{user.name}</div>
-              <div className="mt-1 text-xs text-[#9694A8]">
-                {user.role} · {user.batchLabel}
-              </div>
-              <div className="mt-2 truncate text-xs text-[#5D5B71]">{user.email}</div>
-            </div>
-          </motion.div>
-
-          <Link
-            to="/profile/me"
-            className="mx-3 mt-3 inline-flex items-center gap-2 rounded-md px-4 py-3 text-sm text-[#9694A8] transition hover:bg-[#242336] hover:text-[#E8E6F0]"
-            onClick={onClose}
-          >
-            <Settings className="h-[18px] w-[18px] stroke-[1.5]" />
-            <motion.span
-              animate={{ opacity: panelExpanded ? 1 : 0, width: panelExpanded ? 'auto' : 0, marginLeft: panelExpanded ? 0 : -4 }}
-              className="overflow-hidden whitespace-nowrap"
-            >
-              Settings
-            </motion.span>
-          </Link>
-
-          {onLogout ? (
-            <button
-              type="button"
-              className="mx-3 mt-1 w-[calc(100%-1.5rem)] rounded-md px-4 py-3 text-left text-sm text-[#9694A8] transition hover:bg-[#242336] hover:text-[#E8E6F0]"
-              onClick={() => {
-                onLogout();
-                onClose();
-              }}
-            >
-              <motion.span
-                animate={{ opacity: panelExpanded ? 1 : 0 }}
-                className="inline-block overflow-hidden whitespace-nowrap"
-              >
-                Log out
-              </motion.span>
-            </button>
-          ) : null}
+        {/* Bottom Expand Arrow */}
+        <div className="flex flex-col items-center pb-4">
+           <button className="text-[#3e3e42] hover:text-[#7f7f85] transition-colors">
+             <ChevronUp className="h-6 w-6 stroke-[2]" />
+           </button>
         </div>
       </SidebarBody>
     </Sidebar>

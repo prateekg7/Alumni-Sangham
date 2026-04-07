@@ -183,16 +183,18 @@ export function AuthenticatedLayout() {
         />
       ) : null}
 
-      <SidePanel
-        isDesktop={isDesktop}
-        sidebarOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        onCompose={() => setComposerOpen(true)}
-        user={user}
-        onLogout={handleLogout}
-      />
+      {location.pathname !== '/dashboard' && (
+        <SidePanel
+          isDesktop={isDesktop}
+          sidebarOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          onCompose={() => setComposerOpen(true)}
+          user={user}
+          onLogout={handleLogout}
+        />
+      )}
 
-      <main className="relative z-10 ml-0 min-h-screen p-4 pb-20 pt-20 transition-[margin] duration-300 md:ml-20 md:p-6 md:pb-6 md:pt-6">
+      <main className={`relative z-10 min-h-screen transition-[margin] duration-300 ${location.pathname === '/dashboard' ? 'ml-0 p-0' : 'ml-0 p-4 pb-20 pt-20 md:ml-20 md:p-6 md:pb-6 md:pt-6'}`}>
         <Outlet
           context={{
             user,

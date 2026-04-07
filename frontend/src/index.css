@@ -42,6 +42,20 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    --dashboard-bg: 10, 10, 10;
+    --dashboard-topbar: 12, 50, 61;
+    --dashboard-sidebar: 8, 64, 82;
+  }
+
+  .glass-card {
+    @apply bg-white bg-opacity-10 backdrop-blur-md border border-white/20;
+  }
+
+  .hero-banner {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/image 12.png');
+    background-size: cover;
+    background-position: center;
   }
 
   .dark {
