@@ -194,7 +194,7 @@ export function Login({ onBack }) {
                   <span className="text-xs text-[#a1a1aa] group-hover:text-white transition-colors">Remember me</span>
                 </label>
 
-                <span className="text-xs text-[#A855F7] font-medium">Forgot password?</span>
+                <Link to="/forgot-password" className="text-xs text-[#A855F7] hover:underline font-medium">Forgot password?</Link>
               </div>
 
               <button

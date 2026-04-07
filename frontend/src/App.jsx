@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
 const Login = lazy(() => import('./components/Login').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./components/Register').then((m) => ({ default: m.Register })));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword').then((m) => ({ default: m.ForgotPassword })));
 const AuthenticatedLayout = lazy(() =>
   import('./layouts/AuthenticatedLayout').then((m) => ({ default: m.AuthenticatedLayout })),
 );
@@ -18,7 +19,7 @@ const BlogPage = lazy(() =>
   import('./pages/AuthenticatedPages').then((m) => ({ default: m.BlogPage })),
 );
 const ProfilePage = lazy(() =>
-  import('./pages/AuthenticatedPages').then((m) => ({ default: m.ProfilePage })),
+  import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
 
 function App() {
@@ -34,13 +35,15 @@ function App() {
       }>
         <Routes location={location} key={
           location.pathname.startsWith('/login') ? 'login' : 
-          location.pathname.startsWith('/register') ? 'register' : location.pathname
+          location.pathname.startsWith('/register') ? 'register' : 
+          location.pathname.startsWith('/forgot-password') ? 'forgot-password' : location.pathname
         }>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Navigate to="/login/student" replace />} />
           <Route path="/login/:role" element={<Login onBack={() => navigate('/')} />} />
           <Route path="/register" element={<Navigate to="/register/student" replace />} />
           <Route path="/register/:role" element={<Register onBack={() => navigate('/')} />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route element={<AuthenticatedLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/directory" element={<DirectoryPage />} />
