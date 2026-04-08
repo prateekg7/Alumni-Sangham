@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import Grainient from './ui/Grainient';
-import { registerRequest, setAccessToken } from '@/lib/api';
+import { sendRegistrationOtpRequest, setAccessToken } from '@/lib/api';
 
 export function Register({ onBack }) {
   const { role } = useParams();
@@ -52,12 +52,12 @@ export function Register({ onBack }) {
               currentCompany: currentCompany.trim(),
             };
 
-      const data = await registerRequest(regRole, body);
-      if (data?.accessToken) {
-        setAccessToken(data.accessToken);
-      }
-      // Redirect to email verification page
-      navigate(`/verify-email?email=${encodeURIComponent(email.trim())}`, { replace: true });
+      await sendRegistrationOtpRequest(email.trim());
+      // Redirect to email verification page, passing the registration data!
+      navigate(`/verify-email?email=${encodeURIComponent(email.trim())}`, { 
+        replace: true,
+        state: { registrationData: body, regRole }
+      });
     } catch (err) {
       const msg = err?.message || 'Registration failed';
       const extra = Array.isArray(err.errors) && err.errors.length ? ` ${err.errors.join('; ')}` : '';

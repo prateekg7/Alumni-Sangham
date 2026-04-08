@@ -12,7 +12,7 @@ import { toSessionUser } from "../../utils/profile.mapper.js";
 import { sendOtpEmail } from "../../utils/email.service.js";
 
 const BCRYPT_ROUNDS = 12;
-const OTP_EXPIRY_MINUTES = 10;
+const OTP_EXPIRY_MINUTES = 5;
 const OTP_MAX_ATTEMPTS = 2;
 const OTP_COOLDOWN_SECONDS = 60;
 
@@ -135,8 +135,13 @@ const findTokenIndex = async (rawToken, storedHashes) => {
 export const register = async (payload) => {
   validateRegister(payload); // throws ApiError on failure
 
+  if (!payload.otp) throw new ApiError(400, "OTP is required for registration");
+
   const existing = await User.findOne({ email: payload.email.toLowerCase() });
   if (existing) throw new ApiError(409, "An account with this email already exists");
+
+  // Verify OTP before doing anything else
+  await verifyOtp(payload.email, payload.otp, "email_verify");
 
   const passwordHash = await bcrypt.hash(payload.password, BCRYPT_ROUNDS);
 
@@ -199,14 +204,20 @@ export const register = async (payload) => {
     throw new ApiError(500, "Registration failed while creating profile. Please try again.");
   }
 
-  // Send email verification OTP (non-blocking — don't fail registration if email fails)
-  try {
-    await createAndSendOtp(user.email, "email_verify");
-  } catch (otpErr) {
-    console.warn("Could not send verification OTP during registration:", otpErr.message);
-  }
+  // Automatically mark user as verified since they used an OTP just now
+  user.isVerified = true;
+  user.verificationStatus = "auto_verified";
+  await user.save();
 
-  return { user };
+  // Log them in immediately
+  const accessToken = generateAccessToken({ id: user._id, role: user.role, email: user.email });
+  const refreshToken = generateRefreshToken(user._id);
+
+  if (user.refreshTokens.length >= MAX_SESSIONS) user.refreshTokens.shift();
+  user.refreshTokens.push(await hashToken(refreshToken));
+  await user.save();
+
+  return { user, accessToken, refreshToken };
 };
 
 // ─── login ───────────────────────────────────────────────────────────────────
@@ -219,7 +230,6 @@ export const login = async (payload) => {
 
   if (!user?.passwordHash) throw new ApiError(401, "Invalid email or password");
   if (!user.isActive) throw new ApiError(403, "Your account has been deactivated. Contact support.");
-  if (!user.isVerified) throw new ApiError(403, "Please verify your email before logging in", [{ field: "UNVERIFIED" }]);
 
   const isMatch = await bcrypt.compare(payload.password, user.passwordHash);
   if (!isMatch) throw new ApiError(401, "Invalid email or password");
@@ -371,6 +381,14 @@ export const resetPassword = async (resetToken, newPassword) => {
   user.passwordHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
   // Invalidate all sessions — force re-login everywhere
   user.refreshTokens = [];
+
+  // Since they successfully verified an OTP to reset their password, 
+  // they have proven ownership of the email.
+  if (!user.isVerified) {
+    user.isVerified = true;
+    user.verificationStatus = "auto_verified";
+  }
+
   await user.save();
 
   return { message: "Password has been reset successfully. You can now log in." };
@@ -379,29 +397,17 @@ export const resetPassword = async (resetToken, newPassword) => {
 // ─── email verification ─────────────────────────────────────────────────────
 
 /**
- * Verify email after registration using OTP.
+ * Send an OTP to a new user during registration.
  */
-export const verifyEmailOtp = async (email, otp) => {
+export const sendRegistrationOtp = async (email) => {
   if (!email?.trim()) throw new ApiError(400, "Email is required");
-  if (!otp?.trim()) throw new ApiError(400, "OTP is required");
+  const normalizedEmail = email.toLowerCase().trim();
 
-  await verifyOtp(email, otp.trim(), "email_verify");
+  const existing = await User.findOne({ email: normalizedEmail });
+  if (existing) throw new ApiError(409, "An account with this email already exists");
 
-  const user = await User.findOne({ email: email.toLowerCase().trim() }).select("+refreshTokens");
-  if (!user) throw new ApiError(404, "User not found");
-
-  user.isVerified = true;
-  user.verificationStatus = "auto_verified";
-
-  const accessToken = generateAccessToken({ id: user._id, role: user.role, email: user.email });
-  const refreshToken = generateRefreshToken(user._id);
-
-  if (user.refreshTokens.length >= MAX_SESSIONS) user.refreshTokens.shift();
-  user.refreshTokens.push(await hashToken(refreshToken));
-
-  await user.save();
-
-  return { message: "Email verified successfully.", accessToken, refreshToken, user };
+  await createAndSendOtp(normalizedEmail, "email_verify");
+  return { message: "Verification code sent successfully." };
 };
 
 /**
@@ -416,13 +422,15 @@ export const resendOtp = async (email, purpose) => {
   const normalizedEmail = email.toLowerCase().trim();
   const user = await User.findOne({ email: normalizedEmail });
 
-  if (!user) {
-    // Don't reveal email existence
-    return { message: "If that email is registered, an OTP has been sent." };
-  }
-
-  if (purpose === "email_verify" && user.isVerified) {
-    throw new ApiError(400, "Email is already verified");
+  if (purpose === "password_reset") {
+    if (!user) {
+      // Don't reveal email existence
+      return { message: "If that email is registered, an OTP has been sent." };
+    }
+  } else if (purpose === "email_verify") {
+    if (user) {
+      throw new ApiError(400, "This email is already registered");
+    }
   }
 
   await createAndSendOtp(normalizedEmail, purpose);

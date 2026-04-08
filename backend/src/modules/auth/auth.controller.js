@@ -9,7 +9,13 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   res
     .status(201)
-    .json(new ApiResponse(201, { user: data.user }, "User registered. Please verify your email."));
+    .cookie("refreshToken", data.refreshToken, cookieOptions())
+    .json(new ApiResponse(201, { user: data.user, accessToken: data.accessToken }, "Registration successful"));
+});
+
+export const sendRegistrationOtp = asyncHandler(async (req, res) => {
+  const result = await authService.sendRegistrationOtp(req.body.email);
+  res.status(200).json(new ApiResponse(200, null, result.message));
 });
 
 // ─── login ───────────────────────────────────────────────────────────────────
@@ -79,17 +85,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, null, result.message));
 });
 
-// ─── email verification ─────────────────────────────────────────────────────
-
-export const verifyEmail = asyncHandler(async (req, res) => {
-  const { email, otp } = req.body;
-  const data = await authService.verifyEmailOtp(email, otp);
-  
-  res
-    .status(200)
-    .cookie("refreshToken", data.refreshToken, cookieOptions())
-    .json(new ApiResponse(200, { user: data.user, accessToken: data.accessToken }, data.message));
-});
+// ─── email verification (removed — now part of register) ──────────────────────
 
 // ─── resend OTP ──────────────────────────────────────────────────────────────
 

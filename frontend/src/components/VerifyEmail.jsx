@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCheck, faEnvelope, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import Grainient from './ui/Grainient';
-import { verifyEmailRequest, resendOtpRequest, setAccessToken } from '@/lib/api';
+import { registerRequest, sendRegistrationOtpRequest, setAccessToken } from '@/lib/api';
 
 /**
  * Post-registration email verification page.
@@ -15,6 +15,9 @@ export function VerifyEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const emailFromQuery = searchParams.get('email') || '';
+  
+  const location = useLocation();
+  const { registrationData, regRole } = location.state || {};
 
   const [step, setStep] = useState('otp'); // 'otp' | 'success'
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -82,9 +85,13 @@ export function VerifyEmail() {
       setError('Email not found. Please go back and register again.');
       return;
     }
+    if (!registrationData || !regRole) {
+      setError('Registration session expired. Please go back and register again.');
+      return;
+    }
     setLoading(true);
     try {
-      const data = await verifyEmailRequest(emailFromQuery, otpString);
+      const data = await registerRequest(regRole, { ...registrationData, otp: otpString });
       if (data?.accessToken) {
         setAccessToken(data.accessToken);
       }
@@ -104,7 +111,7 @@ export function VerifyEmail() {
     setResendLoading(true);
     setError('');
     try {
-      await resendOtpRequest(emailFromQuery, 'email_verify');
+      await sendRegistrationOtpRequest(emailFromQuery);
       startResendTimer();
       setOtp(['', '', '', '', '', '']);
       otpRefs.current[0]?.focus();

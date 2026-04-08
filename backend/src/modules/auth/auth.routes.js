@@ -8,7 +8,7 @@ import {
   forgotPassword,
   verifyResetOtp,
   resetPassword,
-  verifyEmail,
+  sendRegistrationOtp,
   resendOtp,
 } from "./auth.controller.js";
 import { validateBody } from "../../middlewares/validate.middleware.js";
@@ -16,6 +16,9 @@ import { validateLogin, validateRegister } from "./auth.validation.js";
 import { authGuard } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
+
+// POST /api/auth/register/send-otp — send OTP for new user
+router.post("/register/send-otp", sendRegistrationOtp);
 
 // POST /api/auth/register/student  — register a student
 // POST /api/auth/register/alumni   — register an alumni
@@ -36,7 +39,6 @@ router.post("/verify-reset-otp", verifyResetOtp);
 router.post("/reset-password", resetPassword);
 
 // ─── email verification ─────────────────────────────────────────────────────
-router.post("/verify-email", verifyEmail);
 router.post("/resend-otp", resendOtp);
 
 export default router;

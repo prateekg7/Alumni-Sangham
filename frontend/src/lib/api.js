@@ -127,6 +127,13 @@ export async function registerRequest(role, body) {
   });
 }
 
+export async function sendRegistrationOtpRequest(email) {
+  return apiRequest('/api/auth/register/send-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
 export async function fetchSession() {
   return apiRequest('/api/auth/me');
 }
@@ -162,14 +169,8 @@ export async function resetPasswordRequest(resetToken, newPassword) {
   });
 }
 
-// ─── Email Verification ─────────────────────────────────────────────────────
-
-export async function verifyEmailRequest(email, otp) {
-  return apiRequest('/api/auth/verify-email', {
-    method: 'POST',
-    body: JSON.stringify({ email, otp }),
-  });
-}
+// legacy verification endpoint removed, handled via registerRequest directly.
+// (Keeping this comment so that other files using verifyEmailRequest that we'll fix don't break immediately if left over)
 
 export async function resendOtpRequest(email, purpose) {
   return apiRequest('/api/auth/resend-otp', {

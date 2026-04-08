@@ -28,11 +28,15 @@ export const validatePasswordStrength = (password) => {
 export const validateRegister = (payload) => {
   const { email, password, role, firstName, lastName } = payload ?? {};
 
-  const missing = ["email", "password", "role", "firstName", "lastName"]
+  const missing = ["email", "password", "role", "firstName", "lastName", "otp"]
     .filter((key) => !payload?.[key]);
 
   if (missing.length) {
     throw new ApiError(400, `Missing required fields: ${missing.join(", ")}`);
+  }
+
+  if (payload.otp && payload.otp.length !== 6) {
+    throw new ApiError(400, "OTP must be exactly 6 digits");
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
