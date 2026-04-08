@@ -6,15 +6,25 @@ let transporter = null;
 function getTransporter() {
   if (transporter) return transporter;
 
-  transporter = nodemailer.createTransport({
-    host: env.smtpHost,
-    port: env.smtpPort,
-    secure: env.smtpPort === 465,
-    auth: {
-      user: env.smtpUser,
-      pass: env.smtpPass,
-    },
-  });
+  const transportConfig = env.smtpService
+    ? {
+        service: env.smtpService,
+        auth: {
+          user: env.smtpUser,
+          pass: env.smtpPass,
+        },
+      }
+    : {
+        host: env.smtpHost,
+        port: env.smtpPort,
+        secure: env.smtpSecure,
+        auth: {
+          user: env.smtpUser,
+          pass: env.smtpPass,
+        },
+      };
+
+  transporter = nodemailer.createTransport(transportConfig);
 
   return transporter;
 }
@@ -88,7 +98,9 @@ export async function sendOtpEmail(to, otp, purpose) {
   `;
 
   const mailOptions = {
-    from: `"Alumni Sangham" <${env.smtpUser}>`,
+    from: env.smtpFrom
+      ? `"${env.smtpFromName}" <${env.smtpFrom}>`
+      : `"${env.smtpFromName}" <${env.smtpUser}>`,
     to,
     subject,
     html,

@@ -273,3 +273,7 @@ export async function createReferralRequest(body) {
     body: JSON.stringify(body),
   });
 }
+
+export async function fetchHallOfFame() {
+  return apiRequest('/api/hall-of-fame');
+}

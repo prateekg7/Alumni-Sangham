@@ -157,6 +157,7 @@ export function AuthenticatedLayout() {
 
   const profileComplete = user.profileComplete;
   const profileProgress = user.profileProgress;
+  const isWideCanvasPage = location.pathname === '/dashboard' || location.pathname === '/directory';
 
   return (
     <div className="auth-shell min-h-screen">
@@ -184,18 +185,22 @@ export function AuthenticatedLayout() {
         />
       ) : null}
 
-      {location.pathname !== '/dashboard' && (
-        <SidePanel
-          isDesktop={isDesktop}
-          sidebarOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          onCompose={() => setComposerOpen(true)}
-          user={user}
-          onLogout={handleLogout}
-        />
-      )}
+      <SidePanel
+        isDesktop={isDesktop}
+        sidebarOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onCompose={() => setComposerOpen(true)}
+        user={user}
+        onLogout={handleLogout}
+      />
 
-      <main className="relative z-10 ml-0 min-h-screen p-4 pb-20 pt-20 transition-[margin] duration-300 md:ml-20 md:p-6 md:pb-6 md:pt-6">
+      <main
+        className={`relative z-10 min-h-screen transition-[margin] duration-300 ${
+          isWideCanvasPage
+            ? 'ml-0 p-0 md:ml-20'
+            : 'ml-0 p-4 pb-20 pt-20 md:ml-20 md:p-6 md:pb-6 md:pt-6'
+        }`}
+      >
         {!user.isVerified && (
           <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/10 p-4 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-red-200">

@@ -1,81 +1,117 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard.js';
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square.js';
-import PieChart from 'lucide-react/dist/esm/icons/pie-chart.js';
-import Heart from 'lucide-react/dist/esm/icons/heart.js';
-import Calendar from 'lucide-react/dist/esm/icons/calendar.js';
-import Clock from 'lucide-react/dist/esm/icons/clock.js';
+import Users from 'lucide-react/dist/esm/icons/users.js';
+import Newspaper from 'lucide-react/dist/esm/icons/newspaper.js';
+import Handshake from 'lucide-react/dist/esm/icons/handshake.js';
 import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up.js';
-import { Sidebar, SidebarBody } from '@/components/ui/sidebar';
+import { Sidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Messages', href: '/blog', icon: MessageSquare },
-  { label: 'Analytics', href: '/', icon: PieChart },
-  { label: 'Saved', href: '/saved', icon: Heart },
-  { label: 'Calendar', href: '/events', icon: Calendar },
-  { label: 'History', href: '/directory', icon: Clock },
+  {
+    label: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+    isActive: (location) => location.pathname === '/dashboard',
+  },
+  {
+    label: 'Directory',
+    href: '/directory',
+    icon: Users,
+    isActive: (location) => location.pathname === '/directory',
+  },
+  {
+    label: 'Blogs',
+    href: '/blog?tab=posts',
+    icon: Newspaper,
+    isActive: (location) => location.pathname === '/blog',
+  },
+  {
+    label: 'Referral Request',
+    href: '/profile/me?tab=referrals',
+    icon: Handshake,
+    isActive: (location) =>
+      location.pathname === '/profile/me' &&
+      new URLSearchParams(location.search).get('tab') === 'referrals',
+  },
 ];
 
-export function SidePanel({ isDesktop, sidebarOpen, onClose, user, onLogout }) {
+export function SidePanel({ isDesktop, sidebarOpen, onClose }) {
   const location = useLocation();
-
-  const isActive = (href) => {
-    return location.pathname === href;
-  };
+  const [hovered, setHovered] = React.useState(false);
+  const expanded = hovered || (!isDesktop && sidebarOpen);
+  const showLabels = expanded || !isDesktop;
 
   return (
     <Sidebar
       mobileOpen={sidebarOpen}
-      expanded={false}
+      expanded={expanded}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="border-r-0 bg-[#000000]"
     >
-      <SidebarBody className="flex flex-col justify-between h-full bg-[#18181A] border-r border-[#202228] w-[80px] fixed left-0 top-0 bottom-0 z-50 py-6">
-        <div className="flex flex-col items-center gap-10 w-full">
-          
-          {/* Logo Area */}
-          <Link to="/dashboard" className="flex items-center justify-center">
-            <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#242427] flex items-center justify-center shadow-md border border-[#3e3e42]">
-               <span className="text-white font-black text-lg">A</span>
+      <div
+        className={cn(
+          'flex h-full flex-col items-center overflow-hidden bg-[#000000] py-6 transition-all duration-300 ease-in-out',
+          expanded ? 'px-5' : 'px-0',
+        )}
+      >
+        <div className="mb-12 flex w-full items-center px-5 flex-shrink-0">
+          <Link to="/dashboard" onClick={onClose} className="flex items-center">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-white/10">
+              <span className="text-2xl font-black text-white">A</span>
             </div>
+            <span
+              className={cn(
+                'ml-3 whitespace-nowrap text-xl font-bold tracking-tight text-white transition-all duration-200',
+                showLabels ? 'opacity-100' : 'opacity-0',
+              )}
+            >
+              Alumni
+            </span>
           </Link>
+        </div>
 
-          {/* Navigation */}
-          <div className="flex flex-col gap-8 w-full items-center">
-            {navLinks.map((item) => {
-              const active = isActive(item.href);
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.label}
-                  to={item.href}
-                  onClick={onClose}
-                  className="group relative flex justify-center w-full"
+        <nav className="flex w-full flex-1 flex-col gap-8 px-5">
+          {navLinks.map((item) => {
+            const Icon = item.icon;
+            const active = item.isActive(location);
+            return (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={onClose}
+                className="flex items-center gap-4 group"
+              >
+                <div
+                  className={cn(
+                    'flex-shrink-0 transition-colors',
+                    active ? 'text-white' : 'text-white/60 group-hover:text-white',
+                  )}
                 >
-                  <Icon 
-                    className={cn(
-                      "h-[22px] w-[22px] transition-colors stroke-[2.5]", 
-                      active ? "text-[#F5CE00]" : "text-[#4d4d50] hover:text-[#7f7f85]"
-                    )} 
-                  />
-                  {/* Tooltip */}
-                  <div className="absolute left-12 scale-0 rounded bg-[#2a2a2d] px-2 py-1 text-xs font-semibold text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100">
-                    {item.label}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+                  <Icon size={22} />
+                </div>
+                <span
+                  className={cn(
+                    'whitespace-nowrap text-sm font-medium transition-all duration-200',
+                    active ? 'text-white' : 'text-white/60 group-hover:text-white',
+                    showLabels ? 'opacity-100' : 'opacity-0',
+                  )}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
 
-        {/* Bottom Expand Arrow */}
         <div className="flex flex-col items-center pb-4">
-           <button className="text-[#3e3e42] hover:text-[#7f7f85] transition-colors">
-             <ChevronUp className="h-6 w-6 stroke-[2]" />
-           </button>
+          <button type="button" className="text-white/25 transition-colors hover:text-white/60">
+            <ChevronUp className="h-6 w-6 stroke-[2]" />
+          </button>
         </div>
-      </SidebarBody>
+      </div>
     </Sidebar>
   );
 }

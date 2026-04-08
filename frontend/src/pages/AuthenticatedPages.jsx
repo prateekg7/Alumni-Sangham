@@ -1866,8 +1866,12 @@ function ReferralRequestsView({ userRole, requestTarget }) {
 }
 
 export function DirectoryPage() {
-  const { user } = useOutletContext();
   const [profiles, setProfiles] = React.useState([]);
+  const [selectedLocations, setSelectedLocations] = React.useState([]);
+  const [selectedDomains, setSelectedDomains] = React.useState([]);
+  const [locationExpanded, setLocationExpanded] = React.useState(true);
+  const [domainExpanded, setDomainExpanded] = React.useState(true);
+  const [query, setQuery] = React.useState('');
 
   React.useEffect(() => {
     let cancelled = false;
@@ -1887,510 +1891,310 @@ export function DirectoryPage() {
       cancelled = true;
     };
   }, []);
-  const viewerIsStudent = user.role.toLowerCase() === 'student';
-  const [query, setQuery] = React.useState('');
-  const [selectedRegions, setSelectedRegions] = React.useState([]);
-  const [selectedDomains, setSelectedDomains] = React.useState([]);
-  const [selectedSupportModes, setSelectedSupportModes] = React.useState([]);
-  const [selectedSkills, setSelectedSkills] = React.useState([]);
-  const [referralOnly, setReferralOnly] = React.useState(false);
 
-  const toggleSelection = React.useCallback((setter, value) => {
-    setter((current) => (current.includes(value) ? current.filter((entry) => entry !== value) : [...current, value]));
-  }, []);
+  const handleLocationChange = (location) => {
+    setSelectedLocations((prev) =>
+      prev.includes(location)
+        ? prev.filter((l) => l !== location)
+        : [...prev, location]
+    );
+  };
 
-  const regionOptions = React.useMemo(() => {
-    const counts = new Map();
-    profiles.forEach((profile) => {
-      counts.set(profile.region, (counts.get(profile.region) || 0) + 1);
+  const handleDomainChange = (domain) => {
+    setSelectedDomains((prev) =>
+      prev.includes(domain)
+        ? prev.filter((d) => d !== domain)
+        : [...prev, domain]
+    );
+  };
+
+  const locationOptions = React.useMemo(() => {
+    const set = new Set();
+    profiles.forEach((p) => {
+      if (p.region) set.add(p.region);
+      if (p.location) set.add(p.location);
     });
-
-    return [...counts.entries()]
-      .map(([label, count]) => ({ label, count }))
-      .sort((left, right) => left.label.localeCompare(right.label));
+    return [...set].sort();
   }, [profiles]);
 
   const domainOptions = React.useMemo(() => {
-    const counts = new Map();
-    profiles.forEach((profile) => {
-      counts.set(profile.domain, (counts.get(profile.domain) || 0) + 1);
+    const set = new Set();
+    profiles.forEach((p) => {
+      if (p.domain) set.add(p.domain);
     });
-
-    return [...counts.entries()]
-      .map(([label, count]) => ({ label, count }))
-      .sort((left, right) => left.label.localeCompare(right.label));
-  }, [profiles]);
-
-  const supportModeOptions = React.useMemo(() => {
-    const counts = new Map();
-    profiles.forEach((profile) => {
-      profile.supportModes.forEach((mode) => {
-        counts.set(mode, (counts.get(mode) || 0) + 1);
-      });
-    });
-
-    return [...counts.entries()]
-      .map(([label, count]) => ({ label, count }))
-      .sort((left, right) => left.label.localeCompare(right.label));
-  }, [profiles]);
-
-  const skillOptions = React.useMemo(() => {
-    const counts = new Map();
-    profiles.forEach((profile) => {
-      profile.skills.forEach((skill) => {
-        counts.set(skill, (counts.get(skill) || 0) + 1);
-      });
-    });
-
-    return [...counts.entries()]
-      .map(([label, count]) => ({ label, count }))
-      .sort((left, right) => {
-        if (right.count !== left.count) {
-          return right.count - left.count;
-        }
-
-        return left.label.localeCompare(right.label);
-      })
-      .slice(0, 12);
+    return [...set].sort();
   }, [profiles]);
 
   const filteredProfiles = React.useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
+    return profiles.filter((profile) => {
+      const locationMatch =
+        selectedLocations.length === 0 ||
+        selectedLocations.some((loc) =>
+          [profile.region, profile.location].some((v) => v && v.includes(loc))
+        );
+      const domainMatch =
+        selectedDomains.length === 0 || selectedDomains.includes(profile.domain);
 
-    return [...profiles]
-      .filter((profile) => {
-        if (selectedRegions.length && !selectedRegions.includes(profile.region)) {
-          return false;
-        }
+      if (!locationMatch || !domainMatch) return false;
 
-        if (selectedDomains.length && !selectedDomains.includes(profile.domain)) {
-          return false;
-        }
+      if (!normalizedQuery) return true;
 
-        if (selectedSupportModes.length && !selectedSupportModes.some((mode) => profile.supportModes.includes(mode))) {
-          return false;
-        }
-
-        if (selectedSkills.length && !selectedSkills.some((skill) => profile.skills.includes(skill))) {
-          return false;
-        }
-
-        if (referralOnly && !profile.referralOpen) {
-          return false;
-        }
-
-        if (!normalizedQuery) {
-          return true;
-        }
-
-        const haystack = [
-          profile.name,
-          profile.title,
-          profile.company,
-          profile.headline,
-          profile.focus,
-          profile.location,
-          profile.region,
-          profile.chapter,
-          profile.domain,
-          profile.years,
-          ...profile.supportModes,
-          ...profile.skills,
-        ]
-          .join(' ')
-          .toLowerCase();
-
-        return haystack.includes(normalizedQuery);
-      })
-      .sort((left, right) => {
-        if (viewerIsStudent && left.referralOpen !== right.referralOpen) {
-          return Number(right.referralOpen) - Number(left.referralOpen);
-        }
-
-        return left.name.localeCompare(right.name);
-      });
-  }, [
-    profiles,
-    query,
-    referralOnly,
-    selectedDomains,
-    selectedRegions,
-    selectedSkills,
-    selectedSupportModes,
-    viewerIsStudent,
-  ]);
-
-  const chapterPreview = React.useMemo(() => {
-    const counts = new Map();
-    filteredProfiles.forEach((profile) => {
-      counts.set(profile.chapter, (counts.get(profile.chapter) || 0) + 1);
+      const haystack = [
+        profile.name, profile.title, profile.company, profile.headline,
+        profile.focus, profile.location, profile.region, profile.domain,
+        ...(profile.skills || []),
+      ].join(' ').toLowerCase();
+      return haystack.includes(normalizedQuery);
     });
+  }, [profiles, query, selectedLocations, selectedDomains]);
 
-    return [...counts.entries()]
-      .map(([label, count]) => ({ label, count }))
-      .sort((left, right) => {
-        if (right.count !== left.count) {
-          return right.count - left.count;
-        }
+  const heroProfile = filteredProfiles[0] || profiles[0];
 
-        return left.label.localeCompare(right.label);
-      })
-      .slice(0, 4);
-  }, [filteredProfiles]);
-
-  const activeFilters = [
-    ...selectedRegions.map((value) => ({ type: 'region', label: value })),
-    ...selectedDomains.map((value) => ({ type: 'domain', label: value })),
-    ...selectedSupportModes.map((value) => ({ type: 'support', label: value })),
-    ...selectedSkills.map((value) => ({ type: 'skill', label: value })),
-    ...(referralOnly ? [{ type: 'referral', label: 'Referral open' }] : []),
+  const bannerImages = [
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F90fee62f21334017817a2fb353db1600?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F992c6773c4d54befa7d222bd5775df9e?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F919e2c060da64d24b2e834f3d493641c?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F5c24b608c09948edaf9b3d02517c661d?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F71a4d8b569814403a2971f7533150ed2?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F9701f4a0a7fc4c46b9ad9ed71d510bc4?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F569ccf8eb19a467c8b84e94263a1a39a?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2Fbc5ce3d7051048d496c29ece1f246c29?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2Fee1a420dc93d41359a7c1265609dcf11?format=webp&width=800&height=1200',
+    'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F81571c1a5cc54506b5d3545b58fc2935?format=webp&width=800&height=1200',
   ];
 
-  const clearAllFilters = React.useCallback(() => {
-    setQuery('');
-    setSelectedRegions([]);
-    setSelectedDomains([]);
-    setSelectedSupportModes([]);
-    setSelectedSkills([]);
-    setReferralOnly(false);
-  }, []);
+  const getBanner = (index) => bannerImages[index % bannerImages.length];
 
-  const removeActiveFilter = React.useCallback(
-    (filter) => {
-      if (filter.type === 'region') {
-        setSelectedRegions((current) => current.filter((item) => item !== filter.label));
-        return;
-      }
-
-      if (filter.type === 'domain') {
-        setSelectedDomains((current) => current.filter((item) => item !== filter.label));
-        return;
-      }
-
-      if (filter.type === 'support') {
-        setSelectedSupportModes((current) => current.filter((item) => item !== filter.label));
-        return;
-      }
-
-      if (filter.type === 'skill') {
-        setSelectedSkills((current) => current.filter((item) => item !== filter.label));
-        return;
-      }
-
-      if (filter.type === 'referral') {
-        setReferralOnly(false);
-      }
-    },
-    [],
-  );
+  const heroBanner = heroProfile?.avatarUrl
+    ? resolvePublicAssetUrl(heroProfile.avatarUrl)
+    : getBanner(0);
 
   return (
-    <div className="space-y-6">
-      <section className="overflow-hidden rounded-[28px] bg-[#f8faff] px-6 py-7 border border-blue-100 shadow-[0_2px_12px_-4px_rgba(59,130,246,0.08)] md:px-8 md:py-8">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl" style={{ fontFamily: 'Syne, sans-serif' }}>
-              Networking directory
-            </h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-500 md:text-base">
-              A filter-first alumni directory built for fast discovery. Students and alumni can search by region, domain, support style, and skills, then open any profile to inspect their public resume and networking context.
-            </p>
-          </div>
+    <div style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="relative h-80 overflow-hidden rounded-xl">
+        <img
+          src={heroBanner}
+          alt="directory hero"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent" />
+      </div>
 
-          <div className="w-full max-w-xl">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search alumni, companies, cities, chapters, or skills..."
-                className="h-14 w-full rounded-2xl border border-gray-200 bg-white pl-12 pr-14 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm"
-              />
-              {query ? (
-                <button
-                  type="button"
-                  onClick={() => setQuery('')}
-                  className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:text-gray-900"
-                  aria-label="Clear search"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              ) : null}
-            </div>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <div className="rounded-full bg-gray-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gray-500 border border-gray-200">
-                {profiles.length} alumni listed
+      {heroProfile ? (
+        <div className="relative -mt-24 mb-8 z-10">
+          <div className="bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 shadow-lg p-8 flex flex-col sm:flex-row items-start justify-between gap-6 rounded-xl">
+            <div className="flex items-start gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-md">
+                  {heroProfile.initials || heroProfile.name?.split(' ').map((n) => n[0]).join('') || '?'}
+                </div>
               </div>
-              <div className="rounded-full bg-gray-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-gray-500 border border-gray-200">
-                Public resume on every profile
+              <div>
+                <h1 className="text-3xl font-bold text-white">{heroProfile.name}</h1>
+                <p className="text-gray-400 mt-1">
+                  {heroProfile.title || heroProfile.headline || 'Alumni'} • {heroProfile.location || heroProfile.region || ''}
+                </p>
+                <div className="flex gap-8 mt-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">{profiles.length}</div>
+                    <div className="text-sm text-gray-400">Members</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">{domainOptions.length}</div>
+                    <div className="text-sm text-gray-400">Industries</div>
+                  </div>
+                </div>
               </div>
             </div>
+            <Link
+              to={`/profile/${heroProfile.id}`}
+              className="px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition flex items-center gap-2 rounded-lg shadow-sm"
+            >
+              <UserRound className="w-4 h-4" />
+              View Profile
+            </Link>
           </div>
         </div>
-      </section>
+      ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="xl:sticky xl:top-6 xl:self-start bg-[#f8faff] rounded-[28px] border border-blue-100 shadow-[0_2px_12px_-4px_rgba(59,130,246,0.08)] overflow-hidden">
-          <div className="p-6">
-            <div className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-6 tracking-tight">
-              <SlidersHorizontal className="h-5 w-5" />
-              Filters
-            </div>
-
-            <div className="space-y-8">
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Region</div>
-                <div className="space-y-3">
-                  {regionOptions.map((region) => {
-                    const checked = selectedRegions.includes(region.label);
-                    return (
-                      <button
-                        key={region.label}
-                        type="button"
-                        onClick={() => toggleSelection(setSelectedRegions, region.label)}
-                        className="flex w-full items-center justify-between text-left group"
-                      >
-                        <span className="flex items-center gap-3">
-                          <span
-                            className={cn(
-                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
-                              checked ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
-                            )}
-                          >
-                            {checked ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
-                          </span>
-                          <span className={cn('text-sm', checked ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{region.label}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Industry</div>
-                <div className="space-y-3">
-                  {domainOptions.map((domain) => {
-                    const active = selectedDomains.includes(domain.label);
-                    return (
-                      <button
-                        key={domain.label}
-                        type="button"
-                        onClick={() => toggleSelection(setSelectedDomains, domain.label)}
-                        className="flex w-full items-center justify-between text-left group"
-                      >
-                        <span className="flex items-center gap-3">
-                          <span
-                            className={cn(
-                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
-                              active ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
-                            )}
-                          >
-                            {active ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
-                          </span>
-                          <span className={cn('text-sm', active ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{domain.label}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Support Style</div>
-                <div className="space-y-3">
-                  {supportModeOptions.map((mode) => {
-                    const active = selectedSupportModes.includes(mode.label);
-                    return (
-                      <button
-                        key={mode.label}
-                        type="button"
-                        onClick={() => toggleSelection(setSelectedSupportModes, mode.label)}
-                        className="flex w-full items-center justify-between text-left group"
-                      >
-                        <span className="flex items-center gap-3">
-                          <span
-                            className={cn(
-                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
-                              active ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
-                            )}
-                          >
-                            {active ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
-                          </span>
-                          <span className={cn('text-sm', active ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{mode.label}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-400 mb-4">Skills</div>
-                <div className="space-y-3">
-                  {skillOptions.map((skill) => {
-                    const active = selectedSkills.includes(skill.label);
-                    return (
-                      <button
-                        key={skill.label}
-                        type="button"
-                        onClick={() => toggleSelection(setSelectedSkills, skill.label)}
-                        className="flex w-full items-center justify-between text-left group"
-                      >
-                        <span className="flex items-center gap-3">
-                          <span
-                            className={cn(
-                              'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition-colors',
-                              active ? 'border-gray-800 bg-gray-800' : 'border-gray-300 bg-white group-hover:border-gray-400',
-                            )}
-                          >
-                            {active ? <span className="h-1.5 w-1.5 rounded-sm bg-white" /> : null}
-                          </span>
-                          <span className={cn('text-sm', active ? 'font-semibold text-gray-900' : 'text-gray-600 font-medium group-hover:text-gray-900')}>{skill.label}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="h-px bg-blue-100/60 w-full" />
-
-          <div className="p-6 bg-[#f0f5ff]">
-            <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#93a3b8] mb-4">Discovery notes</div>
-            <div className="space-y-3">
-              <div className="rounded-2xl bg-white p-4 border border-blue-50 shadow-sm">
-                <div className="text-sm font-bold text-gray-900">Alumni only</div>
-                <p className="mt-1 text-[13px] leading-relaxed text-gray-500">
-                  This surface is intentionally alumni-only. Students and alumni both search here, but every result routes into a public alumni profile.
-                </p>
-              </div>
-              <div className="rounded-2xl bg-white p-4 border border-blue-50 shadow-sm">
-                <div className="text-sm font-bold text-gray-900">Public resume</div>
-                <p className="mt-1 text-[13px] leading-relaxed text-gray-500">
-                  Resume access is consistent across the network, so viewers can inspect the document before reaching out.
-                </p>
-              </div>
-              <div className="rounded-2xl bg-white p-4 border border-blue-50 shadow-sm">
-                <div className="text-sm font-bold text-gray-900">{viewerIsStudent ? 'Referral workflow' : 'Networking workflow'}</div>
-                <p className="mt-1 text-[13px] leading-relaxed text-gray-500">
-                  {viewerIsStudent
-                    ? 'When an alumni is open to referrals, the profile view exposes the referral request path directly.'
-                    : 'Open any alumni profile to inspect role history, chapter context, and shared documents before connecting.'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <div className="space-y-5">
-          {(activeFilters.length > 0 || query) ? (
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-xs text-gray-500 mr-2 uppercase font-bold tracking-wider">Active filters:</span>
-              {activeFilters.map((filter) => (
-                <button
-                  key={`${filter.type}-${filter.label}`}
-                  type="button"
-                  onClick={() => removeActiveFilter(filter)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 shadow-sm"
-                >
-                  {filter.label}
-                  <X className="h-3 w-3" />
-                </button>
-              ))}
-              <Button
-                variant="ghost"
-                onClick={clearAllFilters}
-                className="h-8 rounded-full px-3 text-xs font-semibold text-blue-600 hover:bg-blue-50"
-              >
-                Clear all
-              </Button>
-            </div>
+      <div className="mb-8">
+        <div className="relative max-w-2xl">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search alumni by name, company, skill, or location..."
+            className="h-14 w-full rounded-xl border border-white/10 bg-[#1a1a1a] pl-12 pr-14 text-sm text-white outline-none transition placeholder:text-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-sm"
+          />
+          {query ? (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-gray-400 transition hover:text-white"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
           ) : null}
+        </div>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredProfiles.length ? (
-              filteredProfiles.map((profile) => (
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pb-16">
+        <div className="lg:col-span-1">
+          <div className="bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 p-6 sticky top-6 rounded-xl">
+            <div className="mb-6">
+              <button
+                onClick={() => setLocationExpanded(!locationExpanded)}
+                className="w-full font-semibold text-white mb-4 flex items-center justify-between cursor-pointer hover:opacity-70 transition"
+              >
+                Location
+                <SlidersHorizontal
+                  className="w-4 h-4 transition-transform"
+                  style={{ transform: locationExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                />
+              </button>
+              {locationExpanded ? (
+                <div className="space-y-3">
+                  {locationOptions.map((location) => (
+                    <label key={location} className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedLocations.includes(location)}
+                        onChange={() => handleLocationChange(location)}
+                        className="w-4 h-4 border-gray-300 text-amber-500 cursor-pointer rounded focus:ring-amber-500"
+                      />
+                      <span className="text-sm text-gray-300">{location}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="border-t border-white/10 my-6" />
+
+            <div>
+              <button
+                onClick={() => setDomainExpanded(!domainExpanded)}
+                className="w-full font-semibold text-white mb-4 flex items-center justify-between cursor-pointer hover:opacity-70 transition"
+              >
+                Industry
+                <SlidersHorizontal
+                  className="w-4 h-4 transition-transform"
+                  style={{ transform: domainExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                />
+              </button>
+              {domainExpanded ? (
+                <div className="space-y-3">
+                  {domainOptions.map((domain) => (
+                    <label key={domain} className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDomains.includes(domain)}
+                        onChange={() => handleDomainChange(domain)}
+                        className="w-4 h-4 border-gray-300 text-amber-500 cursor-pointer rounded focus:ring-amber-500"
+                      />
+                      <span className="text-sm text-gray-300">{domain}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {selectedLocations.length > 0 || selectedDomains.length > 0 ? (
+              <>
+                <div className="border-t border-white/10 my-6" />
+                <button
+                  onClick={() => {
+                    setSelectedLocations([]);
+                    setSelectedDomains([]);
+                  }}
+                  className="text-sm text-amber-600 font-semibold hover:text-amber-700 transition"
+                >
+                  Clear all filters
+                </button>
+              </>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="lg:col-span-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filteredProfiles.map((profile, index) => {
+              const cardImage = profile.avatarUrl
+                ? resolvePublicAssetUrl(profile.avatarUrl)
+                : profile.profileImage || getBanner(index);
+
+              return (
                 <Link
                   key={profile.id}
                   to={`/profile/${profile.id}`}
-                  className="group flex flex-col h-full rounded-[20px] bg-white p-5 border border-blue-50/80 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:border-blue-100"
+                  className="bg-[#1a1a1a] border border-white/10 overflow-hidden hover:shadow-lg hover:shadow-black/20 transition-all flex flex-col rounded-xl group hover:-translate-y-1"
                 >
-                  <div className="flex flex-col items-center mb-3 relative pt-1">
-                    {profile.batchLabel ? (
-                      <span className="absolute right-0 top-0 rounded-[8px] bg-[#EEF2FF] text-[#6366F1] px-2 py-0.5 text-[10px] font-bold tracking-wide">
-                        '{String(profile.batchLabel).replace(/\D/g, '').slice(-2) || String(profile.batchLabel)}
-                      </span>
-                    ) : null}
-                    <div className="w-[55%] max-w-[120px] aspect-square flex shrink-0 items-center justify-center rounded-full bg-blue-50/50 overflow-hidden text-blue-600 text-4xl font-bold shadow-sm ring-4 ring-white">
-                      {profile.avatarUrl || profile.profileImage || profile.image || profile.avatar || profile.picture ? (
-                        <img 
-                          src={profile.avatarUrl || profile.profileImage || profile.image || profile.avatar || profile.picture} 
-                          alt={profile.name} 
-                          className="w-full h-full object-cover" 
-                        />
-                      ) : (
-                        profile.initials
-                      )}
-                    </div>
+                  <div className="relative h-32 overflow-hidden" style={{ background: '#d4d4d8' }}>
+                    <img
+                      src={cardImage}
+                      alt={profile.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
 
-                  <div className="mb-4 flex-1 space-y-1.5 text-center flex flex-col items-center">
-                    <h2 className="text-[17px] font-bold text-gray-900 tracking-tight leading-snug group-hover:text-blue-600 transition-colors">
-                      {profile.name}
-                    </h2>
-                    <div className="flex items-start gap-1.5 text-gray-500 text-[13px] font-medium leading-relaxed justify-center text-center">
-                      <BriefcaseBusiness className="h-[14px] w-[14px] shrink-0 mt-0.5 text-gray-400" />
-                      <span className="line-clamp-2">{profile.title}<br/><span className="font-bold text-gray-600">{profile.company}</span></span>
+                  <div className="p-5 text-center flex-1 flex flex-col relative -mt-8 pb-4">
+                    <div className="flex justify-center mb-3">
+                      <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold border-4 border-[#1a1a1a] shadow-md">
+                        {profile.initials || profile.name?.split(' ').map((n) => n[0]).join('') || '?'}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-500 text-[12px] font-medium justify-center">
-                      <MapPin className="h-[14px] w-[14px] shrink-0 text-gray-400" />
-                      <span className="line-clamp-1">{profile.location}</span>
-                    </div>
-                  </div>
 
-                  {profile.focus && (
-                    <div className="mb-3 text-center">
-                      <div className="text-[10px] uppercase font-bold tracking-widest text-[#9CA3AF] mb-1">Helps with</div>
-                      <p className="text-[12px] text-gray-500 italic line-clamp-2 leading-relaxed font-medium">
-                        "{profile.focus}"
+                    <h3 className="text-base font-semibold text-white group-hover:text-amber-400 transition-colors">{profile.name}</h3>
+
+                    <p className="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1">
+                      <span>📋</span> {profile.role || 'Alumni'}
+                    </p>
+
+                    <div className="text-xs text-gray-400 mt-2 space-y-1">
+                      <p className="flex items-center justify-center gap-1">
+                        <MapPin className="h-3 w-3" /> {profile.location || profile.region || '—'}
                       </p>
+                      <p className="font-medium text-gray-300">{profile.title || profile.headline || '—'}</p>
+                      {profile.company ? <p className="font-semibold text-gray-200">{profile.company}</p> : null}
                     </div>
-                  )}
 
-                  <div className="mt-auto flex items-center gap-2">
-                    <button className="flex-1 bg-[#111827] border border-[#111827] text-white font-semibold text-sm py-2 rounded-[10px] transition hover:bg-gray-800 text-center">
-                      Send Referral
-                    </button>
-                    <button className="flex items-center justify-center h-[38px] w-[38px] border border-gray-200 rounded-[10px] text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 shrink-0">
-                      <ArrowDown className="h-4 w-4" />
-                    </button>
+                    {profile.focus ? (
+                      <div className="mt-3 pt-3 border-t border-white/10 flex-1 flex flex-col justify-center">
+                        <p className="text-xs uppercase text-gray-400 font-semibold mb-1">Helps With</p>
+                        <p className="text-xs text-gray-500 italic line-clamp-2">"{profile.focus}"</p>
+                      </div>
+                    ) : null}
+
+                    <div className="w-full px-4 py-2 bg-amber-500 text-white font-medium transition text-sm mt-4 rounded-lg">
+                      View Profile
+                    </div>
                   </div>
                 </Link>
-              ))
-            ) : (
-              <div className="col-span-full">
-                <section className="rounded-3xl bg-white border border-gray-100 p-12 text-center shadow-sm">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-400">
-                    <Search className="h-7 w-7" />
-                  </div>
-                  <div className="mt-5 text-xl font-bold text-gray-900">No alumni match this filter set</div>
-                  <p className="mx-auto mt-2 text-sm text-gray-500 max-w-md">
-                    Try widening the search terms or removing some filters to bring more alumni back into the list.
-                  </p>
-                  <Button
-                    variant="ghost"
-                    onClick={clearAllFilters}
-                    className="mt-6 h-10 rounded-xl bg-gray-50 border border-gray-200 px-5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                  >
-                    Reset filters
-                  </Button>
-                </section>
-              </div>
-            )}
+              );
+            })}
           </div>
+
+          {filteredProfiles.length === 0 ? (
+            <div className="text-center py-16 bg-[#1a1a1a] border border-white/10 rounded-xl">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/5 text-gray-400 mb-5">
+                <Search className="h-7 w-7" />
+              </div>
+              <p className="text-xl font-bold text-white">No alumni found matching your filters.</p>
+              <p className="text-sm text-gray-500 mt-2">Try adjusting your search or removing filters.</p>
+              <button
+                onClick={() => {
+                  setQuery('');
+                  setSelectedLocations([]);
+                  setSelectedDomains([]);
+                }}
+                className="mt-6 px-5 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition"
+              >
+                Reset filters
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

@@ -62,8 +62,8 @@ async function createAndSendOtp(email, purpose) {
     expiresAt: new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000),
   });
 
-  // Send email (fail gracefully with clear message if SMTP not configured)
-  if (!env.smtpUser || env.smtpUser === "your-email@gmail.com") {
+  // Send email (fail gracefully with clear message if mail envs are not configured)
+  if (!env.mailConfigured) {
     console.warn("⚠️  SMTP not configured — OTP for", normalizedEmail, "is:", otp);
     return; // In dev, log OTP to console instead of sending email
   }

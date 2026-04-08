@@ -86,6 +86,8 @@ export function toDirectoryCard(profile, user) {
     batchLabel: user?.batchLabel || "Alumni",
     initials: initialsFromName(name),
     avatarTone: profile.avatarTone || "from-[#8f7cff] to-[#4d82ff]",
+    photoUrl: profile.photoUrl || null,
+    avatarUrl: profile.photoUrl || null,
   };
 }
 
