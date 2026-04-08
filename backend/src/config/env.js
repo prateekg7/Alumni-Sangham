@@ -29,4 +29,10 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "15m",
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+
+  // SMTP for OTP emails (optional — OTP endpoints will fail gracefully if missing)
+  smtpHost: process.env.SMTP_HOST || "smtp.gmail.com",
+  smtpPort: Number(process.env.SMTP_PORT) || 587,
+  smtpUser: process.env.SMTP_USER || "",
+  smtpPass: process.env.SMTP_PASS || "",
 };

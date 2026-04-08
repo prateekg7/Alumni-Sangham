@@ -139,6 +139,46 @@ export async function logoutRequest() {
   }
 }
 
+// ─── Forgot Password ─────────────────────────────────────────────────────────
+
+export async function forgotPasswordRequest(email) {
+  return apiRequest('/api/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function verifyResetOtpRequest(email, otp) {
+  return apiRequest('/api/auth/verify-reset-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email, otp }),
+  });
+}
+
+export async function resetPasswordRequest(resetToken, newPassword) {
+  return apiRequest('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ resetToken, newPassword }),
+  });
+}
+
+// ─── Email Verification ─────────────────────────────────────────────────────
+
+export async function verifyEmailRequest(email, otp) {
+  return apiRequest('/api/auth/verify-email', {
+    method: 'POST',
+    body: JSON.stringify({ email, otp }),
+  });
+}
+
+export async function resendOtpRequest(email, purpose) {
+  return apiRequest('/api/auth/resend-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email, purpose }),
+  });
+}
+
+
 export async function fetchDirectory() {
   return apiRequest('/api/directory');
 }

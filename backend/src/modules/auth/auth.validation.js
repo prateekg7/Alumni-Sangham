@@ -9,7 +9,7 @@ const PASSWORD_RULES = {
   hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
 };
 
-const validatePasswordStrength = (password) => {
+export const validatePasswordStrength = (password) => {
   const errors = [];
   if (!password || typeof password !== "string") return ["Password is required"];
   if (password.length < PASSWORD_RULES.minLength)

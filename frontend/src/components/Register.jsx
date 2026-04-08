@@ -56,7 +56,8 @@ export function Register({ onBack }) {
       if (data?.accessToken) {
         setAccessToken(data.accessToken);
       }
-      navigate('/dashboard', { replace: true });
+      // Redirect to email verification page
+      navigate(`/verify-email?email=${encodeURIComponent(email.trim())}`, { replace: true });
     } catch (err) {
       const msg = err?.message || 'Registration failed';
       const extra = Array.isArray(err.errors) && err.errors.length ? ` ${err.errors.join('; ')}` : '';

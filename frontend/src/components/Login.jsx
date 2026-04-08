@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowRight } from '@fortawesome/free-solid-svg-icons';
@@ -9,10 +9,23 @@ import { loginRequest, setAccessToken } from '@/lib/api';
 export function Login({ onBack }) {
   const { role } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(location.state?.type === 'error' ? location.state.message : '');
+  const [successMsg, setSuccessMsg] = useState(location.state?.type === 'success' ? location.state.message : '');
+
+  // Clear messages on input change
+  const handleInputChange = () => {
+    if (error) setError('');
+    if (successMsg) {
+      setSuccessMsg('');
+      // Clean up history state so refresh doesn't show it again
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  };
+
   const [loading, setLoading] = useState(false);
 
   const activeTab = role === 'alumni' ? 'alumni' : 'student';
@@ -152,7 +165,20 @@ export function Login({ onBack }) {
               </Link>
             </p>
 
-            {error ? <div className="mb-4 text-sm text-red-400">{error}</div> : null}
+            {error ? (
+              <div className="mb-4 text-sm text-red-400">
+                {error}
+                {error.includes('before logging in') && email ? (
+                  <Link
+                    to={`/verify-email?email=${encodeURIComponent(email.trim())}`}
+                    className="ml-2 text-[#A855F7] hover:underline font-medium"
+                  >
+                    Verify now
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
+            {successMsg ? <div className="mb-4 text-sm text-green-400">{successMsg}</div> : null}
 
             <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
               <div className="w-full">
@@ -160,7 +186,7 @@ export function Login({ onBack }) {
                   type="email"
                   placeholder="Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); handleInputChange(); }}
                   required
                   autoComplete="email"
                   className="w-full bg-[#36353E] border border-white/5 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg px-4 py-3.5 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
@@ -172,7 +198,7 @@ export function Login({ onBack }) {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
                   required
                   autoComplete="current-password"
                   className="w-full bg-[#36353E] border border-white/5 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg px-4 py-3.5 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A] pr-12"
@@ -194,7 +220,7 @@ export function Login({ onBack }) {
                   <span className="text-xs text-[#a1a1aa] group-hover:text-white transition-colors">Remember me</span>
                 </label>
 
-                <Link to="/forgot-password" className="text-xs text-[#A855F7] hover:underline font-medium">Forgot password?</Link>
+                <Link to="/forgot-password" className="text-xs text-[#A855F7] font-medium hover:underline">Forgot password?</Link>
               </div>
 
               <button

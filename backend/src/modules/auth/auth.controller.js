@@ -9,8 +9,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   res
     .status(201)
-    .cookie("refreshToken", data.refreshToken, cookieOptions())
-    .json(new ApiResponse(201, { user: data.user, accessToken: data.accessToken }, "User registered"));
+    .json(new ApiResponse(201, { user: data.user }, "User registered. Please verify your email."));
 });
 
 // ─── login ───────────────────────────────────────────────────────────────────
@@ -55,6 +54,49 @@ export const logoutUser = asyncHandler(async (req, res) => {
 export const getMe = asyncHandler(async (req, res) => {
   const session = await authService.getSession(req.user.id);
   res.status(200).json(new ApiResponse(200, session, "User fetched"));
+});
+
+// ─── forgot password step 1: request OTP ─────────────────────────────────────
+
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const result = await authService.forgotPassword(req.body.email);
+  res.status(200).json(new ApiResponse(200, null, result.message));
+});
+
+// ─── forgot password step 2: verify OTP ──────────────────────────────────────
+
+export const verifyResetOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  const result = await authService.verifyResetOtp(email, otp);
+  res.status(200).json(new ApiResponse(200, { resetToken: result.resetToken }, "OTP verified"));
+});
+
+// ─── forgot password step 3: reset password ──────────────────────────────────
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { resetToken, newPassword } = req.body;
+  const result = await authService.resetPassword(resetToken, newPassword);
+  res.status(200).json(new ApiResponse(200, null, result.message));
+});
+
+// ─── email verification ─────────────────────────────────────────────────────
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  const data = await authService.verifyEmailOtp(email, otp);
+  
+  res
+    .status(200)
+    .cookie("refreshToken", data.refreshToken, cookieOptions())
+    .json(new ApiResponse(200, { user: data.user, accessToken: data.accessToken }, data.message));
+});
+
+// ─── resend OTP ──────────────────────────────────────────────────────────────
+
+export const resendOtp = asyncHandler(async (req, res) => {
+  const { email, purpose } = req.body;
+  const result = await authService.resendOtp(email, purpose);
+  res.status(200).json(new ApiResponse(200, null, result.message));
 });
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

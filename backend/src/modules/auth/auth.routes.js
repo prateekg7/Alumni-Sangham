@@ -5,6 +5,11 @@ import {
   refreshTokens,
   logoutUser,
   getMe,
+  forgotPassword,
+  verifyResetOtp,
+  resetPassword,
+  verifyEmail,
+  resendOtp,
 } from "./auth.controller.js";
 import { validateBody } from "../../middlewares/validate.middleware.js";
 import { validateLogin, validateRegister } from "./auth.validation.js";
@@ -24,5 +29,14 @@ router.post("/login", validateBody(validateLogin), loginUser);
 router.post("/refresh", refreshTokens);
 router.post("/logout", logoutUser);
 router.get("/me", authGuard, getMe);
+
+// ─── forgot password ────────────────────────────────────────────────────────
+router.post("/forgot-password", forgotPassword);
+router.post("/verify-reset-otp", verifyResetOtp);
+router.post("/reset-password", resetPassword);
+
+// ─── email verification ─────────────────────────────────────────────────────
+router.post("/verify-email", verifyEmail);
+router.post("/resend-otp", resendOtp);
 
 export default router;

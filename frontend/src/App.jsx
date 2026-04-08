@@ -6,6 +6,7 @@ const HomePage = lazy(() => import('./pages/HomePage').then((m) => ({ default: m
 const Login = lazy(() => import('./components/Login').then((m) => ({ default: m.Login })));
 const Register = lazy(() => import('./components/Register').then((m) => ({ default: m.Register })));
 const ForgotPassword = lazy(() => import('./components/ForgotPassword').then((m) => ({ default: m.ForgotPassword })));
+const VerifyEmail = lazy(() => import('./components/VerifyEmail').then((m) => ({ default: m.VerifyEmail })));
 const AuthenticatedLayout = lazy(() =>
   import('./layouts/AuthenticatedLayout').then((m) => ({ default: m.AuthenticatedLayout })),
 );
@@ -35,8 +36,9 @@ function App() {
       }>
         <Routes location={location} key={
           location.pathname.startsWith('/login') ? 'login' : 
-          location.pathname.startsWith('/register') ? 'register' : 
-          location.pathname.startsWith('/forgot-password') ? 'forgot-password' : location.pathname
+          location.pathname.startsWith('/register') ? 'register' :
+          location.pathname.startsWith('/forgot-password') ? 'forgot-password' :
+          location.pathname.startsWith('/verify-email') ? 'verify-email' : location.pathname
         }>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Navigate to="/login/student" replace />} />
@@ -44,6 +46,7 @@ function App() {
           <Route path="/register" element={<Navigate to="/register/student" replace />} />
           <Route path="/register/:role" element={<Register onBack={() => navigate('/')} />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route element={<AuthenticatedLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/directory" element={<DirectoryPage />} />

@@ -26,6 +26,7 @@ function mapSessionToUser(session) {
     initials: session.initials || '?',
     profileComplete: Boolean(session.profileComplete),
     profileProgress: typeof session.profileProgress === 'number' ? session.profileProgress : 0,
+    isVerified: Boolean(session.isVerified),
   };
 }
 
@@ -194,7 +195,21 @@ export function AuthenticatedLayout() {
         />
       )}
 
-      <main className={`relative z-10 min-h-screen transition-[margin] duration-300 ${location.pathname === '/dashboard' ? 'ml-0 p-0' : 'ml-0 p-4 pb-20 pt-20 md:ml-20 md:p-6 md:pb-6 md:pt-6'}`}>
+      <main className="relative z-10 ml-0 min-h-screen p-4 pb-20 pt-20 transition-[margin] duration-300 md:ml-20 md:p-6 md:pb-6 md:pt-6">
+        {!user.isVerified && (
+          <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/10 p-4 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-red-200">
+              <span className="font-semibold text-white">Action Required:</span> Please verify your email address. Some features may be restricted.
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate(`/verify-email?email=${encodeURIComponent(user.email)}`)}
+              className="text-sm whitespace-nowrap bg-red-500/20 hover:bg-red-500/30 text-white px-4 py-2 rounded-md transition-colors"
+            >
+              Verify Email
+            </button>
+          </div>
+        )}
         <Outlet
           context={{
             user,

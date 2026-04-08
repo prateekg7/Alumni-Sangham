@@ -317,6 +317,7 @@ export function toSessionUser(user, profile) {
     initials: initialsFromName(name),
     profileComplete: Boolean(profile?.profileComplete),
     profileProgress,
+    isVerified: Boolean(user.isVerified),
   };
 }
 
