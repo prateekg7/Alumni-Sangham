@@ -16,8 +16,11 @@ const DashboardPage = lazy(() =>
 const DirectoryPage = lazy(() =>
   import('./pages/AuthenticatedPages').then((m) => ({ default: m.DirectoryPage })),
 );
-const BlogPage = lazy(() =>
-  import('./pages/AuthenticatedPages').then((m) => ({ default: m.BlogPage })),
+const BlogsPage = lazy(() =>
+  import('./pages/BlogsPage').then((m) => ({ default: m.BlogsPage })),
+);
+const BlogDetailPage = lazy(() =>
+  import('./pages/BlogsPage').then((m) => ({ default: m.BlogDetailPage })),
 );
 const ProfilePage = lazy(() =>
   import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
@@ -50,7 +53,9 @@ function App() {
           <Route element={<AuthenticatedLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/directory" element={<DirectoryPage />} />
-            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog" element={<BlogsPage />} />
+            <Route path="/blogs" element={<BlogsPage />} />
+            <Route path="/blog/:id" element={<BlogDetailPage />} />
             <Route path="/profile/me" element={<ProfilePage />} />
             <Route path="/profile/:profileId" element={<ProfilePage />} />
           </Route>
