@@ -83,6 +83,7 @@ export async function apiRequest(path, options = {}, retry = true) {
   }
 
   const res = await fetch(url, {
+    cache: 'no-store',
     ...options,
     headers,
     credentials: 'include',
@@ -276,4 +277,46 @@ export async function createReferralRequest(body) {
 
 export async function fetchHallOfFame() {
   return apiRequest('/api/hall-of-fame');
+}
+
+// ─── BLOG & JOB ENDPOINTS ──────────────────────────────────────────────────
+
+export async function fetchBlogFeed({ search, type, period } = {}) {
+  const params = new URLSearchParams();
+  if (search) params.append('search', search);
+  if (type && type !== 'All') params.append('type', type.toLowerCase() === 'jobs' ? 'job' : 'article');
+  if (period && period !== 'All Time') {
+    const p = period === 'Today' ? 'day' : 
+              period === 'This Week' ? 'week' :
+              period === 'This Month' ? 'month' : '3months';
+    params.append('period', p);
+  }
+  const qs = params.toString() ? `?${params.toString()}` : '';
+  return apiRequest(`/api/posts/blogs${qs}`);
+}
+
+export async function fetchBlogBySlug(slug) {
+  return apiRequest(`/api/posts/blogs/${slug}`);
+}
+
+export async function createBlogPost(body) {
+  return apiRequest('/api/posts/blogs', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function toggleBlogLike(postId) {
+  return apiRequest(`/api/posts/blogs/${postId}/like`, { method: 'POST' });
+}
+
+export async function addBlogComment(postId, text) {
+  return apiRequest(`/api/posts/blogs/${postId}/comments`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  });
+}
+
+export async function fetchAdjacentPosts(postId) {
+  return apiRequest(`/api/posts/blogs/${postId}/adjacent`);
 }

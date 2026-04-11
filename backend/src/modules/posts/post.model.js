@@ -16,13 +16,6 @@ const postSchema = new mongoose.Schema(
       },
     },
     coverImageUrl: { type: String, default: null },
-    category: {
-      type: String,
-      enum: ["college_news", "alumni_stories", "achievements", "announcements"],
-      required() {
-        return this.postType === "article";
-      },
-    },
     company: { type: String, required() { return this.postType === "job"; } },
     location: { type: String, required() { return this.postType === "job"; } },
     isRemote: { type: Boolean, default: false },
@@ -35,11 +28,20 @@ const postSchema = new mongoose.Schema(
     community: { type: String, default: "r/alumni-network" },
     tag: { type: String, default: "Update" },
     authorMeta: { type: String, default: "" },
-    upvotes: { type: Number, default: 0 },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    comments: [{
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      userName: { type: String, required: true },
+      text: { type: String, required: true, maxlength: 2000 },
+      createdAt: { type: Date, default: Date.now }
+    }],
+    readTime: { type: Number, default: 1 },
     commentsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
+
+postSchema.index({ title: "text", body: "text" });
 
 const Post = mongoose.models.Post || mongoose.model("Post", postSchema);
 

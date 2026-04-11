@@ -55,7 +55,7 @@ function App() {
             <Route path="/directory" element={<DirectoryPage />} />
             <Route path="/blog" element={<BlogsPage />} />
             <Route path="/blogs" element={<BlogsPage />} />
-            <Route path="/blog/:id" element={<BlogDetailPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailPage />} />
             <Route path="/profile/me" element={<ProfilePage />} />
             <Route path="/profile/:profileId" element={<ProfilePage />} />
           </Route>

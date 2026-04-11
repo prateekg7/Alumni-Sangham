@@ -42,3 +42,43 @@ export const deletePostById = asyncHandler(async (req, res) => {
   const data = await postService.deletePostById(req.params.id);
   res.status(200).json(new ApiResponse(200, data, "Post deleted"));
 });
+
+// --- BLOG & JOB CONTROLLERS ---
+
+export const createBlog = asyncHandler(async (req, res) => {
+  const authorUser = await User.findById(req.user.id);
+  if (!authorUser) {
+    throw new ApiError(404, "User not found");
+  }
+  const data = await postService.createBlogPost(authorUser, req.body);
+  res.status(201).json(new ApiResponse(201, data, "Blog created"));
+});
+
+export const getBlogFeed = asyncHandler(async (req, res) => {
+  const data = await postService.getBlogFeed(req.query);
+  res.status(200).json(new ApiResponse(200, data, "Blog feed fetched"));
+});
+
+export const getBlogBySlug = asyncHandler(async (req, res) => {
+  const data = await postService.getBlogBySlug(req.params.slug);
+  res.status(200).json(new ApiResponse(200, data, "Blog fetched"));
+});
+
+export const toggleBlogLike = asyncHandler(async (req, res) => {
+  const data = await postService.toggleLike(req.params.id, req.user.id);
+  res.status(200).json(new ApiResponse(200, data, "Like toggled"));
+});
+
+export const addBlogComment = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  const data = await postService.addComment(req.params.id, user, req.body.text);
+  res.status(201).json(new ApiResponse(201, data, "Comment added"));
+});
+
+export const getAdjacentBlogs = asyncHandler(async (req, res) => {
+  const data = await postService.getAdjacentPosts(req.params.id);
+  res.status(200).json(new ApiResponse(200, data, "Adjacent posts fetched"));
+});
