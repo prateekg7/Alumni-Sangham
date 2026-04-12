@@ -1,0 +1,54 @@
+.landing-sticky-footer {
+  isolation: isolate;
+}
+
+.landing-sticky-footer .landing-footer-reveal {
+  height: 680px;
+}
+
+.landing-sticky-footer .landing-footer-bubbles {
+  filter: url("#landing-footer-blob");
+}
+
+.landing-sticky-footer .landing-footer-bubble {
+  position: absolute;
+  bottom: -4rem;
+  left: var(--position, 50%);
+  width: var(--size, 3rem);
+  height: var(--size, 3rem);
+  border-radius: 9999px;
+  background: var(--footer-background, #0c323d);
+  animation:
+    landing-footer-bubble-size var(--time, 3.4s) ease-in infinite var(--delay, 0s),
+    landing-footer-bubble-move var(--time, 3.4s) ease-in infinite var(--delay, 0s);
+}
+
+@keyframes landing-footer-bubble-size {
+  0%,
+  75% {
+    width: var(--size, 3rem);
+    height: var(--size, 3rem);
+  }
+
+  100% {
+    width: 0;
+    height: 0;
+  }
+}
+
+@keyframes landing-footer-bubble-move {
+  0% {
+    transform: translate(-50%, 100%);
+  }
+
+  100% {
+    transform: translate(-50%, calc(-1 * var(--distance, 10rem)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-sticky-footer .landing-footer-bubble {
+    animation: none;
+    transform: translate(-50%, 0);
+  }
+}

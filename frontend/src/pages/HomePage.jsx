@@ -6,11 +6,16 @@ import { StatsSection } from '../components/Stats';
 
 const Grainient = lazy(() => import('../components/ui/Grainient'));
 const AboutUs = lazy(() => import('../components/AboutUs').then((m) => ({ default: m.AboutUs })));
-const HallOfFame = lazy(() =>
-  import('../components/HallOfFame').then((m) => ({ default: m.HallOfFame })),
+const LandingFeaturesSection = lazy(() =>
+  import('../components/LandingFeaturesSection').then((m) => ({
+    default: m.LandingFeaturesSection,
+  })),
 );
-const ZoomParallax = lazy(() =>
-  import('../components/ui/zoom-parallax').then((m) => ({ default: m.ZoomParallax })),
+const LandingHallOfFame = lazy(() =>
+  import('../components/LandingHallOfFame').then((m) => ({ default: m.LandingHallOfFame })),
+);
+const StickyFooter = lazy(() =>
+  import('../components/ui/sticky-footer').then((m) => ({ default: m.StickyFooter })),
 );
 
 function scheduleIdle(callback) {
@@ -152,26 +157,31 @@ export function HomePage() {
           id="features"
           className="scroll-mt-28"
           rootMargin="600px 0px"
-          placeholderClassName="h-[350vh] bg-black/70 backdrop-blur-sm"
+          placeholderClassName="h-[320vh] bg-black/70 backdrop-blur-sm"
         >
           <Suspense
-            fallback={<div className="h-[350vh] bg-black/70 backdrop-blur-sm" aria-hidden="true" />}
+            fallback={<div className="h-[320vh] bg-black/70 backdrop-blur-sm" aria-hidden="true" />}
           >
-            <ZoomParallax />
+            <LandingFeaturesSection sectionId={null} />
           </Suspense>
         </DeferredSection>
         <DeferredSection
           id="hall-of-fame"
           className="scroll-mt-28"
           rootMargin="500px 0px"
-          placeholderClassName="min-h-screen bg-black/70 backdrop-blur-sm"
+          placeholderClassName="min-h-[70vh] bg-black/70 backdrop-blur-sm"
         >
           <Suspense
-            fallback={<div className="min-h-screen bg-black/70 backdrop-blur-sm" aria-hidden="true" />}
+            fallback={<div className="min-h-[70vh] bg-black/70 backdrop-blur-sm" aria-hidden="true" />}
           >
-            <HallOfFame sectionId={null} />
+            <LandingHallOfFame sectionId={null} />
           </Suspense>
         </DeferredSection>
+        <Suspense
+          fallback={<div style={{ height: 'calc(100vh + 680px)' }} className="bg-transparent" aria-hidden="true" />}
+        >
+          <StickyFooter />
+        </Suspense>
       </main>
     </div>
   );

@@ -4,7 +4,6 @@ import LayoutDashboard from 'lucide-react/dist/esm/icons/layout-dashboard.js';
 import Users from 'lucide-react/dist/esm/icons/users.js';
 import Newspaper from 'lucide-react/dist/esm/icons/newspaper.js';
 import Handshake from 'lucide-react/dist/esm/icons/handshake.js';
-import ChevronUp from 'lucide-react/dist/esm/icons/chevron-up.js';
 import { Sidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
@@ -28,16 +27,14 @@ const navLinks = [
     isActive: (location) => location.pathname === '/blog',
   },
   {
-    label: 'Referral Request',
-    href: '/profile/me?tab=referrals',
+    label: 'Referrals',
+    href: '/referrals',
     icon: Handshake,
-    isActive: (location) =>
-      location.pathname === '/profile/me' &&
-      new URLSearchParams(location.search).get('tab') === 'referrals',
+    isActive: (location) => location.pathname === '/referrals',
   },
 ];
 
-export function SidePanel({ isDesktop, sidebarOpen, onClose }) {
+export function SidePanel({ isDesktop, sidebarOpen, onClose, user }) {
   const location = useLocation();
   const [hovered, setHovered] = React.useState(false);
   const expanded = hovered || (!isDesktop && sidebarOpen);
@@ -106,10 +103,27 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose }) {
           })}
         </nav>
 
-        <div className="flex flex-col items-center pb-4">
-          <button type="button" className="text-white/25 transition-colors hover:text-white/60">
-            <ChevronUp className="h-6 w-6 stroke-[2]" />
-          </button>
+        <div className="w-full px-5 pb-4">
+          <Link
+            to="/profile/me"
+            onClick={onClose}
+            className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 transition hover:bg-white/[0.08]"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
+              {user?.initials || 'A'}
+            </div>
+            <div
+              className={cn(
+                'min-w-0 transition-all duration-200',
+                showLabels ? 'opacity-100' : 'pointer-events-none w-0 overflow-hidden opacity-0',
+              )}
+            >
+              <div className="truncate text-sm font-medium text-white">{user?.name || 'Profile'}</div>
+              <div className="truncate text-xs text-white/50">
+                {[user?.role, user?.batchLabel].filter(Boolean).join(' · ') || 'Open profile'}
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
     </Sidebar>

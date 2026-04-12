@@ -29,6 +29,7 @@ import SquarePen from 'lucide-react/dist/esm/icons/square-pen.js';
 import UserRound from 'lucide-react/dist/esm/icons/user-round.js';
 import X from 'lucide-react/dist/esm/icons/x.js';
 import { Button } from '@/components/ui/button';
+import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { cn } from '@/lib/utils';
 import {
   createDiscussionPost,
@@ -1865,6 +1866,18 @@ function ReferralRequestsView({ userRole, requestTarget }) {
   );
 }
 
+function DirectoryCheckbox({ checked, onChange, label }) {
+  return (
+    <label className="flex cursor-pointer items-center gap-3">
+      <span className="directory-filter-checkbox">
+        <input type="checkbox" checked={checked} onChange={onChange} />
+        <span />
+      </span>
+      <span className="text-sm text-white/62 transition group-hover:text-white">{label}</span>
+    </label>
+  );
+}
+
 export function DirectoryPage() {
   const [profiles, setProfiles] = React.useState([]);
   const [selectedLocations, setSelectedLocations] = React.useState([]);
@@ -1949,8 +1962,6 @@ export function DirectoryPage() {
     });
   }, [profiles, query, selectedLocations, selectedDomains]);
 
-  const heroProfile = filteredProfiles[0] || profiles[0];
-
   const bannerImages = [
     'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F90fee62f21334017817a2fb353db1600?format=webp&width=800&height=1200',
     'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F992c6773c4d54befa7d222bd5775df9e?format=webp&width=800&height=1200',
@@ -1965,88 +1976,71 @@ export function DirectoryPage() {
   ];
 
   const getBanner = (index) => bannerImages[index % bannerImages.length];
-
-  const heroBanner = heroProfile?.avatarUrl
-    ? resolvePublicAssetUrl(heroProfile.avatarUrl)
-    : getBanner(0);
+  const directoryHeroBanner =
+    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1800&q=80';
+  const activeFilterCount = selectedLocations.length + selectedDomains.length;
+  const searchPlaceholders = [
+    'Search alumni by company, city, role, or skill',
+    'Find product alumni in Bengaluru',
+    'Search machine learning, Stripe, London',
+    'Look for referral-open alumni',
+    'Find mentors by domain or chapter',
+  ];
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif' }}>
-      <div className="relative h-80 overflow-hidden rounded-xl">
-        <img
-          src={heroBanner}
-          alt="directory hero"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent" />
-      </div>
-
-      {heroProfile ? (
-        <div className="relative -mt-24 mb-8 z-10">
-          <div className="bg-[#1a1a1a]/90 backdrop-blur-xl border border-white/10 shadow-lg p-8 flex flex-col sm:flex-row items-start justify-between gap-6 rounded-xl">
-            <div className="flex items-start gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-md">
-                  {heroProfile.initials || heroProfile.name?.split(' ').map((n) => n[0]).join('') || '?'}
-                </div>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">{heroProfile.name}</h1>
-                <p className="text-gray-400 mt-1">
-                  {heroProfile.title || heroProfile.headline || 'Alumni'} • {heroProfile.location || heroProfile.region || ''}
-                </p>
-                <div className="flex gap-8 mt-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white">{profiles.length}</div>
-                    <div className="text-sm text-gray-400">Members</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-white">{domainOptions.length}</div>
-                    <div className="text-sm text-gray-400">Industries</div>
-                  </div>
-                </div>
-              </div>
+    <div className="min-h-screen bg-black pb-16" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="relative min-h-[360px] overflow-hidden rounded-[8px]">
+        <img src={directoryHeroBanner} alt="Alumni networking" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
+          <div className="max-w-3xl rounded-[8px] bg-black p-6 md:p-8">
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Directory</div>
+            <h1 className="mt-4 text-4xl font-black leading-none tracking-normal text-white md:text-6xl">
+              Find alumni by work, place, and willingness to help.
+            </h1>
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-white/60 md:text-base">
+              Search the IIT Patna alumni network, filter by location or industry, and open a public profile when someone looks relevant.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3 text-sm text-white/72">
+              <span className="rounded-full border border-white/10 px-3 py-1">{profiles.length} alumni</span>
+              <span className="rounded-full border border-white/10 px-3 py-1">{domainOptions.length} industries</span>
+              <span className="rounded-full border border-white/10 px-3 py-1">{filteredProfiles.length} matches</span>
             </div>
-            <Link
-              to={`/profile/${heroProfile.id}`}
-              className="px-6 py-3 bg-amber-500 text-white font-medium hover:bg-amber-600 transition flex items-center gap-2 rounded-lg shadow-sm"
-            >
-              <UserRound className="w-4 h-4" />
-              View Profile
-            </Link>
           </div>
         </div>
-      ) : null}
-
-      <div className="mb-8">
-        <div className="relative max-w-2xl">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search alumni by name, company, skill, or location..."
-            className="h-14 w-full rounded-xl border border-white/10 bg-[#1a1a1a] pl-12 pr-14 text-sm text-white outline-none transition placeholder:text-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 shadow-sm"
-          />
-          {query ? (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-gray-400 transition hover:text-white"
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          ) : null}
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pb-16">
+      <div className="my-8 px-1 md:px-2">
+        <PlaceholdersAndVanishInput
+          placeholders={searchPlaceholders}
+          onChange={(event) => setQuery(event.target.value)}
+          onSubmit={(event) => event.preventDefault()}
+          className="max-w-none"
+        />
+        {query ? (
+          <button
+            type="button"
+            onClick={() => setQuery('')}
+            className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/38 transition hover:text-white"
+          >
+            Clear search
+          </button>
+        ) : null}
+      </div>
+
+      <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-4">
         <div className="lg:col-span-1">
-          <div className="bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 p-6 sticky top-6 rounded-xl">
+          <div className="sticky top-6 p-2 font-mono">
+            <div className="mb-8">
+              <div className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/35">Filters</div>
+              <div className="mt-2 text-sm text-white/56">
+                {activeFilterCount ? `${activeFilterCount} active` : 'No active filters'}
+              </div>
+            </div>
             <div className="mb-6">
               <button
                 onClick={() => setLocationExpanded(!locationExpanded)}
-                className="w-full font-semibold text-white mb-4 flex items-center justify-between cursor-pointer hover:opacity-70 transition"
+                className="mb-4 flex w-full cursor-pointer items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-70"
               >
                 Location
                 <SlidersHorizontal
@@ -2057,26 +2051,23 @@ export function DirectoryPage() {
               {locationExpanded ? (
                 <div className="space-y-3">
                   {locationOptions.map((location) => (
-                    <label key={location} className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedLocations.includes(location)}
-                        onChange={() => handleLocationChange(location)}
-                        className="w-4 h-4 border-gray-300 text-amber-500 cursor-pointer rounded focus:ring-amber-500"
-                      />
-                      <span className="text-sm text-gray-300">{location}</span>
-                    </label>
+                    <DirectoryCheckbox
+                      key={location}
+                      label={location}
+                      checked={selectedLocations.includes(location)}
+                      onChange={() => handleLocationChange(location)}
+                    />
                   ))}
                 </div>
               ) : null}
             </div>
 
-            <div className="border-t border-white/10 my-6" />
+            <div className="my-6 border-t border-white/10" />
 
             <div>
               <button
                 onClick={() => setDomainExpanded(!domainExpanded)}
-                className="w-full font-semibold text-white mb-4 flex items-center justify-between cursor-pointer hover:opacity-70 transition"
+                className="mb-4 flex w-full cursor-pointer items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-70"
               >
                 Industry
                 <SlidersHorizontal
@@ -2087,15 +2078,12 @@ export function DirectoryPage() {
               {domainExpanded ? (
                 <div className="space-y-3">
                   {domainOptions.map((domain) => (
-                    <label key={domain} className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedDomains.includes(domain)}
-                        onChange={() => handleDomainChange(domain)}
-                        className="w-4 h-4 border-gray-300 text-amber-500 cursor-pointer rounded focus:ring-amber-500"
-                      />
-                      <span className="text-sm text-gray-300">{domain}</span>
-                    </label>
+                    <DirectoryCheckbox
+                      key={domain}
+                      label={domain}
+                      checked={selectedDomains.includes(domain)}
+                      onChange={() => handleDomainChange(domain)}
+                    />
                   ))}
                 </div>
               ) : null}
@@ -2103,13 +2091,13 @@ export function DirectoryPage() {
 
             {selectedLocations.length > 0 || selectedDomains.length > 0 ? (
               <>
-                <div className="border-t border-white/10 my-6" />
+                <div className="my-6 border-t border-white/10" />
                 <button
                   onClick={() => {
                     setSelectedLocations([]);
                     setSelectedDomains([]);
                   }}
-                  className="text-sm text-amber-600 font-semibold hover:text-amber-700 transition"
+                  className="text-xs font-semibold uppercase tracking-[0.18em] text-[#f5eee8] transition hover:text-white"
                 >
                   Clear all filters
                 </button>
@@ -2119,7 +2107,7 @@ export function DirectoryPage() {
         </div>
 
         <div className="lg:col-span-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filteredProfiles.map((profile, index) => {
               const cardImage = profile.avatarUrl
                 ? resolvePublicAssetUrl(profile.avatarUrl)
@@ -2129,46 +2117,54 @@ export function DirectoryPage() {
                 <Link
                   key={profile.id}
                   to={`/profile/${profile.id}`}
-                  className="bg-[#1a1a1a] border border-white/10 overflow-hidden hover:shadow-lg hover:shadow-black/20 transition-all flex flex-col rounded-xl group hover:-translate-y-1"
+                  className="group flex min-h-[420px] flex-col overflow-hidden rounded-[8px] border border-white/10 bg-[#181818] transition hover:border-white/24 hover:bg-[#202020]"
                 >
-                  <div className="relative h-32 overflow-hidden" style={{ background: '#d4d4d8' }}>
+                  <div className="relative h-36 overflow-hidden bg-[#222]">
                     <img
                       src={cardImage}
                       alt={profile.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-transparent to-transparent" />
                   </div>
 
-                  <div className="p-5 text-center flex-1 flex flex-col relative -mt-8 pb-4">
-                    <div className="flex justify-center mb-3">
-                      <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold border-4 border-[#1a1a1a] shadow-md">
+                  <div className="relative -mt-8 flex flex-1 flex-col p-5">
+                    <div className="mb-4 flex items-end justify-between gap-3">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-sm font-black text-black">
                         {profile.initials || profile.name?.split(' ').map((n) => n[0]).join('') || '?'}
                       </div>
+                      {profile.referralOpen ? (
+                        <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f5eee8]">
+                          Referral open
+                        </span>
+                      ) : null}
                     </div>
 
-                    <h3 className="text-base font-semibold text-white group-hover:text-amber-400 transition-colors">{profile.name}</h3>
-
-                    <p className="text-xs text-gray-400 mt-1 flex items-center justify-center gap-1">
-                      <span>📋</span> {profile.role || 'Alumni'}
+                    <h3 className="text-lg font-semibold text-white transition group-hover:text-[#f5eee8]">{profile.name}</h3>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-white/34">
+                      {profile.role || 'Alumni'}
                     </p>
 
-                    <div className="text-xs text-gray-400 mt-2 space-y-1">
-                      <p className="flex items-center justify-center gap-1">
-                        <MapPin className="h-3 w-3" /> {profile.location || profile.region || '—'}
+                    <div className="mt-4 space-y-2 text-sm text-white/58">
+                      <p className="flex items-center gap-2">
+                        <MapPin className="h-3.5 w-3.5" /> {profile.location || profile.region || '—'}
                       </p>
-                      <p className="font-medium text-gray-300">{profile.title || profile.headline || '—'}</p>
-                      {profile.company ? <p className="font-semibold text-gray-200">{profile.company}</p> : null}
+                      <p className="font-medium text-white/78">{profile.title || profile.headline || '—'}</p>
+                      {profile.company ? <p className="text-white/50">{profile.company}</p> : null}
                     </div>
 
                     {profile.focus ? (
-                      <div className="mt-3 pt-3 border-t border-white/10 flex-1 flex flex-col justify-center">
-                        <p className="text-xs uppercase text-gray-400 font-semibold mb-1">Helps With</p>
-                        <p className="text-xs text-gray-500 italic line-clamp-2">"{profile.focus}"</p>
+                      <div className="mt-5 border-t border-white/10 pt-4">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/28">Helps With</p>
+                        <p className="mt-2 line-clamp-3 text-sm italic leading-6 text-white/56">"{profile.focus}"</p>
                       </div>
                     ) : null}
 
-                    <div className="w-full px-4 py-2 bg-amber-500 text-white font-medium transition text-sm mt-4 rounded-lg">
-                      View Profile
+                    <div className="mt-auto pt-5">
+                      <div className="flex items-center justify-between rounded-[8px] bg-[#f5eee8] px-4 py-2.5 text-sm font-bold text-black">
+                        View Profile
+                        <ArrowUpRight className="h-4 w-4" />
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -2177,19 +2173,19 @@ export function DirectoryPage() {
           </div>
 
           {filteredProfiles.length === 0 ? (
-            <div className="text-center py-16 bg-[#1a1a1a] border border-white/10 rounded-xl">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/5 text-gray-400 mb-5">
+            <div className="rounded-[8px] border border-white/10 bg-[#181818] py-16 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white/5 text-white/45">
                 <Search className="h-7 w-7" />
               </div>
               <p className="text-xl font-bold text-white">No alumni found matching your filters.</p>
-              <p className="text-sm text-gray-500 mt-2">Try adjusting your search or removing filters.</p>
+              <p className="mt-2 text-sm text-white/42">Try adjusting your search or removing filters.</p>
               <button
                 onClick={() => {
                   setQuery('');
                   setSelectedLocations([]);
                   setSelectedDomains([]);
                 }}
-                className="mt-6 px-5 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition"
+                className="mt-6 rounded-[8px] bg-[#f5eee8] px-5 py-2 text-sm font-bold text-black transition hover:bg-white"
               >
                 Reset filters
               </button>

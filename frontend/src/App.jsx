@@ -25,6 +25,9 @@ const BlogDetailPage = lazy(() =>
 const ProfilePage = lazy(() =>
   import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
 );
+const ReferralRequestsPage = lazy(() =>
+  import('./pages/ReferralRequestsPage').then((m) => ({ default: m.ReferralRequestsPage })),
+);
 
 function App() {
   const location = useLocation();
@@ -56,6 +59,7 @@ function App() {
             <Route path="/blog" element={<BlogsPage />} />
             <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/blog/:slug" element={<BlogDetailPage />} />
+            <Route path="/referrals" element={<ReferralRequestsPage />} />
             <Route path="/profile/me" element={<ProfilePage />} />
             <Route path="/profile/:profileId" element={<ProfilePage />} />
           </Route>

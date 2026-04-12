@@ -103,6 +103,191 @@
 }
 
 @layer components {
+  .dashboard-bento-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f5eee8;
+    isolation: isolate;
+  }
+
+  .dashboard-bento-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    z-index: -1;
+    border-radius: inherit;
+    background: conic-gradient(from var(--glow-rotation), transparent 0deg, rgba(255, 255, 255, 0) 52deg, rgba(255, 255, 255, 0.95) 82deg, rgba(245, 238, 232, 0) 112deg, transparent 360deg);
+    opacity: 0;
+    animation:
+      dashboard-bento-rotate 2.4s linear infinite,
+      dashboard-bento-focus 14s linear infinite;
+    animation-delay: 0s, var(--glow-delay, 0s);
+  }
+
+  .dashboard-bento-card::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    border-radius: 7px;
+    background: inherit;
+  }
+
+  @property --glow-rotation {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  @keyframes dashboard-bento-rotate {
+    to {
+      --glow-rotation: 360deg;
+    }
+  }
+
+  @keyframes dashboard-bento-focus {
+    0%,
+    12% {
+      opacity: 1;
+    }
+    16%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .directory-vanish-search canvas {
+    filter: invert(1);
+  }
+
+  .blog-border-glow-card {
+    --blog-glow-x: 50%;
+    --blog-glow-y: 50%;
+    position: relative;
+    border-radius: 24px;
+    background: #f5eee8;
+    isolation: isolate;
+  }
+
+  .blog-border-glow-card::before,
+  .blog-border-glow-card::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  .blog-border-glow-card::before {
+    padding: 1px;
+    background:
+      radial-gradient(
+        160px circle at var(--blog-glow-x) var(--blog-glow-y),
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(192, 132, 252, 0.78) 18%,
+        rgba(244, 114, 182, 0.68) 34%,
+        rgba(56, 189, 248, 0.62) 54%,
+        rgba(245, 238, 232, 0.06) 72%,
+        transparent 86%
+      );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  .blog-border-glow-card::after {
+    inset: -10px;
+    background:
+      radial-gradient(
+        140px circle at var(--blog-glow-x) var(--blog-glow-y),
+        rgba(192, 132, 252, 0.22) 0%,
+        rgba(244, 114, 182, 0.18) 25%,
+        rgba(56, 189, 248, 0.14) 45%,
+        transparent 72%
+      );
+    filter: blur(16px);
+  }
+
+  .blog-border-glow-card:hover::before,
+  .blog-border-glow-card:hover::after {
+    opacity: 1;
+  }
+
+  .blog-border-glow-inner {
+    height: 100%;
+    border-radius: inherit;
+    background: #f5eee8;
+  }
+
+  .directory-filter-checkbox {
+    position: relative;
+    display: inline-flex;
+    height: 1.1rem;
+    width: 1.1rem;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .directory-filter-checkbox input {
+    position: absolute;
+    height: 0;
+    width: 0;
+    opacity: 0;
+  }
+
+  .directory-filter-checkbox span {
+    position: relative;
+    height: 1.1rem;
+    width: 1.1rem;
+    border-radius: 5px;
+    background: #343434;
+    transition: all 0.28s ease;
+  }
+
+  .directory-filter-checkbox input:checked + span {
+    border: 2px solid #343434;
+    background: #f0f0f0;
+  }
+
+  .directory-filter-checkbox span::after {
+    content: '';
+    position: absolute;
+    left: 0.32rem;
+    top: 0.1rem;
+    display: none;
+    height: 0.58rem;
+    width: 0.28rem;
+    border: solid #343434;
+    border-width: 0 0.16rem 0.16rem 0;
+    border-radius: 4px;
+    filter: drop-shadow(0 0 10px #888);
+    transform: rotate(45deg);
+  }
+
+  .directory-filter-checkbox input:checked + span::after {
+    display: block;
+    animation: directory-check-bounce 0.42s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  @keyframes directory-check-bounce {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) rotate(45deg);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) rotate(45deg);
+    }
+  }
+
   .auth-shell {
     background: #0f0e17;
     color: #e8e6f0;

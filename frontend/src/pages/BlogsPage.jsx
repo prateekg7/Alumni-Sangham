@@ -1,9 +1,17 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext, useParams, useNavigate, Link } from 'react-router-dom';
-import { Search, ThumbsUp, ArrowRight, ArrowLeft, Clock, Calendar, User, PenLine, History, Briefcase, MapPin, ExternalLink, Send, MessageSquare, AlertCircle, FileText } from 'lucide-react';
-import Sidebar from '../components/dashboard/Sidebar';
-import TopNav from '../components/dashboard/TopNav';
+import { ThumbsUp, ArrowRight, ArrowLeft, Clock, PenLine, History, Briefcase, MapPin, ExternalLink, Send, MessageSquare, AlertCircle, FileText, ChevronDown, X } from 'lucide-react';
+import { PlaceholdersAndVanishInput } from '../components/ui/placeholders-and-vanish-input';
+import BorderGlow from '../components/ui/border-glow';
+import { StatefulButton } from '../components/ui/stateful-button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 import { fetchBlogFeed, fetchBlogBySlug, createBlogPost, toggleBlogLike, addBlogComment, fetchAdjacentPosts } from '../lib/api';
+import blogHero from '../assets/blogHero.svg';
 
 /* ───────────────────── recent posts helpers ───────────────────── */
 
@@ -41,41 +49,52 @@ function addRecentPost(blog) {
 
 function HeroBanner() {
   return (
-    <div
-      className="w-full px-8 py-14 md:px-16 md:py-20"
-      style={{ background: '#facc15' }}
-    >
-      <h1 className="text-4xl font-black tracking-tight text-black md:text-5xl lg:text-6xl leading-tight">
-        The Alumni{' '}
-        <span className="text-white">Blog & Jobs</span>
-      </h1>
-      <p className="mt-4 max-w-2xl text-base text-black/70 md:text-lg font-medium">
-        Stories, insights, knowledge, and career opportunities shared by the community. 
-      </p>
+    <div className="relative min-h-[360px] overflow-hidden rounded-[8px]">
+      <img src={blogHero} alt="Alumni blog and jobs" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="absolute inset-0 bg-black/42" />
+      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
+        <div className="max-w-3xl rounded-[8px] bg-black p-6 md:p-8">
+          <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/40">Blogs & Jobs</div>
+          <h1 className="mt-4 text-4xl font-black leading-none tracking-normal text-white md:text-6xl">
+            Read alumni stories, job drops, and campus notes.
+          </h1>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-white/60 md:text-base">
+            Browse writing from alumni, discover referral-worthy roles, and keep track of posts you recently opened.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
 
 function SearchBar({ value, onChange }) {
-  const [localVal, setLocalVal] = useState(value);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onChange(localVal);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [localVal, onChange]);
+  const placeholders = [
+    'Search alumni stories, jobs, or companies',
+    'Find referral posts from product alumni',
+    'Search backend roles in Bengaluru',
+    'Look for resume advice or hiring notes',
+    'Find articles by title, author, or topic',
+  ];
 
   return (
     <div className="relative w-full">
-      <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" />
-      <input
-        type="text"
-        value={localVal}
-        onChange={(e) => setLocalVal(e.target.value)}
-        placeholder="Search articles and jobs..."
-        className="w-full rounded-xl border border-white/10 bg-[#1a1a2e] py-3.5 pl-12 pr-4 text-white placeholder-white/40 outline-none transition-all focus:border-[#facc15]/50 focus:ring-1 focus:ring-[#facc15]/30 text-sm"
+      <PlaceholdersAndVanishInput
+        placeholders={placeholders}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onSubmit={(event) => event.preventDefault()}
+        className="max-w-none"
       />
+      {value ? (
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/38 transition hover:text-white"
+        >
+          <X className="h-3.5 w-3.5" />
+          Clear search
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -87,12 +106,12 @@ function FilterPills({ activeType, onSelectType, activePeriod, onSelectPeriod })
   return (
     <div className="flex flex-col sm:flex-row justify-between gap-4 w-full">
       {/* Type Filter */}
-      <div className="flex bg-[#1a1a2e] border border-white/10 rounded-xl p-1 w-max">
+      <div className="flex w-max rounded-[8px] border border-[#f5eee8]/20 bg-[#111] p-1">
         {types.map(t => (
           <button
             key={t}
             onClick={() => onSelectType(t)}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${activeType === t ? 'bg-[#facc15] text-black shadow-sm' : 'text-white/50 hover:text-white'}`}
+            className={`rounded-[6px] px-4 py-1.5 text-sm font-semibold transition-all ${activeType === t ? 'bg-[#f5eee8] text-black' : 'text-[#f5eee8]/50 hover:text-[#f5eee8]'}`}
           >
             {t}
           </button>
@@ -100,15 +119,28 @@ function FilterPills({ activeType, onSelectType, activePeriod, onSelectPeriod })
       </div>
 
       {/* Period Filter */}
-      <select 
-        value={activePeriod}
-        onChange={(e) => onSelectPeriod(e.target.value)}
-        className="bg-[#1a1a2e] border border-white/10 text-white text-sm rounded-xl px-4 py-2 outline-none focus:border-[#facc15]/50 transition-colors"
-      >
-        {periods.map(p => (
-          <option key={p} value={p}>{p}</option>
-        ))}
-      </select>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex h-10 min-w-[160px] items-center justify-between gap-2 rounded-[8px] border border-[#f5eee8]/20 bg-[#111] px-4 text-sm font-semibold text-[#f5eee8] outline-none transition hover:bg-[#171717]"
+          >
+            {activePeriod}
+            <ChevronDown className="h-4 w-4 opacity-70" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="min-w-[--radix-dropdown-menu-trigger-width]">
+          {periods.map((period) => (
+            <DropdownMenuItem
+              key={period}
+              onSelect={() => onSelectPeriod(period)}
+              className={activePeriod === period ? 'bg-[#f5eee8] text-black' : ''}
+            >
+              {period}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -118,90 +150,95 @@ function BlogCard({ blog, onLike, currentUserId }) {
   const hasLiked = blog.likes?.includes(currentUserId);
 
   return (
-    <article className="group relative rounded-2xl bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 min-h-[160px]">
+    <BorderGlow className="h-full">
+      <article className="group relative min-h-[160px] rounded-[24px] bg-[#f5eee8] p-6 transition-transform duration-300 hover:-translate-y-0.5">
       
-      {/* Badge depending on type */}
-      {isJob ? (
-        <div className="absolute top-6 right-6 flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase">
-          <Briefcase className="h-3 w-3" /> Job Posting
-        </div>
-      ) : (
-        <div className="absolute top-6 right-6 flex items-center gap-1.5 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase">
-          <PenLine className="h-3 w-3" /> Blog Post
-        </div>
-      )}
-
-      {/* top */}
-      <div className="pr-24">
-        <span className="text-[11px] text-gray-400 font-medium tracking-wide uppercase">
-          {new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-        </span>
-
-        <h3 className="mt-2 text-xl font-black text-gray-900 leading-snug group-hover:text-[#eab308] transition-colors duration-200 line-clamp-2">
-          {blog.title}
-        </h3>
-
-        {isJob && (
-          <div className="flex flex-wrap items-center gap-3 mt-3">
-            <span className="flex items-center gap-1 text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded-md">
-              <Briefcase className="w-3 h-3 text-gray-500" /> {blog.company}
-            </span>
-            <span className="flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
-              <MapPin className="w-3 h-3 text-gray-400" /> {blog.location}
-            </span>
+        {/* Badge depending on type */}
+        {isJob ? (
+          <div className="absolute top-6 right-6 flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-700">
+            <Briefcase className="h-3 w-3" /> Job Posting
+          </div>
+        ) : (
+          <div className="absolute top-6 right-6 flex items-center gap-1.5 rounded-full bg-yellow-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-yellow-700">
+            <PenLine className="h-3 w-3" /> Blog Post
           </div>
         )}
 
-        <p className="mt-3 text-sm leading-relaxed text-gray-500 line-clamp-2 whitespace-pre-wrap">
-          {blog.body}
-        </p>
-      </div>
+        {/* top */}
+        <div className="pr-24">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+            {new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
 
-      {/* author row */}
-      <div className="mt-5 flex items-center gap-3">
-        <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold bg-[#facc15] text-black">
-          {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
-        </div>
-        <div className="min-w-0 flex-1 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-gray-800 truncate">{blog.authorName}</p>
-            <p className="text-xs text-gray-400">{blog.authorMeta || "Alumni"}</p>
-          </div>
-          {!isJob && (
-            <p className="flex items-center gap-1 text-xs font-medium text-gray-400">
-              <Clock className="h-3 w-3 text-gray-300" />
-              {blog.readTime} min read
-            </p>
+          <h3 className="mt-2 line-clamp-2 text-xl font-black leading-snug text-gray-900 transition-colors duration-200 group-hover:text-[#8e6cf3]">
+            {blog.title}
+          </h3>
+
+          {isJob && (
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <span className="flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+                <Briefcase className="h-3 w-3 text-gray-500" /> {blog.company}
+              </span>
+              <span className="flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                <MapPin className="h-3 w-3 text-gray-400" /> {blog.location}
+              </span>
+            </div>
           )}
-        </div>
-      </div>
 
-      {/* footer */}
-      <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); onLike(blog._id); }}
-            className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${hasLiked ? 'text-blue-600 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            <ThumbsUp className={`h-4 w-4 ${hasLiked ? 'fill-current' : ''}`} />
-            <span>{blog.likes?.length || 0}</span>
-          </button>
-          
-          <div className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-400">
-            <MessageSquare className="h-4 w-4" />
-            <span>{blog.commentsCount || 0}</span>
+          <p className="mt-3 line-clamp-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-500">
+            {blog.body}
+          </p>
+        </div>
+
+        {/* author row */}
+        <div className="mt-5 flex items-center gap-3">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0f0f0f] text-sm font-bold text-[#f5eee8]">
+            {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
+          </div>
+          <div className="min-w-0 flex-1 flex items-center justify-between">
+            <div>
+              <p className="truncate text-sm font-semibold text-gray-800">{blog.authorName}</p>
+              <p className="text-xs text-gray-400">{blog.authorMeta || 'Alumni'}</p>
+            </div>
+            {!isJob && (
+              <p className="flex items-center gap-1 text-xs font-medium text-gray-400">
+                <Clock className="h-3 w-3 text-gray-300" />
+                {blog.readTime} min read
+              </p>
+            )}
           </div>
         </div>
 
-        <Link
-          to={`/blog/${blog.slug}`}
-          className="inline-flex items-center gap-1 text-sm font-bold text-[#eab308] transition-all hover:gap-2"
-        >
-          Read Details <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-    </article>
+        {/* footer */}
+        <div className="mt-5 flex items-center justify-between border-t border-black/8 pt-4">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                onLike(blog._id);
+              }}
+              className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${hasLiked ? 'text-blue-600 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              <ThumbsUp className={`h-4 w-4 ${hasLiked ? 'fill-current' : ''}`} />
+              <span>{blog.likes?.length || 0}</span>
+            </button>
+
+            <div className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-400">
+              <MessageSquare className="h-4 w-4" />
+              <span>{blog.commentsCount || 0}</span>
+            </div>
+          </div>
+
+          <Link
+            to={`/blog/${blog.slug}`}
+            className="inline-flex items-center gap-1 text-sm font-bold text-[#8e6cf3] transition-all hover:gap-2"
+          >
+            Read Details <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </article>
+    </BorderGlow>
   );
 }
 
@@ -638,6 +675,18 @@ function CreatePostComposer({ user, onPost }) {
   const [applyLink, setApplyLink] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [publishComplete, setPublishComplete] = useState(false);
+
+  useEffect(() => {
+    if (!publishComplete) return undefined;
+
+    const timeout = window.setTimeout(() => {
+      setExpanded(false);
+      setPublishComplete(false);
+    }, 1200);
+
+    return () => window.clearTimeout(timeout);
+  }, [publishComplete]);
 
   const canSubmit = title.trim() && text.trim() && (!isJob || (company.trim() && location.trim() && applyLink.trim()));
 
@@ -661,9 +710,10 @@ function CreatePostComposer({ user, onPost }) {
       setLocation('');
       setApplyLink('');
       setIsJob(false);
-      setExpanded(false);
+      setPublishComplete(true);
     } catch (err) {
       setError(err.message || 'Failed to post');
+      throw err;
     } finally {
       setSubmitting(false);
     }
@@ -674,99 +724,153 @@ function CreatePostComposer({ user, onPost }) {
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="w-full flex items-center gap-3 rounded-2xl bg-[#1a1a2e] border border-white/10 p-4 text-left transition-all hover:border-[#facc15]/30 shadow-lg"
+        className="flex w-full items-center gap-4 border-y border-white/10 py-5 text-left transition hover:border-[#f5eee8]/45"
       >
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#facc15] text-sm font-bold text-black">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-sm font-bold text-black">
           {user.initials || user.name?.[0] || 'A'}
         </div>
         <span className="text-[15px] font-medium text-white/50">Share an insightful article or a job opportunity...</span>
-        <PenLine className="ml-auto h-5 w-5 text-white/30" />
+        <PenLine className="ml-auto h-5 w-5 text-[#f5eee8]/55" />
       </button>
     );
   }
 
   return (
-    <div className="rounded-2xl bg-[#1a1a2e] border border-white/20 p-5 md:p-6 shadow-2xl">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#facc15] text-sm font-bold text-black">
-            {user.initials || user.name?.[0] || 'A'}
+    <div className="border-y border-[#f5eee8]/25 py-6">
+      <div className="mb-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-sm font-bold text-black">
+              {user.initials || user.name?.[0] || 'A'}
+            </div>
+            <div>
+              <p className="text-[15px] font-bold tracking-wide text-white">{user.name}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-white/40">Alumni Contributor</p>
+            </div>
           </div>
-          <div>
-            <p className="text-[15px] font-bold text-white tracking-wide">{user.name}</p>
-            <p className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">Alumni Contributor</p>
-          </div>
+          <h3 className="mt-6 text-2xl font-black leading-tight tracking-normal text-white">
+            Create something useful for the network.
+          </h3>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-white/45">
+            Keep the post specific. Articles need a title and body. Jobs need role, company, location, link, and description.
+          </p>
         </div>
-        
-        {/* Toggle Job vs Blog */}
-        <label className="flex items-center cursor-pointer bg-[#010101] p-1 rounded-full border border-white/10">
-          <div className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${!isJob ? 'bg-[#facc15] text-black shadow-md' : 'text-white/40'}`} onClick={() => setIsJob(false)}>Blog Post</div>
-          <div className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${isJob ? 'bg-blue-500 text-white shadow-md' : 'text-white/40'}`} onClick={() => setIsJob(true)}>Job Post</div>
-        </label>
+
+        <div className="space-y-3">
+          {[
+            { value: false, title: 'Blog Post', copy: 'Title and body for advice, reflections, or updates.' },
+            { value: true, title: 'Job Post', copy: 'Role details, company, location, link, and description.' },
+          ].map((option) => {
+            const active = isJob === option.value;
+            return (
+              <button
+                key={option.title}
+                type="button"
+                onClick={() => setIsJob(option.value)}
+                className={`block w-full rounded-[8px] border px-4 py-3 text-left transition ${
+                  active
+                    ? 'border-[#f5eee8] bg-[#f5eee8] text-black'
+                    : 'border-white/10 bg-transparent text-white/58 hover:border-white/25 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-black">{option.title}</span>
+                  <span className={`h-3 w-3 rounded-full border ${active ? 'border-black bg-black' : 'border-white/25'}`} />
+                </div>
+                <p className={`mt-2 text-xs leading-5 ${active ? 'text-black/62' : 'text-white/38'}`}>{option.copy}</p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder={isJob ? "Job Title (e.g. Senior Frontend Engineer)" : "Catchy Article Title"}
-        className="w-full rounded-xl border border-white/10 bg-[#0d0d17] px-4 py-3 text-[15px] font-semibold text-white placeholder-white/30 outline-none focus:border-[#facc15]/40 mb-3 transition-colors"
-      />
-      
-      {isJob && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <div className="lg:col-span-7">
+          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-white/36">
+            {isJob ? 'Job title' : 'Blog title'}
+          </label>
           <input
             type="text"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            placeholder="Company Name"
-            className="w-full rounded-xl border border-white/10 bg-[#0d0d17] px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none focus:border-blue-500/40 transition-colors"
-          />
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Location (e.g. Remote, Bangalore)"
-            className="w-full rounded-xl border border-white/10 bg-[#0d0d17] px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none focus:border-blue-500/40 transition-colors"
-          />
-          <input
-            type="url"
-            value={applyLink}
-            onChange={(e) => setApplyLink(e.target.value)}
-            placeholder="External Apply Link URL (https://...)"
-            className="w-full sm:col-span-2 rounded-xl border border-white/10 bg-[#0d0d17] px-4 py-3 text-[14px] text-white placeholder-white/30 outline-none focus:border-blue-500/40 transition-colors"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={isJob ? 'Senior Frontend Engineer' : 'What alumni should know before referral season'}
+            className="mt-2 w-full rounded-[8px] border border-white/10 bg-transparent px-4 py-3 text-[15px] font-semibold text-white outline-none transition-colors placeholder:text-white/30 focus:border-[#f5eee8]/50"
           />
         </div>
-      )}
 
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={5}
-        placeholder={isJob ? "Provide a brief job description, requirements, and any perks..." : "Write your article using basic markdown format (**bold text**, bullet points)..."}
-        className="w-full rounded-xl border border-white/10 bg-[#0d0d17] px-4 py-3 text-[15px] leading-relaxed text-white placeholder-white/30 outline-none resize-y focus:border-[#facc15]/40 transition-colors"
-      />
+        {isJob ? (
+          <>
+            <div className="lg:col-span-5">
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-white/36">Company</label>
+              <input
+                type="text"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Company name"
+                className="mt-2 w-full rounded-[8px] border border-white/10 bg-transparent px-4 py-3 text-[15px] text-white outline-none transition-colors placeholder:text-white/30 focus:border-[#f5eee8]/50"
+              />
+            </div>
+            <div className="lg:col-span-5">
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-white/36">Location</label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Remote, Bengaluru, Hyderabad"
+                className="mt-2 w-full rounded-[8px] border border-white/10 bg-transparent px-4 py-3 text-[15px] text-white outline-none transition-colors placeholder:text-white/30 focus:border-[#f5eee8]/50"
+              />
+            </div>
+            <div className="lg:col-span-7">
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-white/36">External link</label>
+              <input
+                type="url"
+                value={applyLink}
+                onChange={(e) => setApplyLink(e.target.value)}
+                placeholder="https://..."
+                className="mt-2 w-full rounded-[8px] border border-white/10 bg-transparent px-4 py-3 text-[15px] text-white outline-none transition-colors placeholder:text-white/30 focus:border-[#f5eee8]/50"
+              />
+            </div>
+          </>
+        ) : null}
 
-      {error && <p className="mt-3 text-sm text-red-400 flex items-center gap-1"><AlertCircle className="w-4 h-4"/> {error}</p>}
+        <div className="lg:col-span-12">
+          <label className="text-xs font-semibold uppercase tracking-[0.2em] text-white/36">
+            {isJob ? 'Description' : 'Body'}
+          </label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={6}
+            placeholder={isJob ? 'Describe the role, requirements, team, and referral context.' : 'Write your article using simple markdown like **bold text** and bullets.'}
+            className="mt-2 w-full resize-y rounded-[8px] border border-white/10 bg-transparent px-4 py-3 text-[15px] leading-relaxed text-white outline-none transition-colors placeholder:text-white/30 focus:border-[#f5eee8]/50"
+          />
+        </div>
+      </div>
 
-      <div className="mt-4 flex items-center justify-between">
-        <p className="text-xs text-white/30 hidden sm:block">Posts are immediately visible to the network.</p>
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+      {error && <p className="mt-3 flex items-center gap-1 text-sm text-red-400"><AlertCircle className="w-4 h-4"/> {error}</p>}
+
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-white/30">Posts are visible to the network after publishing.</p>
+        <div className="flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white/50 hover:text-white hover:bg-white/5 transition-all"
+            className="rounded-[8px] px-5 py-2.5 text-sm font-semibold text-white/50 transition hover:bg-white/5 hover:text-white"
           >
             Cancel
           </button>
-          <button
-            type="button"
+          <StatefulButton
             onClick={handleSubmit}
-            disabled={!canSubmit || submitting}
-            className={`rounded-xl px-6 py-2.5 text-sm font-bold transition-all disabled:opacity-40 select-none flex items-center gap-2 ${isJob ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-[#facc15] hover:bg-[#e0bb00] text-black'}`}
+            disabled={!canSubmit || submitting || publishComplete}
+            loadingLabel="Publishing..."
+            successLabel={isJob ? 'Job published' : 'Blog published'}
+            className="gap-2"
           >
-            {submitting ? 'Publishing...' : 'Publish'} <Send className="w-3.5 h-3.5" />
-          </button>
+            <span className="inline-flex items-center gap-2">
+              {isJob ? 'Publish job' : 'Publish blog'}
+              {isJob ? <ExternalLink className="h-3.5 w-3.5" /> : <Send className="h-3.5 w-3.5" />}
+            </span>
+          </StatefulButton>
         </div>
       </div>
     </div>
@@ -800,33 +904,42 @@ function RecentPostsSidebar() {
   };
 
   return (
-    <div className="sticky top-0">
+    <div className="sticky top-6">
       <div className="flex items-center gap-2 mb-4">
-        <History className="h-4 w-4 text-[#facc15]" />
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Recently Viewed</h3>
+        <h3 className="flex-1 text-xl font-black tracking-normal text-white">Recently Viewed</h3>
+        <History className="h-5 w-5 text-white/45" />
       </div>
 
       {recentPosts.length === 0 ? (
-        <div className="rounded-xl bg-[#1a1a2e] border border-white/8 p-4 text-center">
-          <p className="text-xs font-semibold text-white/50 mb-1">No history</p>
-          <p className="text-[11px] text-white/30">Articles you read will appear here</p>
+        <div className="border-t border-white/10 py-5 text-sm text-white/45">
+          No reading history yet.
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="overflow-y-auto pr-1">
           {recentPosts.map((post) => (
             <Link
               key={`${post.slug}-${post.visitedAt}`}
               to={`/blog/${post.slug}`}
-              className="group flex gap-3 rounded-xl bg-[#1a1a2e] border border-white/6 p-3 transition-all hover:border-[#facc15]/20 hover:bg-[#1e1e35]"
+              className="group grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 border-t border-white/10 py-4 last:border-b"
             >
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white/80 leading-snug group-hover:text-[#facc15] transition-colors line-clamp-2">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f5eee8] text-xs font-black text-black">
+                {String(post.author || '?')
+                  .split(/\s+/)
+                  .slice(0, 2)
+                  .map((part) => part[0] || '')
+                  .join('')
+                  .toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-white transition group-hover:text-[#f5eee8]">
                   {post.title}
                 </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-[10px] text-white/40 font-medium truncate pr-2">{post.author}</span>
-                  <span className="text-[9px] text-white/20 uppercase tracking-widest whitespace-nowrap">{formatVisitedTime(post.visitedAt)}</span>
-                </div>
+                <p className="mt-1 truncate text-xs text-white/45">
+                  {post.author}
+                </p>
+              </div>
+              <div className="whitespace-nowrap text-[10px] font-black uppercase tracking-[0.16em] text-white/38">
+                {formatVisitedTime(post.visitedAt)}
               </div>
             </Link>
           ))}
