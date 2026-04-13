@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Menu from 'lucide-react/dist/esm/icons/menu.js';
 import { SidePanel } from '@/components/dashboard/SidePanel';
 import { ComposeDialog } from '@/components/dashboard/ComposeDialog';
+import { PageLoader } from '@/components/PageLoader';
 import {
   clearSession,
   fetchSession,
@@ -148,11 +149,7 @@ export function AuthenticatedLayout() {
   }, [navigate]);
 
   if (!authReady || !user) {
-    return (
-      <div className="fixed inset-0 bg-[#030303] flex items-center justify-center z-[200]">
-        <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   const profileComplete = user.profileComplete;

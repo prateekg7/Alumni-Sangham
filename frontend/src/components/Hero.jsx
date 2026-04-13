@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
-const FRAME_COUNT = 240;
+const FRAME_COUNT = 200;
 const INITIAL_FRAME_COUNT = 8;
 const NEARBY_FRAME_WINDOW = 6;
 const BACKGROUND_PRELOAD_BATCH = 12;
 const PROGRESS_UPDATE_INTERVAL = 12;
 
-const getFrameSrc = (index) => `/frames/frame_${String(index + 1).padStart(4, '0')}.jpg`;
+const getFrameSrc = (index) => `/frames/ezgif-frame-${String(index + 1).padStart(3, '0')}.webp`;
 
 const isFrameReady = (img) => Boolean(img?.complete && img.naturalHeight !== 0);
 
@@ -36,6 +36,8 @@ const cancelIdle = (id) => {
 };
 
 function drawCover(ctx, img, canvas) {
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   const hRatio = canvas.width / img.width;
   const vRatio = canvas.height / img.height;
   const ratio = Math.max(hRatio, vRatio);
@@ -208,8 +210,12 @@ export function Hero() {
       const img = imgs[idx];
       if (!isFrameReady(img)) return;
 
-      if (canvas.width !== window.innerWidth) canvas.width = window.innerWidth;
-      if (canvas.height !== window.innerHeight) canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const targetWidth = Math.floor(window.innerWidth * dpr);
+      const targetHeight = Math.floor(window.innerHeight * dpr);
+
+      if (canvas.width !== targetWidth) canvas.width = targetWidth;
+      if (canvas.height !== targetHeight) canvas.height = targetHeight;
 
       drawCover(canvas.getContext('2d'), img, canvas);
       lastFrameRef.current = idx;
@@ -233,8 +239,9 @@ export function Hero() {
     const handleResize = () => {
       const canvas = canvasRef.current;
       if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
         renderFrame(lastFrameRef.current);
       }
     };
