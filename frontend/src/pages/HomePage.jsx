@@ -127,6 +127,7 @@ export function HomePage() {
             />
           </Suspense>
         ) : null}
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       </div>
       <Navbar
         className="pointer-events-auto"
@@ -140,12 +141,12 @@ export function HomePage() {
           id="about"
           className="scroll-mt-28"
           rootMargin="400px 0px"
-          placeholderClassName="min-h-screen md:min-h-[1100px] bg-black/70 backdrop-blur-sm"
+          placeholderClassName="min-h-screen md:min-h-[1100px] bg-transparent"
         >
           <Suspense
             fallback={
               <div
-                className="min-h-screen md:min-h-[1100px] bg-black/70 backdrop-blur-sm"
+                className="min-h-screen md:min-h-[1100px] bg-transparent"
                 aria-hidden="true"
               />
             }
@@ -157,10 +158,10 @@ export function HomePage() {
           id="features"
           className="scroll-mt-28"
           rootMargin="600px 0px"
-          placeholderClassName="h-[320vh] bg-black/70 backdrop-blur-sm"
+          placeholderClassName="h-[320vh] bg-transparent"
         >
           <Suspense
-            fallback={<div className="h-[320vh] bg-black/70 backdrop-blur-sm" aria-hidden="true" />}
+            fallback={<div className="h-[320vh] bg-transparent" aria-hidden="true" />}
           >
             <LandingFeaturesSection sectionId={null} />
           </Suspense>
@@ -169,10 +170,10 @@ export function HomePage() {
           id="hall-of-fame"
           className="scroll-mt-28"
           rootMargin="500px 0px"
-          placeholderClassName="min-h-[70vh] bg-black/70 backdrop-blur-sm"
+          placeholderClassName="min-h-[70vh] bg-transparent"
         >
           <Suspense
-            fallback={<div className="min-h-[70vh] bg-black/70 backdrop-blur-sm" aria-hidden="true" />}
+            fallback={<div className="min-h-[70vh] bg-transparent" aria-hidden="true" />}
           >
             <LandingHallOfFame sectionId={null} />
           </Suspense>

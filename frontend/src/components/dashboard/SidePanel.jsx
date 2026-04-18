@@ -54,15 +54,15 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user }) {
           expanded ? 'px-5' : 'px-0',
         )}
       >
-        <div className="mb-12 flex w-full items-center px-5 flex-shrink-0">
-          <Link to="/dashboard" onClick={onClose} className="flex items-center">
+        <div className={cn("mb-12 flex w-full flex-shrink-0 items-center", expanded ? "px-5 justify-start" : "justify-center")}>
+          <Link to="/" onClick={onClose} className="flex items-center">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-white/10">
               <span className="text-2xl font-black text-white">A</span>
             </div>
             <span
               className={cn(
                 'ml-3 whitespace-nowrap text-xl font-bold tracking-tight text-white transition-all duration-200',
-                showLabels ? 'opacity-100' : 'opacity-0',
+                showLabels ? 'opacity-100' : 'hidden md:block md:w-0 md:opacity-0',
               )}
             >
               Alumni
@@ -70,7 +70,7 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user }) {
           </Link>
         </div>
 
-        <nav className="flex w-full flex-1 flex-col gap-8 px-5">
+        <nav className={cn("flex w-full flex-1 flex-col gap-8", expanded ? "px-5" : "items-center")}>
           {navLinks.map((item) => {
             const Icon = item.icon;
             const active = item.isActive(location);
@@ -79,7 +79,7 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user }) {
                 key={item.label}
                 to={item.href}
                 onClick={onClose}
-                className="flex items-center gap-4 group"
+                className={cn("flex items-center group", expanded ? "gap-4" : "justify-center")}
               >
                 <div
                   className={cn(
@@ -93,7 +93,7 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user }) {
                   className={cn(
                     'whitespace-nowrap text-sm font-medium transition-all duration-200',
                     active ? 'text-white' : 'text-white/60 group-hover:text-white',
-                    showLabels ? 'opacity-100' : 'opacity-0',
+                    showLabels ? 'opacity-100' : 'hidden md:block md:w-0 md:opacity-0',
                   )}
                 >
                   {item.label}
@@ -103,11 +103,14 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user }) {
           })}
         </nav>
 
-        <div className="w-full px-5 pb-4">
+        <div className={cn("w-full pb-4", expanded ? "px-5" : "flex justify-center")}>
           <Link
             to="/profile/me"
             onClick={onClose}
-            className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 transition hover:bg-white/[0.08]"
+            className={cn(
+              "flex items-center transition",
+              expanded ? "gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 hover:bg-white/[0.08]" : "hover:opacity-70"
+            )}
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
               {user?.initials || 'A'}
@@ -115,7 +118,7 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user }) {
             <div
               className={cn(
                 'min-w-0 transition-all duration-200',
-                showLabels ? 'opacity-100' : 'pointer-events-none w-0 overflow-hidden opacity-0',
+                showLabels ? 'opacity-100' : 'hidden md:block md:pointer-events-none md:w-0 md:opacity-0 overflow-hidden',
               )}
             >
               <div className="truncate text-sm font-medium text-white">{user?.name || 'Profile'}</div>

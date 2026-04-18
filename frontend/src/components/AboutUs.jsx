@@ -1,19 +1,28 @@
 import React from 'react';
 import adminPov from '../../Assets/admin-pov.jpg';
 import admin from '../../Assets/admin.jpg';
+import BorderGlow from './ui/about-border-glow';
 
 export function AboutUs({ sectionId = 'about' }) {
   const idAttr = sectionId != null && sectionId !== '' ? { id: sectionId } : {};
+  const cardProps = {
+    edgeSensitivity: 18,
+    glowColor: '48 88 74',
+    backgroundColor: 'rgba(5, 5, 5, 0.82)',
+    borderRadius: 28,
+    glowRadius: 30,
+    glowIntensity: 0.9,
+    coneSpread: 24,
+    animated: false,
+    colors: ['#f3de92', '#f7f1d2', '#7dd3fc'],
+    fillOpacity: 0.34,
+  };
+
   return (
     <section
       {...idAttr}
-      className="w-full relative isolate overflow-visible bg-black/70 backdrop-blur-sm pointer-events-auto py-20 md:py-32 px-6 md:px-16 lg:px-24"
+      className="w-full relative isolate overflow-visible pointer-events-auto py-20 md:py-32 px-6 md:px-16 lg:px-24"
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -top-16 md:-top-24 h-16 md:h-24 bg-gradient-to-b from-black/0 via-black/45 to-black/70 backdrop-blur-sm"
-      />
-
       {/* Top Row */}
       <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[2.5fr_1fr] gap-6 md:gap-12 items-start">
         {/* Left: Title + Tagline + Large Image */}
@@ -62,32 +71,38 @@ export function AboutUs({ sectionId = 'about' }) {
               className="w-full h-[160px] md:h-[200px] object-cover rounded-[1.5rem] transform hover:scale-110 transition-transform duration-700"
             />
           </div>
-          <div className="space-y-3 mt-5">
-            <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight font-[Syne]">Who We Are</h3>
-            <p className="text-white/50 text-sm leading-relaxed font-light">
-              IIT Patna is one of India's leading engineering institutions, known for its strong academic foundation and a steadily growing focus on research and innovation.
-            </p>
-          </div>
+          <BorderGlow {...cardProps} className="mt-4">
+            <div className="space-y-3 px-5 py-5 md:px-6 md:py-6">
+              <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight font-[Syne]">Who We Are</h3>
+              <p className="text-white/50 text-sm leading-relaxed font-light">
+                IIT Patna is one of India's leading engineering institutions, known for its strong academic foundation and a steadily growing focus on research and innovation.
+              </p>
+            </div>
+          </BorderGlow>
         </div>
       </div>
 
       {/* Bottom Row */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 mt-16 md:mt-24">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 mt-8 md:mt-10">
         {/* The Community */}
-        <div className="rounded-[2rem] bg-black p-6 md:p-8 shadow-2xl">
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight font-[Syne]">The Community</h3>
-          <p className="text-white/50 text-sm md:text-base leading-relaxed font-light">
-            What truly defines IIT Patna is its people — a close-knit community of students, faculty, and alumni who value curiosity, collaboration, and continuous learning.
-          </p>
-        </div>
+        <BorderGlow {...cardProps}>
+          <div className="px-6 py-6 md:px-8 md:py-8">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight font-[Syne]">The Community</h3>
+            <p className="text-white/50 text-sm md:text-base leading-relaxed font-light">
+              What truly defines IIT Patna is its people — a close-knit community of students, faculty, and alumni who value curiosity, collaboration, and continuous learning.
+            </p>
+          </div>
+        </BorderGlow>
 
         {/* Beyond Campus */}
-        <div className="rounded-[2rem] bg-black p-6 md:p-8 shadow-2xl">
-          <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight font-[Syne]">Beyond Campus</h3>
-          <p className="text-white/50 text-sm md:text-base leading-relaxed font-light">
-            With contributions across industry, research, and entrepreneurship, the IIT Patna community continues to make its mark beyond the campus through its growing alumni network.
-          </p>
-        </div>
+        <BorderGlow {...cardProps}>
+          <div className="px-6 py-6 md:px-8 md:py-8">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight font-[Syne]">Beyond Campus</h3>
+            <p className="text-white/50 text-sm md:text-base leading-relaxed font-light">
+              With contributions across industry, research, and entrepreneurship, the IIT Patna community continues to make its mark beyond the campus through its growing alumni network.
+            </p>
+          </div>
+        </BorderGlow>
       </div>
     </section>
   );

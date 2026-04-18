@@ -3,8 +3,18 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import Grainient from './ui/Grainient';
-import { sendRegistrationOtpRequest, setAccessToken } from '@/lib/api';
+import { sendRegistrationOtpRequest } from '@/lib/api';
+import { AuthShowcase } from './AuthShowcase';
+import joinBackground from '../assets/auth/join.jpg';
+import j1 from '../assets/auth/j1.jpg';
+import j2 from '../assets/auth/j2.jpg';
+import j3 from '../assets/auth/j3.jpg';
+
+const registerSlides = [
+  { src: j1, alt: 'Students gathered outside campus building' },
+  { src: j2, alt: 'Campus walkway and architecture' },
+  { src: j3, alt: 'Campus memory capture' },
+];
 
 export function Register({ onBack }) {
   const { role } = useParams();
@@ -72,118 +82,92 @@ export function Register({ onBack }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#010d14] overflow-hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#16110d]"
     >
-      <div className="absolute inset-0 z-0 opacity-80">
-        <Grainient
-          color1="#003544"
-          color2="#001f29"
-          color3="#005066"
-          timeSpeed={0.8}
-          colorBalance={0}
-          warpStrength={1.5}
-          warpFrequency={2.5}
-          warpSpeed={1.5}
-          warpAmplitude={60}
-          blendAngle={0}
-          blendSoftness={0.1}
-          rotationAmount={300}
-          noiseScale={2.5}
-          grainAmount={0.15}
-          grainScale={1.5}
-          grainAnimated={true}
-          contrast={1.3}
-          gamma={1.1}
-          saturation={1.2}
-          centerX={0}
-          centerY={0}
-          zoom={1}
-        />
-      </div>
+      <img
+        src={joinBackground}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+        style={{ objectPosition: 'center 24%' }}
+      />
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(255,248,238,0.08),rgba(31,23,19,0.72))]" />
 
       <motion.div
         initial={{ scale: 0.95, y: 20, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-        className="relative z-10 w-[95%] max-w-[1100px] h-[650px] flex rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/5 bg-[#0b1a26] p-3 md:p-4"
+        className="relative z-10 flex w-[95%] max-w-[1120px] flex-col rounded-[2rem] border border-white/30 bg-white/14 p-3 shadow-[0_30px_60px_rgba(0,0,0,0.28)] backdrop-blur-2xl md:h-[700px] md:flex-row md:p-4"
       >
-        <div className="hidden md:flex w-1/2 relative bg-black flex-col justify-between p-8 rounded-2xl overflow-hidden shadow-2xl border border-white/5">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-80 mix-blend-screen"
-            style={{
-              backgroundImage:
-                'url("https://images.unsplash.com/photo-1549480017-d773068e594d?q=80&w=2674&auto=format&fit=crop")',
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0b1a26]/30 via-transparent to-[#010d14]/90 mix-blend-multiply" />
-
-          <div className="relative z-10 flex justify-between items-center w-full">
-            <h1 className="text-3xl font-black tracking-widest text-white drop-shadow-lg" style={{ fontFamily: 'sans-serif' }}>
-              ΛMU
-            </h1>
+        <div className="relative hidden w-[44%] md:block">
+          <div className="absolute right-6 top-6 z-20">
             <button
               type="button"
               onClick={onBack}
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-semibold text-white transition-all shadow-lg border border-white/10"
+              className="flex items-center gap-2 rounded-full border border-white/35 bg-white/18 px-4 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-md transition-all hover:bg-white/28"
+            >
+              Back to website <FontAwesomeIcon icon={faArrowRight} />
+            </button>
+          </div>
+          <AuthShowcase
+            slides={registerSlides}
+            accentColor="#e8528d"
+            fullBleed
+          />
+        </div>
+
+        <div className="relative z-10 flex max-h-[680px] w-full flex-col overflow-y-auto rounded-[1.7rem] border border-white/35 bg-[rgba(255,255,255,0.72)] px-8 pb-10 pt-8 backdrop-blur-xl md:max-h-none md:w-[56%] md:px-12 md:pb-12 md:pt-9">
+          <div className="mb-6 flex justify-end md:hidden">
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex items-center gap-2 rounded-full border border-[#e4b8c8]/70 bg-white/60 px-4 py-1.5 text-xs font-semibold text-[#5a3949] transition-all hover:bg-white/80"
             >
               Back to website <FontAwesomeIcon icon={faArrowRight} />
             </button>
           </div>
 
-          <div className="relative z-10 mb-8 flex flex-col items-center text-center w-full text-white">
-            <h2 className="text-3xl font-medium tracking-tight mb-8 drop-shadow-md leading-tight">
-              Capturing Moments,
-              <br />
-              Creating Memories
-            </h2>
-            <div className="flex gap-2.5">
-              <div className="w-6 h-1 bg-white/30 rounded-full transition-all" />
-              <div className="w-6 h-1 bg-white/30 rounded-full transition-all" />
-              <div className="w-8 h-1 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all" />
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full md:w-1/2 bg-[#0b1a26] flex flex-col px-10 md:px-14 pt-8 pb-12 relative z-10 rounded-2xl overflow-y-auto max-h-[650px]">
-          <div className="flex items-center w-full border-b border-white/5 shrink-0">
+          <div className="flex w-full shrink-0 items-center border-b border-[#e6ced8]">
             <button
               type="button"
               onClick={() => navigate('/register/student')}
-              className={`flex-1 relative pb-3 text-lg md:text-xl tracking-wide transition-all duration-300 ${activeTab === 'student' ? 'text-white font-bold drop-shadow-md' : 'text-white/50 font-medium hover:text-white/80'}`}
+              className={`relative flex-1 pb-3 text-lg tracking-wide transition-all duration-300 md:text-xl ${activeTab === 'student' ? 'font-bold text-[#201317]' : 'font-medium text-[#7f6470] hover:text-[#4c3740]'}`}
             >
               Student
               {activeTab === 'student' && (
                 <motion.div
                   layoutId="activeTabUnderlineRegister"
-                  className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#0ea5e9] shadow-[0_0_12px_rgba(14,165,233,1)] rounded-full"
+                  className="absolute bottom-[-1px] left-0 right-0 h-[3px] rounded-full bg-[#e8528d] shadow-[0_0_12px_rgba(232,82,141,0.55)]"
                 />
               )}
             </button>
             <button
               type="button"
               onClick={() => navigate('/register/alumni')}
-              className={`flex-1 relative pb-3 text-lg md:text-xl tracking-wide transition-all duration-300 ${activeTab === 'alumni' ? 'text-white font-bold drop-shadow-md' : 'text-white/50 font-medium hover:text-white/80'}`}
+              className={`relative flex-1 pb-3 text-lg tracking-wide transition-all duration-300 md:text-xl ${activeTab === 'alumni' ? 'font-bold text-[#201317]' : 'font-medium text-[#7f6470] hover:text-[#4c3740]'}`}
             >
               Alumni
               {activeTab === 'alumni' && (
                 <motion.div
                   layoutId="activeTabUnderlineRegister"
-                  className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-[#0ea5e9] shadow-[0_0_12px_rgba(14,165,233,1)] rounded-full"
+                  className="absolute bottom-[-1px] left-0 right-0 h-[3px] rounded-full bg-[#e8528d] shadow-[0_0_12px_rgba(232,82,141,0.55)]"
                 />
               )}
             </button>
           </div>
 
           <div className="w-full mt-auto mb-auto py-4">
-            <h2 className="text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight">Create an account</h2>
-            <p className="text-[#a1a1aa] mb-8 text-sm">
+            <h2 className="mb-2 text-3xl font-semibold tracking-tight text-[#201317] md:text-4xl" style={{ fontFamily: 'Syne, sans-serif' }}>
+              Create an account
+            </h2>
+            <p className="mb-8 text-sm text-[#6e5560]">
               Already have an account?{' '}
-              <Link to={`/login/${activeTab}`} className="text-[#0ea5e9] cursor-pointer hover:underline font-medium">
+              <Link to={`/login/${activeTab}`} className="cursor-pointer font-medium text-[#d74682] hover:underline">
                 Log in
               </Link>
             </p>
 
-            {error ? <div className="mb-4 text-sm text-red-400">{error}</div> : null}
+            {error ? <div className="mb-4 text-sm text-red-500">{error}</div> : null}
 
             <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit}>
               <div className="flex gap-4 w-full">
@@ -193,7 +177,7 @@ export function Register({ onBack }) {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
-                  className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                  className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                 />
                 <input
                   type="text"
@@ -201,7 +185,7 @@ export function Register({ onBack }) {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   required
-                  className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                  className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                 />
               </div>
 
@@ -213,7 +197,7 @@ export function Register({ onBack }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                    className="w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                   />
                   <div className="flex gap-4 w-full">
                     <input
@@ -222,7 +206,7 @@ export function Register({ onBack }) {
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
                       required
-                      className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                      className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                     />
                     <input
                       type="text"
@@ -230,7 +214,7 @@ export function Register({ onBack }) {
                       value={expectedGradYear}
                       onChange={(e) => setExpectedGradYear(e.target.value)}
                       required
-                      className="w-[120px] bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                      className="w-[140px] rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                     />
                   </div>
                   <input
@@ -238,7 +222,7 @@ export function Register({ onBack }) {
                     placeholder="Phone Number"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                    className="w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                   />
                 </>
               ) : (
@@ -249,7 +233,7 @@ export function Register({ onBack }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                    className="w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                   />
                   <div className="flex gap-4 w-full">
                     <input
@@ -258,7 +242,7 @@ export function Register({ onBack }) {
                       value={department}
                       onChange={(e) => setDepartment(e.target.value)}
                       required
-                      className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                      className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                     />
                     <input
                       type="text"
@@ -266,7 +250,7 @@ export function Register({ onBack }) {
                       value={gradYear}
                       onChange={(e) => setGradYear(e.target.value)}
                       required
-                      className="w-[100px] bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                      className="w-[120px] rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                     />
                   </div>
                   <div className="flex gap-4 w-full">
@@ -275,14 +259,14 @@ export function Register({ onBack }) {
                       placeholder="Current Company"
                       value={currentCompany}
                       onChange={(e) => setCurrentCompany(e.target.value)}
-                      className="flex-1 bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                      className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                     />
                     <input
                       type="tel"
                       placeholder="Phone"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-[150px] bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]"
+                      className="w-[150px] rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                     />
                   </div>
                 </>
@@ -296,12 +280,12 @@ export function Register({ onBack }) {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="new-password"
-                  className="w-full bg-[#112331] border border-white/5 focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9]/50 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A] pr-12"
+                  className="w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3 pr-12 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#82818A] hover:text-white transition-colors p-1 flex items-center justify-center rounded-md"
+                  className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-[#8b737d] transition-colors hover:text-[#2c1e24]"
                 >
                   <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                 </button>
@@ -309,17 +293,19 @@ export function Register({ onBack }) {
 
               <div className="flex justify-between items-center mt-1">
                 <label className="flex items-center gap-2 cursor-pointer group">
-                  <div className="w-4 h-4 rounded border border-[#82818A] group-hover:border-[#0ea5e9] bg-[#112331] flex items-center justify-center transition-colors">
-                    <input type="checkbox" className="opacity-0 absolute w-4 h-4 cursor-pointer" />
-                  </div>
-                  <span className="text-xs text-[#a1a1aa] group-hover:text-white transition-colors">I agree to Terms & Conditions</span>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 cursor-pointer rounded border-[#b18a99] bg-white/55 accent-[#e8528d]"
+                    style={{ accentColor: '#e8528d' }}
+                  />
+                  <span className="text-xs text-[#6e5560] transition-colors group-hover:text-[#2d1f25]">I agree to Terms & Conditions</span>
                 </label>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-4 w-full bg-[#0284c7] hover:bg-[#0369a1] disabled:opacity-60 text-white rounded-lg py-3 font-semibold text-sm transition-all shadow-[0_4px_14px_rgba(2,132,199,0.4)]"
+                className="mt-4 w-full rounded-xl bg-[#e8528d] py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,82,141,0.24)] transition-all hover:bg-[#d74682] disabled:opacity-60"
               >
                 {loading ? 'Creating account…' : 'Register'}
               </button>

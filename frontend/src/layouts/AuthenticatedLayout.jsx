@@ -159,7 +159,7 @@ export function AuthenticatedLayout() {
   return (
     <div className="auth-shell min-h-screen">
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[#0F0E17]" />
+        <div className="absolute inset-0 bg-[#000000]" />
       </div>
 
       {!sidebarOpen ? (

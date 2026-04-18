@@ -85,28 +85,22 @@ export function LandingHallOfFame({ sectionId = 'hall-of-fame' }) {
   return (
     <section
       {...idAttr}
-      className="pointer-events-auto relative overflow-hidden bg-[#06090b] px-6 py-24 md:px-12 lg:px-20"
+      className="pointer-events-auto relative overflow-hidden px-6 py-24 md:px-12 lg:px-20"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(8,64,82,0.18),_transparent_40%)]" />
-
       <div className="relative mx-auto max-w-7xl">
-        <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/55">
-            Hall of fame
-          </div>
+        <div className="max-w-4xl">
           <h2
-            className="mt-6 text-4xl font-semibold leading-tight text-white md:text-5xl"
-            style={{ fontFamily: 'Syne, sans-serif' }}
+            className="text-[80px] md:text-[100px] lg:text-[120px] font-black text-white leading-[0.85] tracking-tighter uppercase"
+            style={{ fontFamily: '"JetBrains Mono", monospace' }}
           >
-            Seven alumni stories that make the network feel aspirational and reachable at once.
+            Hall of<br />Fame
           </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/55 md:text-base">
-            On larger screens these cards expand on hover, keeping the section playful while still
-            feeling easy to scan.
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/55 md:text-lg">
+            Celebrating distinguished alumni whose journeys inspire the next generation of innovators and leaders.
           </p>
         </div>
 
-        <div className="mt-14 flex h-[470px] gap-3 overflow-x-auto pb-3 lg:overflow-visible">
+        <div className="mt-8 flex h-[470px] gap-3 overflow-x-auto pb-3 lg:overflow-visible">
           {honorees.map((member, index) => {
             const active = index === activeIndex;
             const Icon = member.icon;
@@ -138,10 +132,7 @@ export function LandingHallOfFame({ sectionId = 'hall-of-fame' }) {
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,64,82,0.14),rgba(0,0,0,0))]" />
 
                 <div className="relative flex h-full flex-col justify-between p-5 text-white">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/12 backdrop-blur-md">
-                      <Icon className="h-5 w-5" />
-                    </div>
+                  <div className="flex items-start justify-end gap-3">
                     {active ? (
                       <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#0c323d]">
                         Featured

@@ -9,9 +9,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
+import footerPoster from '@/assets/footerposter.svg';
 import './sticky-footer.css';
 
-const FOOTER_HEIGHT = 680;
+const FOOTER_HEIGHT = 950;
 
 const socialLinks = [
   { title: 'Facebook', href: '#', icon: FacebookIcon },
@@ -92,7 +93,7 @@ export function StickyFooter({ className, ...props }) {
         className="landing-footer-reveal sticky"
         style={{ top: `calc(100vh - ${FOOTER_HEIGHT}px)` }}
       >
-        <div className="pointer-events-auto relative flex h-[680px] flex-col justify-between overflow-hidden rounded-t-[34px] border-t border-white/10 bg-[#0c323d] shadow-[0_-24px_90px_rgba(0,0,0,0.34)]">
+        <div className="pointer-events-auto relative flex flex-col overflow-hidden rounded-t-[34px] border-t border-white/10 bg-[#0c323d] shadow-[0_-24px_90px_rgba(0,0,0,0.34)]">
           <div
             aria-hidden
             className="absolute inset-0"
@@ -135,7 +136,7 @@ export function StickyFooter({ className, ...props }) {
             </defs>
           </svg>
 
-          <div className="relative z-10 flex h-full flex-col justify-between px-6 py-10 text-white md:px-12 md:py-12 lg:px-16">
+          <div className="relative z-10 flex flex-col justify-between px-6 py-10 text-white md:px-12 md:py-12 lg:px-16">
             <div
               aria-hidden="true"
               className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/12 via-white/4 to-transparent"
@@ -200,8 +201,16 @@ export function StickyFooter({ className, ...props }) {
 
             <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-5 text-sm text-white/62 md:flex-row md:items-center md:justify-between">
               <p>© 2026 Alumni Sangham. Built for IIT Patna’s alumni and students.</p>
-              <p>Sticky close, gooey on the edge, and meant to leave the page with momentum.</p>
             </div>
+          </div>
+
+          {/* Footer Poster */}
+          <div className="relative z-10 w-full">
+            <img
+              src={footerPoster}
+              alt="Alumni Sangham – IIT Patna"
+              className="w-full h-auto object-cover"
+            />
           </div>
         </div>
       </div>

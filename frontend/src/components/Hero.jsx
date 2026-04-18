@@ -275,14 +275,14 @@ export function Hero() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, delay: 0.5, ease: 'easeOut' }}
-            className="pointer-events-none"
+            className="pointer-events-none flex flex-col items-center"
           >
-            <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-2xl pointer-events-auto">
-              Unite. Innovate. <br />
-              <span className="text-blue-400">Elevate.</span>
+            <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 tracking-tighter drop-shadow-2xl pointer-events-auto text-center">
+              Alumni <br />
+              <span className="text-blue-400">Sangham</span>
             </h1>
-            <p className="mt-6 mx-auto max-w-2xl text-xl md:text-2xl font-medium tracking-wide text-blue-100 mix-blend-screen drop-shadow-md pointer-events-auto">
-              Welcome back to your roots. Connect with the IITP global family and build futures that echo eternity.
+            <p className="mt-6 mx-auto max-w-2xl text-xl md:text-2xl font-medium tracking-wide text-blue-100 mix-blend-screen drop-shadow-md pointer-events-auto text-center">
+              Where IIT Patna's past, present, and future converge — building bridges that last beyond campus.
             </p>
 
             <div className="mt-10 flex items-center justify-center pointer-events-auto">
@@ -292,21 +292,6 @@ export function Hero() {
                 </div>
               )}
             </div>
-
-            <motion.div
-              className="absolute bottom-12 left-1/2 flex -translate-x-1/2 flex-col items-center opacity-80"
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <div className="mb-3 text-xs font-bold tracking-widest uppercase text-white/60">Scroll to explore</div>
-              <div className="flex h-10 w-6 justify-center rounded-full border-2 border-white/30 p-1">
-                <motion.div
-                  className="h-1.5 w-1.5 rounded-full bg-white"
-                  animate={{ y: [0, 16, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                />
-              </div>
-            </motion.div>
           </motion.div>
         </motion.div>
 

@@ -102,9 +102,9 @@ export function Navbar({ onLoginClick, onRegisterClick, className }) {
                 animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, x: -10, filter: 'blur(5px)', scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                className="text-lg font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-white tracking-tight hidden md:block select-none"
+                className="hidden select-none bg-gradient-to-r from-blue-300 via-cyan-300 to-white bg-clip-text text-lg font-black tracking-tight text-transparent drop-shadow-[0_0_12px_rgba(56,189,248,0.45)] md:block"
               >
-                AlumniConnect
+                AlumniSangham
               </motion.span>
             )}
           </AnimatePresence>
