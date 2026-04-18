@@ -75,6 +75,8 @@ export const updateMyProfile = async (userId, payload) => {
     "currentJobTitle",
     "currentCompany",
     "yearsExperience",
+    "resumeLink",
+    "externalLinks",
   ];
 
   const update = {};

@@ -283,6 +283,8 @@ export function toFullProfile(profile, user, { isOwner = false, profileCompleteO
     trackItems,
     checklist,
     referralTarget,
+    resumeLink: profile.resumeLink || null,
+    externalLinks: Array.isArray(profile.externalLinks) ? profile.externalLinks : [],
   };
 }
 

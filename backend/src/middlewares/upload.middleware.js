@@ -5,8 +5,10 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const resumeDir = path.join(__dirname, "..", "..", "public", "uploads", "resumes");
+const photoDir = path.join(__dirname, "..", "..", "public", "uploads", "photos");
 
 fs.mkdirSync(resumeDir, { recursive: true });
+fs.mkdirSync(photoDir, { recursive: true });
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
@@ -34,5 +36,34 @@ export const resumeUpload = multer({
       return;
     }
     cb(new Error("Only PDF or Word documents are allowed"));
+  },
+});
+
+const photoStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, photoDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || ".jpg";
+    const safe = `${String(req.user.id)}_${Date.now()}${ext.replace(/[^a-zA-Z0-9.]/g, "")}`;
+    cb(null, safe);
+  },
+});
+
+const allowedImageMime = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+export const profilePhotoUpload = multer({
+  storage: photoStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (allowedImageMime.has(file.mimetype)) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error("Only JPEG, PNG, or WebP images are allowed"));
   },
 });

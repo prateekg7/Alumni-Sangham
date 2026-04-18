@@ -253,6 +253,40 @@ export async function uploadResume(file) {
   return json?.data;
 }
 
+export async function uploadProfilePhoto(file) {
+  const base = getApiBase();
+  const url = `${base}/api/profiles/me/photo`;
+  const form = new FormData();
+  form.append('photo', file);
+  const headers = new Headers();
+  const token = getAccessToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: form,
+    credentials: 'include',
+  });
+  const text = await res.text();
+  let json = null;
+  if (text) {
+    try {
+      json = JSON.parse(text);
+    } catch {
+      /* ignore */
+    }
+  }
+  if (!res.ok) {
+    const message = json?.message || res.statusText || 'Upload failed';
+    const err = new Error(message);
+    err.status = res.status;
+    throw err;
+  }
+  return json?.data;
+}
+
 export async function fetchDiscussionFeed() {
   return apiRequest('/api/posts/feed/discussions');
 }

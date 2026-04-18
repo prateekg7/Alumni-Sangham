@@ -24,6 +24,14 @@ const trackItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const externalLinkSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    url: { type: String, required: true, trim: true },
+  },
+  { _id: false }
+);
+
 const checklistItemSchema = new mongoose.Schema(
   {
     label: { type: String, required: true },
@@ -85,6 +93,12 @@ const profileSchema = new mongoose.Schema(
     showEmail: { type: Boolean, default: false },
     showInDirectory: { type: Boolean, default: true },
     showOnMap: { type: Boolean, default: true },
+    resumeLink: { type: String, default: null, trim: true },
+    externalLinks: {
+      type: [externalLinkSchema],
+      default: [],
+      validate: [arr => arr.length <= 10, "Maximum 10 external links allowed"],
+    },
   },
   { timestamps: true }
 );
