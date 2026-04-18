@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { sendRegistrationOtpRequest } from '@/lib/api';
 import { AuthShowcase } from './AuthShowcase';
+import { CompanyAutocomplete } from './ui/CompanyAutocomplete';
 import joinBackground from '../assets/auth/join.jpg';
 import j1 from '../assets/auth/j1.jpg';
 import j2 from '../assets/auth/j2.jpg';
@@ -254,13 +255,13 @@ export function Register({ onBack }) {
                     />
                   </div>
                   <div className="flex gap-4 w-full">
-                    <input
-                      type="text"
-                      placeholder="Current Company"
-                      value={currentCompany}
-                      onChange={(e) => setCurrentCompany(e.target.value)}
-                      className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
-                    />
+                    <div className="flex-1">
+                      <CompanyAutocomplete
+                        value={currentCompany}
+                        onChange={(val) => setCurrentCompany(val)}
+                        theme="light"
+                      />
+                    </div>
                     <input
                       type="tel"
                       placeholder="Phone"

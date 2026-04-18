@@ -28,6 +28,7 @@ import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
 import SquarePen from 'lucide-react/dist/esm/icons/square-pen.js';
 import UserRound from 'lucide-react/dist/esm/icons/user-round.js';
 import X from 'lucide-react/dist/esm/icons/x.js';
+import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { Button } from '@/components/ui/button';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { cn } from '@/lib/utils';
@@ -1038,7 +1039,7 @@ function ProfileEditorPanel({ profile, sessionUser, open, onClose, onSaved }) {
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
                   Current company
-                  <input className={profileEditInputClass} value={form.currentCompany} onChange={(e) => updateField('currentCompany', e.target.value)} />
+                  <CompanyAutocomplete value={form.currentCompany} onChange={(val) => updateField('currentCompany', val)} />
                 </label>
                 <label className="block text-xs uppercase tracking-[0.2em] text-white/40">
                   Current role

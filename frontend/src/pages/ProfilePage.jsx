@@ -23,6 +23,7 @@ import {
   resolvePublicAssetUrl,
   uploadProfilePhoto,
 } from '../lib/api';
+import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 
 /* ── colour tokens (profile page only) ── */
 const C = {
@@ -1029,7 +1030,7 @@ export function ProfilePage() {
                   <>
                     <InputField label="Department" value={form.department} onChange={(e) => updateForm('department', e.target.value)} />
                     <InputField label="Domain" value={form.domain} onChange={(e) => updateForm('domain', e.target.value)} />
-                    <InputField label="Current company" value={form.currentCompany} onChange={(e) => updateForm('currentCompany', e.target.value)} />
+                    <CompanyAutocomplete value={form.currentCompany} onChange={(val) => updateForm('currentCompany', val)} />
                     <InputField label="Current role" value={form.currentJobTitle} onChange={(e) => updateForm('currentJobTitle', e.target.value)} />
                     <InputField label="Experience" value={form.yearsExperience} onChange={(e) => updateForm('yearsExperience', e.target.value)} />
                     <InputField label="Chapter" value={form.chapter} onChange={(e) => updateForm('chapter', e.target.value)} />
