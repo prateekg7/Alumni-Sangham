@@ -29,3 +29,4 @@ build/
 
 # Temp files
 backend/public/temp/
+backend/public/uploads/

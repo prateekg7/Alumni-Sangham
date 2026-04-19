@@ -10,6 +10,7 @@ import joinBackground from '../assets/auth/join.jpg';
 import j1 from '../assets/auth/j1.jpg';
 import j2 from '../assets/auth/j2.jpg';
 import j3 from '../assets/auth/j3.jpg';
+import { DepartmentDropdown } from './ui/DepartmentDropdown';
 
 const registerSlides = [
   { src: j1, alt: 'Students gathered outside campus building' },
@@ -201,13 +202,10 @@ export function Register({ onBack }) {
                     className="w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                   />
                   <div className="flex gap-4 w-full">
-                    <input
-                      type="text"
-                      placeholder="Department / Major"
+                    <DepartmentDropdown
                       value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                      required
-                      className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
+                      onChange={(val) => setDepartment(val)}
+                      theme="light"
                     />
                     <input
                       type="text"
@@ -237,13 +235,10 @@ export function Register({ onBack }) {
                     className="w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
                   />
                   <div className="flex gap-4 w-full">
-                    <input
-                      type="text"
-                      placeholder="Department"
+                    <DepartmentDropdown
                       value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                      required
-                      className="flex-1 rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45"
+                      onChange={(val) => setDepartment(val)}
+                      theme="light"
                     />
                     <input
                       type="text"

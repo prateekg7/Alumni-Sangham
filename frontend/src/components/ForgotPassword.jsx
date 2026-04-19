@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash, faArrowLeft, faEnvelope, faLock, faCheck } from '@fortawesome/free-solid-svg-icons';
-import Grainient from './ui/Grainient';
 import { forgotPasswordRequest, verifyResetOtpRequest, resetPasswordRequest } from '@/lib/api';
+import loginBackground from '../assets/auth/login.jpg';
 
 /**
  * Multi-step forgot-password page:
@@ -190,47 +190,34 @@ export function ForgotPassword() {
   // ─── Render ────────────────────────────────────────────────────────────────
 
   const inputClass =
-    'w-full bg-[#36353E] border border-white/5 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg px-4 py-3.5 text-sm text-white focus:outline-none transition-all placeholder:text-[#82818A]';
+    'w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3.5 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45';
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#09090b] overflow-hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#1a1015]"
     >
-      <div className="absolute inset-0 z-0 opacity-80">
-        <Grainient
-          color1="#360044"
-          color2="#1a0022"
-          color3="#4f0066"
-          timeSpeed={0.8}
-          colorBalance={0}
-          warpStrength={1.5}
-          warpFrequency={2.5}
-          warpSpeed={1.5}
-          warpAmplitude={60}
-          blendAngle={0}
-          blendSoftness={0.1}
-          rotationAmount={300}
-          noiseScale={2.5}
-          grainAmount={0.15}
-          grainScale={1.5}
-          grainAnimated={true}
-          contrast={1.3}
-          gamma={1.1}
-          saturation={1.2}
-          centerX={0}
-          centerY={0}
-          zoom={1}
-        />
-      </div>
+      <img
+        src={loginBackground}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+        style={{ objectPosition: 'center 18%' }}
+      />
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(255,248,238,0.08),rgba(38,23,32,0.72))]" />
 
-      <div className="relative z-10 w-[95%] max-w-[480px]">
+      <motion.div
+        initial={{ scale: 0.95, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        className="relative z-10 flex w-[95%] max-w-[480px] flex-col rounded-[1.7rem] border border-white/35 bg-[rgba(255,255,255,0.72)] px-8 pb-10 pt-8 shadow-[0_30px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+      >
         {/* Back link */}
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-sm text-[#5a3949] hover:text-[#201317] transition-colors mb-6 font-medium"
         >
           <FontAwesomeIcon icon={faArrowLeft} />
           Back to sign in
@@ -245,22 +232,21 @@ export function ForgotPassword() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="rounded-2xl border border-white/10 bg-[#2c2638]/80 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.6)]"
             >
-              <h1 className="text-2xl font-bold text-white tracking-tight">Reset your password</h1>
-              <p className="mt-2 text-sm text-[#a1a1aa] leading-6">
+              <h1 className="text-3xl font-semibold tracking-tight text-[#201317]" style={{ fontFamily: 'Syne, sans-serif' }}>Reset your password</h1>
+              <p className="mt-2 text-sm text-[#6e5560] leading-6">
                 Enter your email address and we'll send you an OTP to reset your password.
               </p>
 
-              {emailError ? <div className="mt-4 text-sm text-red-400">{emailError}</div> : null}
+              {emailError ? <div className="mt-4 text-sm text-red-500">{emailError}</div> : null}
 
               <form onSubmit={handleSendOtp} className="mt-6 space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-white/80 block mb-1.5">Email address</label>
+                  <label className="text-sm font-medium text-[#24181e] block mb-1.5">Email address</label>
                   <div className="relative">
                     <FontAwesomeIcon
                       icon={faEnvelope}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#82818A] text-sm"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8b737d] text-sm"
                     />
                     <input
                       type="email"
@@ -277,15 +263,15 @@ export function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={emailLoading}
-                  className="w-full bg-[#6B21A8] hover:bg-[#832bc9] disabled:opacity-60 text-white rounded-lg py-3.5 font-semibold text-sm transition-all shadow-[0_4px_14px_rgba(107,33,168,0.4)]"
+                  className="w-full rounded-xl bg-[#e8528d] py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,82,141,0.24)] transition-all hover:bg-[#d74682] disabled:opacity-60"
                 >
                   {emailLoading ? 'Sending OTP…' : 'Send OTP'}
                 </button>
               </form>
 
-              <p className="mt-6 text-center text-sm text-[#a1a1aa]">
+              <p className="mt-6 text-center text-sm text-[#6e5560]">
                 Remember your password?{' '}
-                <Link to="/login" className="text-[#A855F7] hover:underline font-medium">
+                <Link to="/login" className="text-[#d74682] hover:underline font-medium">
                   Sign in instead
                 </Link>
               </p>
@@ -300,25 +286,24 @@ export function ForgotPassword() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="rounded-2xl border border-white/10 bg-[#2c2638]/80 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.6)]"
             >
-              <h1 className="text-2xl font-bold text-white tracking-tight">
+              <h1 className="text-3xl font-semibold tracking-tight text-[#201317]" style={{ fontFamily: 'Syne, sans-serif' }}>
                 {otpVerified ? 'Set new password' : 'Verify OTP'}
               </h1>
-              <p className="mt-2 text-sm text-[#a1a1aa] leading-6">
+              <p className="mt-2 text-sm text-[#6e5560] leading-6">
                 {otpVerified ? (
-                  <>OTP verified! Now create a new password for <strong className="text-white">{email}</strong>.</>
+                  <>OTP verified! Now create a new password for <strong className="text-[#201317]">{email}</strong>.</>
                 ) : (
-                  <>Enter the OTP sent to <strong className="text-white">{email}</strong>.</>
+                  <>Enter the OTP sent to <strong className="text-[#201317]">{email}</strong>.</>
                 )}
               </p>
 
-              {otpError ? <div className="mt-4 text-sm text-red-400">{otpError}</div> : null}
+              {otpError ? <div className="mt-4 text-sm text-red-500">{otpError}</div> : null}
 
               {/* OTP Boxes */}
               {!otpVerified && (
                 <div className="mt-6">
-                  <label className="text-sm font-medium text-white/80 block mb-1.5">OTP</label>
+                  <label className="text-sm font-medium text-[#24181e] block mb-1.5">OTP</label>
                   <div className="flex gap-2 justify-center">
                     {otp.map((digit, idx) => (
                       <input
@@ -335,17 +320,17 @@ export function ForgotPassword() {
                           const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
                           handleOtpChange(0, pasted);
                         }}
-                        className="w-12 h-14 text-center text-xl font-bold bg-[#36353E] border border-white/10 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg text-white focus:outline-none transition-all"
+                        className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/55 bg-white/58 text-[#24181e] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45 transition-all"
                       />
                     ))}
                   </div>
-                  <p className="mt-2 text-xs text-[#82818A]">Enter the 6-digit code sent to your email</p>
+                  <p className="mt-2 text-xs text-[#8b737d] text-center">Enter the 6-digit code sent to your email</p>
 
                   <button
                     type="button"
                     onClick={handleVerifyOtp}
                     disabled={otpLoading || otpString.length !== 6}
-                    className="mt-4 w-full bg-[#6B21A8] hover:bg-[#832bc9] disabled:opacity-60 text-white rounded-lg py-3.5 font-semibold text-sm transition-all shadow-[0_4px_14px_rgba(107,33,168,0.4)]"
+                    className="mt-6 w-full rounded-xl bg-[#e8528d] py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,82,141,0.24)] transition-all hover:bg-[#d74682] disabled:opacity-60"
                   >
                     {otpLoading ? 'Verifying…' : 'Validate OTP'}
                   </button>
@@ -365,18 +350,18 @@ export function ForgotPassword() {
                   >
                     {/* OTP verified badge */}
                     <div className="flex items-center gap-2 rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-2.5">
-                      <FontAwesomeIcon icon={faCheck} className="text-green-400 text-sm" />
-                      <span className="text-sm text-green-300 font-medium">OTP verified successfully</span>
+                      <FontAwesomeIcon icon={faCheck} className="text-green-600 text-sm" />
+                      <span className="text-sm text-green-700 font-medium">OTP verified successfully</span>
                     </div>
 
-                    {resetError ? <div className="text-sm text-red-400">{resetError}</div> : null}
+                    {resetError ? <div className="text-sm text-red-500">{resetError}</div> : null}
 
                     <div>
-                      <label className="text-sm font-medium text-white/80 block mb-1.5">New password</label>
+                      <label className="text-sm font-medium text-[#24181e] block mb-1.5">New password</label>
                       <div className="relative">
                         <FontAwesomeIcon
                           icon={faLock}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#82818A] text-sm"
+                          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8b737d] text-sm"
                         />
                         <input
                           type={showNewPassword ? 'text' : 'password'}
@@ -390,7 +375,7 @@ export function ForgotPassword() {
                         <button
                           type="button"
                           onClick={() => setShowNewPassword(!showNewPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#82818A] hover:text-white transition-colors"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8b737d] hover:text-[#2c1e24] transition-colors"
                         >
                           <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
                         </button>
@@ -399,34 +384,34 @@ export function ForgotPassword() {
 
                     {/* Dynamic password requirements UI */}
                     <div className="mt-2 space-y-1">
-                      <div className={`text-xs ${reqs.length ? 'text-green-400' : 'text-[#82818A]'}`}>
+                      <div className={`text-xs ${reqs.length ? 'text-green-600' : 'text-[#8b737d]'}`}>
                         <FontAwesomeIcon icon={faCheck} className={`mr-1.5 ${reqs.length ? 'opacity-100' : 'opacity-0'}`} />
                         At least 8 characters
                       </div>
-                      <div className={`text-xs ${reqs.upper ? 'text-green-400' : 'text-[#82818A]'}`}>
+                      <div className={`text-xs ${reqs.upper ? 'text-green-600' : 'text-[#8b737d]'}`}>
                         <FontAwesomeIcon icon={faCheck} className={`mr-1.5 ${reqs.upper ? 'opacity-100' : 'opacity-0'}`} />
                         At least 1 uppercase letter
                       </div>
-                      <div className={`text-xs ${reqs.lower ? 'text-green-400' : 'text-[#82818A]'}`}>
+                      <div className={`text-xs ${reqs.lower ? 'text-green-600' : 'text-[#8b737d]'}`}>
                         <FontAwesomeIcon icon={faCheck} className={`mr-1.5 ${reqs.lower ? 'opacity-100' : 'opacity-0'}`} />
                         At least 1 lowercase letter
                       </div>
-                      <div className={`text-xs ${reqs.number ? 'text-green-400' : 'text-[#82818A]'}`}>
+                      <div className={`text-xs ${reqs.number ? 'text-green-600' : 'text-[#8b737d]'}`}>
                         <FontAwesomeIcon icon={faCheck} className={`mr-1.5 ${reqs.number ? 'opacity-100' : 'opacity-0'}`} />
                         At least 1 number
                       </div>
-                      <div className={`text-xs ${reqs.special ? 'text-green-400' : 'text-[#82818A]'}`}>
+                      <div className={`text-xs ${reqs.special ? 'text-green-600' : 'text-[#8b737d]'}`}>
                         <FontAwesomeIcon icon={faCheck} className={`mr-1.5 ${reqs.special ? 'opacity-100' : 'opacity-0'}`} />
                         At least 1 special character
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-white/80 block mb-1.5">Confirm password</label>
+                      <label className="text-sm font-medium text-[#24181e] block mb-1.5">Confirm password</label>
                       <div className="relative">
                         <FontAwesomeIcon
                           icon={faLock}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#82818A] text-sm"
+                          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8b737d] text-sm"
                         />
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
@@ -440,7 +425,7 @@ export function ForgotPassword() {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#82818A] hover:text-white transition-colors"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8b737d] hover:text-[#2c1e24] transition-colors"
                         >
                           <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
                         </button>
@@ -450,7 +435,7 @@ export function ForgotPassword() {
                     <button
                       type="submit"
                       disabled={resetLoading || !meetsAll}
-                      className="w-full bg-[#6B21A8] hover:bg-[#832bc9] disabled:opacity-60 text-white rounded-lg py-3.5 font-semibold text-sm transition-all shadow-[0_4px_14px_rgba(107,33,168,0.4)]"
+                      className="w-full rounded-xl bg-[#e8528d] py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,82,141,0.24)] transition-all hover:bg-[#d74682] disabled:opacity-60"
                     >
                       {resetLoading ? 'Resetting…' : 'Reset password'}
                     </button>
@@ -459,27 +444,29 @@ export function ForgotPassword() {
               </AnimatePresence>
 
               {/* Resend OTP */}
-              <p className="mt-6 text-center text-sm text-[#a1a1aa]">
-                {"Didn't receive the OTP? "}
-                {resendTimer > 0 ? (
-                  <span className="text-[#82818A]">
-                    Resend in {resendTimer}s
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    disabled={resendLoading}
-                    className="text-[#A855F7] hover:underline font-medium disabled:opacity-50"
-                  >
-                    {resendLoading ? 'Sending…' : 'Resend code'}
-                  </button>
-                )}
-              </p>
+              {!otpVerified && (
+                <p className="mt-6 text-center text-sm text-[#6e5560]">
+                  {"Didn't receive the OTP? "}
+                  {resendTimer > 0 ? (
+                    <span className="text-[#8b737d]">
+                      Resend in {resendTimer}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={resendLoading}
+                      className="text-[#d74682] hover:underline font-medium disabled:opacity-50"
+                    >
+                      {resendLoading ? 'Sending…' : 'Resend code'}
+                    </button>
+                  )}
+                </p>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

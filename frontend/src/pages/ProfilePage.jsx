@@ -24,6 +24,8 @@ import {
   uploadProfilePhoto,
 } from '../lib/api';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
+import { DepartmentDropdown } from '../components/ui/DepartmentDropdown';
+import { DEPARTMENTS } from '../lib/departments';
 
 /* ── colour tokens (profile page only) ── */
 const C = {
@@ -554,6 +556,7 @@ export function ProfilePage() {
         });
       } else {
         Object.assign(payload, {
+          department: form.department?.trim() || null,
           program: form.program.trim() || null,
           cgpa: form.cgpa.trim() || null,
           targetRoles: form.targetRoles.trim() || null,
@@ -1028,7 +1031,7 @@ export function ProfilePage() {
               <div className="grid gap-4 md:grid-cols-2">
                 {isAlumniProfile ? (
                   <>
-                    <InputField label="Department" value={form.department} onChange={(e) => updateForm('department', e.target.value)} />
+                    <DepartmentDropdown label="Department" value={form.department} onChange={(val) => updateForm('department', val)} theme="dark" />
                     <InputField label="Domain" value={form.domain} onChange={(e) => updateForm('domain', e.target.value)} />
                     <CompanyAutocomplete value={form.currentCompany} onChange={(val) => updateForm('currentCompany', val)} />
                     <InputField label="Current role" value={form.currentJobTitle} onChange={(e) => updateForm('currentJobTitle', e.target.value)} />
@@ -1057,6 +1060,7 @@ export function ProfilePage() {
                   </>
                 ) : (
                   <>
+                    <DepartmentDropdown label="Department" value={form.department} onChange={(val) => updateForm('department', val)} theme="dark" />
                     <InputField label="Program" value={form.program} onChange={(e) => updateForm('program', e.target.value)} />
                     <InputField label="Graduation year" value={form.expectedGradYear} onChange={(e) => updateForm('expectedGradYear', e.target.value)} inputMode="numeric" />
                     <InputField label="CGPA" value={form.cgpa} onChange={(e) => updateForm('cgpa', e.target.value)} />
