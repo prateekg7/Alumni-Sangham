@@ -1,4 +1,49 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Environment Variables
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage / Caches
+coverage/
+.nyc_output/
+.npm
+
+# Media files / Documents and Personal User Info
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.mp4
+*.mp3
+*.mov
+*.csv
+*.xlsx
+uploads/
+media/
+assets/uploads/
+
+# Editor directories and OS files
+.vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
