@@ -1879,13 +1879,226 @@ function DirectoryCheckbox({ checked, onChange, label }) {
   );
 }
 
+function FilterSection({ title, expanded, onToggle, children }) {
+  return (
+    <div className="mb-5">
+      <button
+        onClick={onToggle}
+        className="mb-4 flex w-full cursor-pointer items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-70"
+      >
+        {title}
+        <SlidersHorizontal
+          className="w-4 h-4 transition-transform"
+          style={{ transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+        />
+      </button>
+      {expanded ? <div className="space-y-3">{children}</div> : null}
+    </div>
+  );
+}
+
+/* ── Referral Request Popup Modal ── */
+function ReferralRequestModal({ profile: targetProfile, onClose }) {
+  const [driveLink, setDriveLink] = React.useState('');
+  const [note, setNote] = React.useState(
+    targetProfile
+      ? `Hi ${targetProfile.name}, I am interested in ${targetProfile.title || targetProfile.role || 'a role'} at ${targetProfile.company || 'your company'}. I would really value your consideration for a referral.`
+      : ''
+  );
+  const [sending, setSending] = React.useState(false);
+  const [sent, setSent] = React.useState(false);
+  const [error, setError] = React.useState('');
+
+  // Close on Escape
+  React.useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  // Prevent body scroll while modal open
+  React.useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  const handleSend = async () => {
+    if (!note.trim()) { setError('Please write a short referral note.'); return; }
+    setSending(true);
+    setError('');
+    try {
+      await createReferralRequest({
+        alumniUserId: targetProfile?.alumniUserId || targetProfile?.id,
+        coverNote: note + (driveLink ? `\n\nResume Drive Link: ${driveLink}` : ''),
+        targetRole: targetProfile?.title || targetProfile?.headline || 'Referral',
+        targetCompany: targetProfile?.company || 'See referral note',
+      });
+      setSent(true);
+    } catch (e) {
+      setError(e?.message || 'Could not send request. Please try again.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const initials = targetProfile
+    ? (targetProfile.initials || (targetProfile.name || '?').split(/\s+/).slice(0, 2).map((n) => n[0]).join('').toUpperCase())
+    : '?';
+
+  return (
+    /* Backdrop with blur */
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', backgroundColor: 'rgba(0,0,0,0.72)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative w-full max-w-lg overflow-hidden rounded-[18px] border border-white/12 bg-[#111318] shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/8 text-white/50 transition hover:bg-white/16 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="p-6 md:p-8">
+          {/* Header */}
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-lg font-black text-black">
+              {initials}
+            </div>
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35">
+                Referral Request
+              </div>
+              <div className="mt-1 text-xl font-bold text-white">{targetProfile?.name || 'Alumni'}</div>
+              <div className="text-sm text-white/48">
+                {targetProfile?.title || targetProfile?.headline || targetProfile?.role || 'Alumni Sangham'}
+                {targetProfile?.company ? ` · ${targetProfile.company}` : ''}
+              </div>
+            </div>
+          </div>
+
+          {sent ? (
+            <div className="mt-8 rounded-[12px] border border-emerald-500/30 bg-emerald-500/10 p-5 text-center">
+              <div className="text-2xl">🎉</div>
+              <div className="mt-2 text-lg font-bold text-emerald-300">Request sent!</div>
+              <p className="mt-1 text-sm text-white/55">
+                Your referral request has been submitted. Keep your profile updated and resume accessible.
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                className="mt-4 rounded-[8px] bg-[#f5eee8] px-5 py-2 text-sm font-bold text-black transition hover:bg-white"
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <div className="mt-6 space-y-5">
+              {/* Drive link */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                  Resume / Portfolio Drive Link
+                </label>
+                <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-white/12 bg-[#0d0f12] px-3 py-0.5">
+                  <Link2 className="h-4 w-4 shrink-0 text-white/35" />
+                  <input
+                    type="url"
+                    value={driveLink}
+                    onChange={(e) => setDriveLink(e.target.value)}
+                    placeholder="https://drive.google.com/file/your-resume"
+                    className="flex-1 bg-transparent py-2.5 text-sm text-white placeholder:text-white/25 outline-none"
+                  />
+                </div>
+                <p className="mt-1.5 text-[11px] text-white/35">
+                  Optional but strongly recommended — share a Google Drive or Dropbox link to your resume.
+                </p>
+              </div>
+
+              {/* Referral note */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                  Your Message
+                </label>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={5}
+                  placeholder="Write a short, specific note explaining why you fit the role and why you are reaching out..."
+                  className="mt-2 w-full resize-none rounded-[10px] border border-white/12 bg-[#0d0f12] px-4 py-3 text-sm leading-7 text-white outline-none transition placeholder:text-white/25 focus:border-white/25"
+                />
+              </div>
+
+              {/* Attached automatically note */}
+              <div className="rounded-[10px] border border-white/8 bg-[#0d0f12] px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-white/35" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/35">Profile attached automatically</span>
+                </div>
+                <p className="mt-1.5 text-xs leading-5 text-white/42">
+                  Alumni can view your full public profile and documents directly from this request.
+                </p>
+              </div>
+
+              {error ? (
+                <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                  {error}
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap gap-3 pt-1">
+                <button
+                  type="button"
+                  disabled={sending}
+                  onClick={handleSend}
+                  className="inline-flex items-center gap-2 rounded-[10px] bg-[#f5eee8] px-5 py-2.5 text-sm font-bold text-black transition hover:bg-white disabled:opacity-60"
+                >
+                  <Send className="h-4 w-4" />
+                  {sending ? 'Sending…' : 'Send Request'}
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center rounded-[10px] border border-white/12 bg-transparent px-5 py-2.5 text-sm font-semibold text-white/60 transition hover:bg-white/8 hover:text-white"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DirectoryPage() {
   const [profiles, setProfiles] = React.useState([]);
+
+  // Filter states
+  const [selectedBatches, setSelectedBatches] = React.useState([]);
+  const [selectedDepts, setSelectedDepts] = React.useState([]);
   const [selectedLocations, setSelectedLocations] = React.useState([]);
-  const [selectedDomains, setSelectedDomains] = React.useState([]);
+  const [selectedIndustries, setSelectedIndustries] = React.useState([]);
+  const [selectedCompanies, setSelectedCompanies] = React.useState([]);
+
+  // Filter expand states
+  const [batchExpanded, setBatchExpanded] = React.useState(true);
+  const [deptExpanded, setDeptExpanded] = React.useState(true);
   const [locationExpanded, setLocationExpanded] = React.useState(true);
-  const [domainExpanded, setDomainExpanded] = React.useState(true);
+  const [industryExpanded, setIndustryExpanded] = React.useState(false);
+  const [companyExpanded, setCompanyExpanded] = React.useState(false);
+
   const [query, setQuery] = React.useState('');
+
+  // Referral modal state
+  const [referralTarget, setReferralTarget] = React.useState(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -1906,21 +2119,21 @@ export function DirectoryPage() {
     };
   }, []);
 
-  const handleLocationChange = (location) => {
-    setSelectedLocations((prev) =>
-      prev.includes(location)
-        ? prev.filter((l) => l !== location)
-        : [...prev, location]
-    );
-  };
+  // Dynamic filter options
+  const batchOptions = React.useMemo(() => {
+    const set = new Set();
+    profiles.forEach((p) => {
+      const year = p.batch || p.graduationYear || p.expectedGradYear;
+      if (year) set.add(String(year));
+    });
+    return [...set].sort((a, b) => b.localeCompare(a));
+  }, [profiles]);
 
-  const handleDomainChange = (domain) => {
-    setSelectedDomains((prev) =>
-      prev.includes(domain)
-        ? prev.filter((d) => d !== domain)
-        : [...prev, domain]
-    );
-  };
+  const deptOptions = React.useMemo(() => {
+    const set = new Set();
+    profiles.forEach((p) => { if (p.department) set.add(p.department); });
+    return [...set].sort();
+  }, [profiles]);
 
   const locationOptions = React.useMemo(() => {
     const set = new Set();
@@ -1931,37 +2144,46 @@ export function DirectoryPage() {
     return [...set].sort();
   }, [profiles]);
 
-  const domainOptions = React.useMemo(() => {
+  const industryOptions = React.useMemo(() => {
     const set = new Set();
-    profiles.forEach((p) => {
-      if (p.domain) set.add(p.domain);
-    });
+    profiles.forEach((p) => { if (p.domain) set.add(p.domain); });
     return [...set].sort();
   }, [profiles]);
+
+  const companyOptions = React.useMemo(() => {
+    const set = new Set();
+    profiles.forEach((p) => { if (p.company) set.add(p.company); });
+    return [...set].sort();
+  }, [profiles]);
+
+  const toggle = (setter) => (val) =>
+    setter((prev) => prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]);
 
   const filteredProfiles = React.useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return profiles.filter((profile) => {
+      const batchVal = String(profile.batch || profile.graduationYear || profile.expectedGradYear || '');
+      const batchMatch = selectedBatches.length === 0 || selectedBatches.includes(batchVal);
+      const deptMatch = selectedDepts.length === 0 || selectedDepts.includes(profile.department);
       const locationMatch =
         selectedLocations.length === 0 ||
         selectedLocations.some((loc) =>
           [profile.region, profile.location].some((v) => v && v.includes(loc))
         );
-      const domainMatch =
-        selectedDomains.length === 0 || selectedDomains.includes(profile.domain);
+      const industryMatch = selectedIndustries.length === 0 || selectedIndustries.includes(profile.domain);
+      const companyMatch = selectedCompanies.length === 0 || selectedCompanies.includes(profile.company);
 
-      if (!locationMatch || !domainMatch) return false;
-
+      if (!batchMatch || !deptMatch || !locationMatch || !industryMatch || !companyMatch) return false;
       if (!normalizedQuery) return true;
 
       const haystack = [
         profile.name, profile.title, profile.company, profile.headline,
-        profile.focus, profile.location, profile.region, profile.domain,
+        profile.focus, profile.location, profile.region, profile.domain, profile.department,
         ...(profile.skills || []),
       ].join(' ').toLowerCase();
       return haystack.includes(normalizedQuery);
     });
-  }, [profiles, query, selectedLocations, selectedDomains]);
+  }, [profiles, query, selectedBatches, selectedDepts, selectedLocations, selectedIndustries, selectedCompanies]);
 
   const bannerImages = [
     'https://cdn.builder.io/api/v1/image/assets%2Ff5936d6a86bb4bcd85b3201b8346da12%2F90fee62f21334017817a2fb353db1600?format=webp&width=800&height=1200',
@@ -1979,7 +2201,8 @@ export function DirectoryPage() {
   const getBanner = (index) => bannerImages[index % bannerImages.length];
   const directoryHeroBanner =
     'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1800&q=80';
-  const activeFilterCount = selectedLocations.length + selectedDomains.length;
+  const activeFilterCount =
+    selectedBatches.length + selectedDepts.length + selectedLocations.length + selectedIndustries.length + selectedCompanies.length;
   const searchPlaceholders = [
     'Search alumni by company, city, role, or skill',
     'Find product alumni in Bengaluru',
@@ -1988,8 +2211,24 @@ export function DirectoryPage() {
     'Find mentors by domain or chapter',
   ];
 
+  const clearAll = () => {
+    setSelectedBatches([]);
+    setSelectedDepts([]);
+    setSelectedLocations([]);
+    setSelectedIndustries([]);
+    setSelectedCompanies([]);
+  };
+
   return (
     <div className="min-h-screen bg-black pb-16" style={{ fontFamily: 'Inter, sans-serif' }}>
+      {/* Referral modal */}
+      {referralTarget && (
+        <ReferralRequestModal
+          profile={referralTarget}
+          onClose={() => setReferralTarget(null)}
+        />
+      )}
+
       <div className="relative min-h-[360px] overflow-hidden rounded-[8px]">
         <img src={directoryHeroBanner} alt="Alumni networking" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-black/45" />
@@ -2000,11 +2239,11 @@ export function DirectoryPage() {
               Find alumni by work, place, and willingness to help.
             </h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-white/60 md:text-base">
-              Search the IIT Patna alumni network, filter by location or industry, and open a public profile when someone looks relevant.
+              Search the IIT Patna alumni network, filter by batch, department, location, industry, and company.
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-sm text-white/72">
               <span className="rounded-full border border-white/10 px-3 py-1">{profiles.length} alumni</span>
-              <span className="rounded-full border border-white/10 px-3 py-1">{domainOptions.length} industries</span>
+              <span className="rounded-full border border-white/10 px-3 py-1">{industryOptions.length} industries</span>
               <span className="rounded-full border border-white/10 px-3 py-1">{filteredProfiles.length} matches</span>
             </div>
           </div>
@@ -2030,145 +2269,182 @@ export function DirectoryPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-4">
+        {/* Sidebar Filters */}
         <div className="lg:col-span-1">
           <div className="sticky top-6 p-2 font-mono">
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/35">Filters</div>
               <div className="mt-2 text-sm text-white/56">
                 {activeFilterCount ? `${activeFilterCount} active` : 'No active filters'}
               </div>
             </div>
-            <div className="mb-6">
-              <button
-                onClick={() => setLocationExpanded(!locationExpanded)}
-                className="mb-4 flex w-full cursor-pointer items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-70"
-              >
-                Location
-                <SlidersHorizontal
-                  className="w-4 h-4 transition-transform"
-                  style={{ transform: locationExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
-                />
-              </button>
-              {locationExpanded ? (
-                <div className="space-y-3">
-                  {locationOptions.map((location) => (
+
+            {/* Batch */}
+            {batchOptions.length > 0 && (
+              <>
+                <FilterSection title="Batch" expanded={batchExpanded} onToggle={() => setBatchExpanded(!batchExpanded)}>
+                  {batchOptions.map((b) => (
                     <DirectoryCheckbox
-                      key={location}
-                      label={location}
-                      checked={selectedLocations.includes(location)}
-                      onChange={() => handleLocationChange(location)}
+                      key={b}
+                      label={b}
+                      checked={selectedBatches.includes(b)}
+                      onChange={() => toggle(setSelectedBatches)(b)}
                     />
                   ))}
-                </div>
-              ) : null}
-            </div>
+                </FilterSection>
+                <div className="my-4 border-t border-white/10" />
+              </>
+            )}
 
-            <div className="my-6 border-t border-white/10" />
-
-            <div>
-              <button
-                onClick={() => setDomainExpanded(!domainExpanded)}
-                className="mb-4 flex w-full cursor-pointer items-center justify-between text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:opacity-70"
-              >
-                Industry
-                <SlidersHorizontal
-                  className="w-4 h-4 transition-transform"
-                  style={{ transform: domainExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
-                />
-              </button>
-              {domainExpanded ? (
-                <div className="space-y-3">
-                  {domainOptions.map((domain) => (
+            {/* Department */}
+            {deptOptions.length > 0 && (
+              <>
+                <FilterSection title="Department" expanded={deptExpanded} onToggle={() => setDeptExpanded(!deptExpanded)}>
+                  {deptOptions.map((d) => (
                     <DirectoryCheckbox
-                      key={domain}
-                      label={domain}
-                      checked={selectedDomains.includes(domain)}
-                      onChange={() => handleDomainChange(domain)}
+                      key={d}
+                      label={d}
+                      checked={selectedDepts.includes(d)}
+                      onChange={() => toggle(setSelectedDepts)(d)}
                     />
                   ))}
-                </div>
-              ) : null}
-            </div>
+                </FilterSection>
+                <div className="my-4 border-t border-white/10" />
+              </>
+            )}
 
-            {selectedLocations.length > 0 || selectedDomains.length > 0 ? (
+            {/* Location */}
+            <FilterSection title="Location" expanded={locationExpanded} onToggle={() => setLocationExpanded(!locationExpanded)}>
+              {locationOptions.map((loc) => (
+                <DirectoryCheckbox
+                  key={loc}
+                  label={loc}
+                  checked={selectedLocations.includes(loc)}
+                  onChange={() => toggle(setSelectedLocations)(loc)}
+                />
+              ))}
+            </FilterSection>
+
+            <div className="my-4 border-t border-white/10" />
+
+            {/* Industry */}
+            <FilterSection title="Industry" expanded={industryExpanded} onToggle={() => setIndustryExpanded(!industryExpanded)}>
+              {industryOptions.map((ind) => (
+                <DirectoryCheckbox
+                  key={ind}
+                  label={ind}
+                  checked={selectedIndustries.includes(ind)}
+                  onChange={() => toggle(setSelectedIndustries)(ind)}
+                />
+              ))}
+            </FilterSection>
+
+            <div className="my-4 border-t border-white/10" />
+
+            {/* Company */}
+            <FilterSection title="Company" expanded={companyExpanded} onToggle={() => setCompanyExpanded(!companyExpanded)}>
+              {companyOptions.slice(0, 20).map((c) => (
+                <DirectoryCheckbox
+                  key={c}
+                  label={c}
+                  checked={selectedCompanies.includes(c)}
+                  onChange={() => toggle(setSelectedCompanies)(c)}
+                />
+              ))}
+            </FilterSection>
+
+            {activeFilterCount > 0 && (
               <>
                 <div className="my-6 border-t border-white/10" />
                 <button
-                  onClick={() => {
-                    setSelectedLocations([]);
-                    setSelectedDomains([]);
-                  }}
+                  onClick={clearAll}
                   className="text-xs font-semibold uppercase tracking-[0.18em] text-[#f5eee8] transition hover:text-white"
                 >
                   Clear all filters
                 </button>
               </>
-            ) : null}
+            )}
           </div>
         </div>
 
+        {/* Profile Cards */}
         <div className="lg:col-span-3">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredProfiles.map((profile, index) => {
-              const cardImage = profile.avatarUrl
+              const avatarSrc = profile.avatarUrl
                 ? resolvePublicAssetUrl(profile.avatarUrl)
-                : profile.profileImage || getBanner(index);
+                : '';
+              const bannerSrc = profile.profileImage || getBanner(index);
+              const initials = profile.initials || (profile.name || '?').split(/\s+/).slice(0, 2).map((n) => n[0]).join('').toUpperCase();
 
               return (
-                <Link
+                <div
                   key={profile.id}
-                  to={`/profile/${profile.id}`}
-                  className="group flex min-h-[420px] flex-col overflow-hidden rounded-[8px] border border-white/10 bg-[#181818] transition hover:border-white/24 hover:bg-[#202020]"
+                  className="group flex min-h-[400px] flex-col overflow-hidden rounded-[8px] border border-white/10 bg-[#181818] transition hover:border-white/24 hover:bg-[#1e1e1e]"
                 >
-                  <div className="relative h-36 overflow-hidden bg-[#222]">
+                  {/* Banner */}
+                  <div className="relative h-28 overflow-hidden bg-[#222]">
                     <img
-                      src={cardImage}
-                      alt={profile.name}
+                      src={bannerSrc}
+                      alt=""
                       className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/40 to-transparent" />
                   </div>
 
-                  <div className="relative -mt-8 flex flex-1 flex-col p-5">
-                    <div className="mb-4 flex items-end justify-between gap-3">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-sm font-black text-black">
-                        {profile.initials || profile.name?.split(' ').map((n) => n[0]).join('') || '?'}
-                      </div>
-                      {profile.referralOpen ? (
-                        <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f5eee8]">
-                          Referral open
-                        </span>
-                      ) : null}
+                  {/* Centered profile photo */}
+                  <div className="flex flex-col items-center px-5 pb-2 -mt-10 relative z-10">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-xl font-black text-black shadow-lg overflow-hidden">
+                      {avatarSrc ? (
+                        <img src={avatarSrc} alt={profile.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <span>{initials}</span>
+                      )}
                     </div>
 
-                    <h3 className="text-lg font-semibold text-white transition group-hover:text-[#f5eee8]">{profile.name}</h3>
-                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-white/34">
+                    {profile.referralOpen && (
+                      <span className="mt-2 rounded-full border border-white/12 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f5eee8]">
+                        Referral open
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Card body */}
+                  <div className="flex flex-1 flex-col items-center px-5 pt-2 pb-5 text-center">
+                    <h3 className="text-base font-bold text-white transition group-hover:text-[#f5eee8]">{profile.name}</h3>
+                    <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
                       {profile.role || 'Alumni'}
                     </p>
 
-                    <div className="mt-4 space-y-2 text-sm text-white/58">
+                    <div className="mt-3 w-full space-y-1.5 text-sm text-white/55 text-left">
                       <p className="flex items-center gap-2">
-                        <MapPin className="h-3.5 w-3.5" /> {profile.location || profile.region || '—'}
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{profile.location || profile.region || '—'}</span>
                       </p>
-                      <p className="font-medium text-white/78">{profile.title || profile.headline || '—'}</p>
-                      {profile.company ? <p className="text-white/50">{profile.company}</p> : null}
+                      <p className="font-medium text-white/78 truncate">{profile.title || profile.headline || '—'}</p>
+                      {profile.company ? <p className="text-white/45 truncate">{profile.company}</p> : null}
                     </div>
 
                     {profile.focus ? (
-                      <div className="mt-5 border-t border-white/10 pt-4">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/28">Helps With</p>
-                        <p className="mt-2 line-clamp-3 text-sm italic leading-6 text-white/56">"{profile.focus}"</p>
+                      <div className="mt-4 w-full border-t border-white/10 pt-3">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/28 text-left">Helps With</p>
+                        <p className="mt-1.5 line-clamp-2 text-xs italic leading-5 text-white/50 text-left">"{profile.focus}"</p>
                       </div>
                     ) : null}
 
-                    <div className="mt-auto pt-5">
-                      <div className="flex items-center justify-between rounded-[8px] bg-[#f5eee8] px-4 py-2.5 text-sm font-bold text-black">
-                        View Profile
-                        <ArrowUpRight className="h-4 w-4" />
-                      </div>
+                    {/* Actions */}
+                    <div className="mt-auto w-full pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setReferralTarget(profile)}
+                        className="flex w-full items-center justify-center gap-2 rounded-[8px] bg-[#f5eee8] px-4 py-2.5 text-sm font-bold text-black transition hover:bg-white"
+                      >
+                        <Handshake className="h-4 w-4" />
+                        Request Referral
+                      </button>
                     </div>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
@@ -2181,11 +2457,7 @@ export function DirectoryPage() {
               <p className="text-xl font-bold text-white">No alumni found matching your filters.</p>
               <p className="mt-2 text-sm text-white/42">Try adjusting your search or removing filters.</p>
               <button
-                onClick={() => {
-                  setQuery('');
-                  setSelectedLocations([]);
-                  setSelectedDomains([]);
-                }}
+                onClick={() => { setQuery(''); clearAll(); }}
                 className="mt-6 rounded-[8px] bg-[#f5eee8] px-5 py-2 text-sm font-bold text-black transition hover:bg-white"
               >
                 Reset filters
