@@ -3,8 +3,8 @@ import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-do
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCheck, faEnvelope, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
-import Grainient from './ui/Grainient';
 import { registerRequest, sendRegistrationOtpRequest, setAccessToken } from '@/lib/api';
+import joinBackground from '../assets/auth/join.jpg';
 
 /**
  * Post-registration email verification page.
@@ -129,40 +129,27 @@ export function VerifyEmail() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-[#09090b] overflow-hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#16110d]"
     >
-      <div className="absolute inset-0 z-0 opacity-80">
-        <Grainient
-          color1="#360044"
-          color2="#1a0022"
-          color3="#4f0066"
-          timeSpeed={0.8}
-          colorBalance={0}
-          warpStrength={1.5}
-          warpFrequency={2.5}
-          warpSpeed={1.5}
-          warpAmplitude={60}
-          blendAngle={0}
-          blendSoftness={0.1}
-          rotationAmount={300}
-          noiseScale={2.5}
-          grainAmount={0.15}
-          grainScale={1.5}
-          grainAnimated={true}
-          contrast={1.3}
-          gamma={1.1}
-          saturation={1.2}
-          centerX={0}
-          centerY={0}
-          zoom={1}
-        />
-      </div>
+      <img
+        src={joinBackground}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 z-0 h-full w-full object-cover"
+        style={{ objectPosition: 'center 24%' }}
+      />
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(180deg,rgba(255,248,238,0.08),rgba(31,23,19,0.72))]" />
 
-      <div className="relative z-10 w-[95%] max-w-[480px]">
+      <motion.div
+        initial={{ scale: 0.95, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        className="relative z-10 flex w-[95%] max-w-[480px] flex-col rounded-[1.7rem] border border-white/35 bg-[rgba(255,255,255,0.72)] px-8 pb-10 pt-8 shadow-[0_30px_60px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+      >
         {/* Back link */}
         <Link
           to="/login"
-          className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-sm text-[#5a3949] hover:text-[#201317] transition-colors mb-6 font-medium"
         >
           <FontAwesomeIcon icon={faArrowLeft} />
           Back to sign in
@@ -177,25 +164,24 @@ export function VerifyEmail() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="rounded-2xl border border-white/10 bg-[#2c2638]/80 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.6)]"
             >
               {/* Icon */}
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#6B21A8]/10 border border-[#6B21A8]/20 mb-5">
-                <FontAwesomeIcon icon={faShieldHalved} className="text-[#A855F7] text-xl" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e8528d]/10 border border-[#e8528d]/20 mb-5">
+                <FontAwesomeIcon icon={faShieldHalved} className="text-[#e8528d] text-xl" />
               </div>
 
-              <h1 className="text-2xl font-bold text-white tracking-tight text-center">Verify your email</h1>
-              <p className="mt-2 text-sm text-[#a1a1aa] leading-6 text-center">
-                We've sent a 6-digit verification code to{' '}
-                <strong className="text-white">{emailFromQuery || 'your email'}</strong>.
+              <h1 className="text-3xl font-semibold tracking-tight text-[#201317] text-center" style={{ fontFamily: 'Syne, sans-serif' }}>Verify your email</h1>
+              <p className="mt-2 text-sm text-[#6e5560] leading-6 text-center">
+                We've sent a 6-digit verification code to <br/>
+                <strong className="text-[#201317]">{emailFromQuery || 'your email'}</strong>.<br/>
                 Enter it below to complete your registration.
               </p>
 
-              {error ? <div className="mt-4 text-sm text-red-400 text-center">{error}</div> : null}
+              {error ? <div className="mt-4 text-sm text-red-500 text-center">{error}</div> : null}
 
               {/* OTP Boxes */}
               <div className="mt-6">
-                <label className="text-sm font-medium text-white/80 block mb-2 text-center">Verification code</label>
+                <label className="text-sm font-medium text-[#24181e] block mb-2 text-center">Verification code</label>
                 <div className="flex gap-2 justify-center">
                   {otp.map((digit, idx) => (
                     <input
@@ -212,7 +198,7 @@ export function VerifyEmail() {
                         const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
                         handleOtpChange(0, pasted);
                       }}
-                      className="w-12 h-14 text-center text-xl font-bold bg-[#36353E] border border-white/10 focus:border-[#A855F7] focus:ring-1 focus:ring-[#A855F7]/50 rounded-lg text-white focus:outline-none transition-all"
+                      className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/55 bg-white/58 text-[#24181e] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45 transition-all"
                     />
                   ))}
                 </div>
@@ -222,18 +208,16 @@ export function VerifyEmail() {
                 type="button"
                 onClick={handleVerify}
                 disabled={loading || otpString.length !== 6}
-                className="mt-6 w-full bg-[#6B21A8] hover:bg-[#832bc9] disabled:opacity-60 text-white rounded-lg py-3.5 font-semibold text-sm transition-all shadow-[0_4px_14px_rgba(107,33,168,0.4)]"
+                className="mt-8 w-full rounded-xl bg-[#e8528d] py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,82,141,0.24)] transition-all hover:bg-[#d74682] disabled:opacity-60"
               >
                 {loading ? 'Verifying…' : 'Verify email'}
               </button>
 
-
-
               {/* Resend */}
-              <p className="mt-4 text-center text-sm text-[#a1a1aa]">
+              <p className="mt-6 text-center text-sm text-[#6e5560]">
                 {"Didn't receive the code? "}
                 {resendTimer > 0 ? (
-                  <span className="text-[#82818A]">
+                  <span className="text-[#8b737d]">
                     Resend in {resendTimer}s
                   </span>
                 ) : (
@@ -241,7 +225,7 @@ export function VerifyEmail() {
                     type="button"
                     onClick={handleResendOtp}
                     disabled={resendLoading}
-                    className="text-[#A855F7] hover:underline font-medium disabled:opacity-50"
+                    className="text-[#d74682] hover:underline font-medium disabled:opacity-50"
                   >
                     {resendLoading ? 'Sending…' : 'Resend code'}
                   </button>
@@ -257,26 +241,26 @@ export function VerifyEmail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="rounded-2xl border border-white/10 bg-[#2c2638]/80 backdrop-blur-xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.6)] text-center"
+              className="text-center"
             >
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20 mb-6">
-                <FontAwesomeIcon icon={faCheck} className="text-green-400 text-2xl" />
+                <FontAwesomeIcon icon={faCheck} className="text-green-600 text-2xl" />
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Email verified!</h1>
-              <p className="mt-3 text-sm text-[#a1a1aa] leading-6">
+              <h1 className="text-3xl font-semibold tracking-tight text-[#201317]" style={{ fontFamily: 'Syne, sans-serif' }}>Email verified!</h1>
+              <p className="mt-3 text-sm text-[#6e5560] leading-6">
                 Your email has been verified successfully. You now have full access to the Alumni Sangham network.
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard')}
-                className="mt-6 w-full bg-[#6B21A8] hover:bg-[#832bc9] text-white rounded-lg py-3.5 font-semibold text-sm transition-all shadow-[0_4px_14px_rgba(107,33,168,0.4)]"
+                className="mt-8 w-full rounded-xl bg-[#e8528d] py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,82,141,0.24)] transition-all hover:bg-[#d74682]"
               >
                 Go to Dashboard
               </button>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
