@@ -252,10 +252,10 @@ export function VerifyEmail() {
               </p>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/')}
                 className="mt-8 w-full rounded-xl bg-[#e8528d] py-3.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(232,82,141,0.24)] transition-all hover:bg-[#d74682]"
               >
-                Go to Dashboard
+                Go to Home Page
               </button>
             </motion.div>
           )}

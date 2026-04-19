@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { fetchSession, getAccessToken, resolvePublicAssetUrl, logoutRequest } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../../Assets/iitp-logo.png';
 import Home from 'lucide-react/dist/esm/icons/house.js';
@@ -23,6 +24,35 @@ export function Navbar({ onLoginClick, onRegisterClick, className }) {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState('Home');
+  const [user, setUser] = useState(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(() => !!getAccessToken());
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+    } catch {
+      // ignore
+    } finally {
+      window.location.href = '/';
+    }
+  };
+
+  useEffect(() => {
+    if (getAccessToken()) {
+      fetchSession()
+        .then((session) => {
+          if (session) {
+            setUser(session);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setIsAuthLoading(false);
+        });
+    } else {
+      setIsAuthLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -143,18 +173,50 @@ export function Navbar({ onLoginClick, onRegisterClick, className }) {
           })}
         </motion.div>
 
-        {/* Auth Buttons */}
+        {/* Auth Buttons / Avatar */}
         <motion.div layout transition={layoutTransition} className="flex items-center gap-2 border-l border-white/10 pl-2 sm:pl-4">
-          <motion.div layout transition={layoutTransition} className="hidden sm:block">
-            <Button variant="ghost" className={`text-white/70 hover:bg-white/10 hover:text-white rounded-full font-medium ${scrolled ? 'px-3 h-8 text-xs' : 'px-5 text-sm h-9'}`} onClick={onLoginClick}>
-              Login
-            </Button>
-          </motion.div>
-          <motion.div layout transition={layoutTransition} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button className={`bg-gradient-to-tr from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.3)] rounded-full text-sm font-semibold ${scrolled ? 'px-4 h-8' : 'px-6 h-9'}`} onClick={onRegisterClick}>
-              Join
-            </Button>
-          </motion.div>
+          {isAuthLoading ? (
+            <motion.div layout transition={layoutTransition}>
+              <div className={`rounded-full bg-white/10 animate-pulse ${scrolled ? 'h-8 w-8' : 'h-10 w-10'}`} />
+            </motion.div>
+          ) : user ? (
+            <>
+              <motion.div layout transition={layoutTransition} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  title="Go to Dashboard"
+                  className={`flex items-center justify-center rounded-full bg-white/10 text-white font-semibold transition-colors hover:bg-white/20 border border-white/20 overflow-hidden ${scrolled ? 'h-8 w-8 text-xs' : 'h-10 w-10 text-sm'}`}
+                >
+                  {user.profilePhoto ? (
+                    <img src={resolvePublicAssetUrl(user.profilePhoto)} alt={user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    user.initials || user.name?.slice(0, 2).toUpperCase() || 'U'
+                  )}
+                </button>
+              </motion.div>
+              <motion.div layout transition={layoutTransition}>
+                <button
+                  onClick={handleLogout}
+                  className={`flex items-center justify-center rounded-full bg-red-500/10 text-red-500 font-semibold transition-colors hover:bg-red-500/20 hover:text-red-400 border border-red-500/20 ${scrolled ? 'px-3 h-8 text-xs' : 'px-4 h-10 text-sm'}`}
+                >
+                  Logout
+                </button>
+              </motion.div>
+            </>
+          ) : (
+            <>
+              <motion.div layout transition={layoutTransition} className="hidden sm:block">
+                <Button variant="ghost" className={`text-white/70 hover:bg-white/10 hover:text-white rounded-full font-medium ${scrolled ? 'px-3 h-8 text-xs' : 'px-5 text-sm h-9'}`} onClick={onLoginClick}>
+                  Login
+                </Button>
+              </motion.div>
+              <motion.div layout transition={layoutTransition} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button className={`bg-gradient-to-tr from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border border-cyan-400/30 shadow-[0_0_15px_rgba(34,211,238,0.3)] rounded-full text-sm font-semibold ${scrolled ? 'px-4 h-8' : 'px-6 h-9'}`} onClick={onRegisterClick}>
+                  Join
+                </Button>
+              </motion.div>
+            </>
+          )}
         </motion.div>
 
       </motion.nav>

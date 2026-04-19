@@ -144,9 +144,8 @@ export function AuthenticatedLayout() {
       clearSession();
       setAccessToken(null);
     }
-    setSessionUser(null);
-    navigate('/', { replace: true });
-  }, [navigate]);
+    window.location.href = '/';
+  }, []);
 
   if (!authReady || !user) {
     return <PageLoader />;

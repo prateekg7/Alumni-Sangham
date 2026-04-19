@@ -50,7 +50,7 @@ export function Login({ onBack }) {
       if (data?.accessToken) {
         setAccessToken(data.accessToken);
       }
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       const msg = err?.message || 'Login failed';
       setError(msg);
