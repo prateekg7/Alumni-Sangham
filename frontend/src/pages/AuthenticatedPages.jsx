@@ -1900,11 +1900,11 @@ function FilterSection({ title, expanded, onToggle, children }) {
 /* ── Referral Request Popup Modal ── */
 function ReferralRequestModal({ profile: targetProfile, onClose }) {
   const [driveLink, setDriveLink] = React.useState('');
-  const [note, setNote] = React.useState(
-    targetProfile
-      ? `Hi ${targetProfile.name}, I am interested in ${targetProfile.title || targetProfile.role || 'a role'} at ${targetProfile.company || 'your company'}. I would really value your consideration for a referral.`
-      : ''
-  );
+  const suggestedNote = targetProfile
+    ? `Hi ${targetProfile.name}, I am interested in ${targetProfile.title || targetProfile.role || 'a role'} at ${targetProfile.company || 'your company'}. I would really value your consideration for a referral.`
+    : "";
+
+  const [note, setNote] = React.useState("");
   const [sending, setSending] = React.useState(false);
   const [sent, setSent] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -1954,7 +1954,7 @@ function ReferralRequestModal({ profile: targetProfile, onClose }) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-[18px] border border-white/12 bg-[#111318] shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+        className="relative w-full max-w-lg overflow-hidden rounded-[18px] bg-[#111318] shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -2006,19 +2006,16 @@ function ReferralRequestModal({ profile: targetProfile, onClose }) {
                 <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
                   Resume / Portfolio Drive Link
                 </label>
-                <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-white/12 bg-[#0d0f12] px-3 py-0.5">
+                <div className="mt-2 flex items-center gap-2 rounded-[10px] border border-white/5 bg-[#000000] px-3 py-0.5 focus-within:border-white/25">
                   <Link2 className="h-4 w-4 shrink-0 text-white/35" />
                   <input
                     type="url"
                     value={driveLink}
                     onChange={(e) => setDriveLink(e.target.value)}
                     placeholder="https://drive.google.com/file/your-resume"
-                    className="flex-1 bg-transparent py-2.5 text-sm text-white placeholder:text-white/25 outline-none"
+                    className="flex-1 bg-transparent py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-white/25"
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-white/35">
-                  Optional but strongly recommended — share a Google Drive or Dropbox link to your resume.
-                </p>
               </div>
 
               {/* Referral note */}
@@ -2030,21 +2027,12 @@ function ReferralRequestModal({ profile: targetProfile, onClose }) {
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={5}
-                  placeholder="Write a short, specific note explaining why you fit the role and why you are reaching out..."
-                  className="mt-2 w-full resize-none rounded-[10px] border border-white/12 bg-[#0d0f12] px-4 py-3 text-sm leading-7 text-white outline-none transition placeholder:text-white/25 focus:border-white/25"
+                  placeholder={suggestedNote}
+                  className="mt-2 w-full resize-none rounded-[10px] border border-white/5 bg-[#000000] px-4 py-3 text-sm leading-5 text-white outline-none transition placeholder:text-white/25 focus:border-white/25"
                 />
               </div>
 
-              {/* Attached automatically note */}
-              <div className="rounded-[10px] border border-white/8 bg-[#0d0f12] px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-white/35" />
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/35">Profile attached automatically</span>
-                </div>
-                <p className="mt-1.5 text-xs leading-5 text-white/42">
-                  Alumni can view your full public profile and documents directly from this request.
-                </p>
-              </div>
+
 
               {error ? (
                 <div className="rounded-[8px] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
