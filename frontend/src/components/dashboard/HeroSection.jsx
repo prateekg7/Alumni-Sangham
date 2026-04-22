@@ -13,20 +13,31 @@ export default function HeroSection({ user, stats = [] }) {
   const greeting = greetingForHour(new Date().getHours());
 
   return (
-    <div className="hero-banner relative min-h-[640px] rounded-br-3xl rounded-bl-3xl overflow-hidden flex flex-col justify-end p-10">
-      <div className="absolute inset-0 bg-black/30" />
-      <div className="relative z-10 w-full">
-        <h1 className="text-6xl font-semibold text-white mb-12 tracking-tight">
-          {greeting}, {firstName}
+    <div className="relative min-h-[440px] overflow-hidden flex flex-col justify-end items-start p-8 md:p-12">
+      {/* Background image */}
+      <img
+        src="/hero_graduation.png"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-center"
+      />
+      {/* Gradual black fade to blend into the dashboard background — darkened further for a dramatic look */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 via-50% to-black" />
+
+      <div className="relative z-10 w-full max-w-4xl">
+        {/* Greeting */}
+        <h1 className="text-4xl font-bold text-white md:text-5xl lg:text-6xl mb-6">
+          {greeting}, <span className="font-extrabold">{firstName}</span>
         </h1>
-        <div className="flex flex-wrap gap-12 text-white/90">
+
+        {/* Stats bar — stacked below the greeting at the bottom left */}
+        <div className="flex flex-wrap items-center gap-10 border-t border-white/20 pt-6">
           {stats.map((item, index) => (
             <div
               key={item.label}
-              className={index === 0 ? 'flex flex-col' : 'flex flex-col border-l border-white/20 pl-12'}
+              className="flex flex-col items-start min-w-[80px]"
             >
-              <span className="text-xs font-light uppercase tracking-widest opacity-60 mb-1">{item.label}</span>
-              <span className="text-2xl font-bold">{item.value}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50 mb-1.5">{item.label}</span>
+              <span className="text-2xl font-black text-white">{item.value}</span>
             </div>
           ))}
         </div>

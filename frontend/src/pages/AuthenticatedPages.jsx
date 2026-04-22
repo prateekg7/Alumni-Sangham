@@ -32,6 +32,8 @@ import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { Button } from '@/components/ui/button';
 import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input';
 import { cn } from '@/lib/utils';
+import { PRE_CURATED_COMPANIES } from '@/lib/companies';
+import { DEPARTMENTS } from '@/lib/departments';
 import {
   createDiscussionPost,
   createReferralRequest,
@@ -1879,7 +1881,7 @@ function DirectoryCheckbox({ checked, onChange, label }) {
   );
 }
 
-function FilterSection({ title, expanded, onToggle, children }) {
+function FilterSection({ title, expanded, onToggle, searchValue, onSearchChange, children }) {
   return (
     <div className="mb-5">
       <button
@@ -1892,7 +1894,23 @@ function FilterSection({ title, expanded, onToggle, children }) {
           style={{ transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
         />
       </button>
-      {expanded ? <div className="space-y-3">{children}</div> : null}
+      {expanded ? (
+        <div>
+          {onSearchChange && (
+            <div className="directory-filter-search-wrap">
+              <Search className="h-3.5 w-3.5" />
+              <input
+                type="text"
+                className="directory-filter-search"
+                placeholder={`Search ${title.toLowerCase()}…`}
+                value={searchValue || ''}
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+            </div>
+          )}
+          <div className="directory-filter-options space-y-3">{children}</div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -2066,6 +2084,96 @@ function ReferralRequestModal({ profile: targetProfile, onClose }) {
   );
 }
 
+const BATCH_OPTIONS = ['2025', '2024', '2023', '2022', '2021'];
+
+const INDUSTRY_OPTIONS = [
+  'Accounting & Auditing',
+  'Advertising & Marketing',
+  'Aerospace & Defense',
+  'Agriculture & Agribusiness',
+  'Architecture & Planning',
+  'Automotive',
+  'Banking & Financial Services',
+  'Biotechnology',
+  'Chemicals',
+  'Civil Engineering & Construction',
+  'Computer Hardware',
+  'Consulting & Strategy',
+  'Consumer Electronics',
+  'Consumer Goods & FMCG',
+  'Cybersecurity',
+  'Data Analytics & Business Intelligence',
+  'E-Commerce',
+  'Education & EdTech',
+  'Electrical & Electronics',
+  'Energy & Utilities',
+  'Entertainment & Media',
+  'Environmental Services',
+  'Fashion & Apparel',
+  'Food & Beverage',
+  'Gaming',
+  'Government & Public Sector',
+  'Healthcare & Hospitals',
+  'Hospitality & Tourism',
+  'Human Resources & Staffing',
+  'Information Technology & Services',
+  'Insurance',
+  'Internet of Things (IoT)',
+  'Investment Banking & Venture Capital',
+  'Legal Services',
+  'Logistics & Supply Chain',
+  'Machine Learning & AI',
+  'Manufacturing',
+  'Market Research',
+  'Mechanical & Industrial Engineering',
+  'Mining & Metals',
+  'Non-Profit & NGO',
+  'Oil, Gas & Petroleum',
+  'Pharmaceuticals',
+  'Real Estate',
+  'Renewable Energy',
+  'Research & Development',
+  'Retail',
+  'Robotics & Automation',
+  'Semiconductors & VLSI',
+  'Software Development',
+  'Sports & Fitness',
+  'Telecommunications',
+  'Textiles',
+  'Transportation & Mobility',
+];
+
+const INDIAN_STATES = [
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+];
+
 export function DirectoryPage() {
   const [profiles, setProfiles] = React.useState([]);
 
@@ -2082,6 +2190,13 @@ export function DirectoryPage() {
   const [locationExpanded, setLocationExpanded] = React.useState(true);
   const [industryExpanded, setIndustryExpanded] = React.useState(false);
   const [companyExpanded, setCompanyExpanded] = React.useState(false);
+
+  // Filter search states
+  const [batchSearch, setBatchSearch] = React.useState('');
+  const [deptSearch, setDeptSearch] = React.useState('');
+  const [locationSearch, setLocationSearch] = React.useState('');
+  const [industrySearch, setIndustrySearch] = React.useState('');
+  const [companySearch, setCompanySearch] = React.useState('');
 
   const [query, setQuery] = React.useState('');
 
@@ -2107,42 +2222,31 @@ export function DirectoryPage() {
     };
   }, []);
 
-  // Dynamic filter options
-  const batchOptions = React.useMemo(() => {
-    const set = new Set();
-    profiles.forEach((p) => {
-      const year = p.batch || p.graduationYear || p.expectedGradYear;
-      if (year) set.add(String(year));
-    });
-    return [...set].sort((a, b) => b.localeCompare(a));
-  }, [profiles]);
+  // Filter options with in-filter search
+  const filteredBatchOptions = React.useMemo(() => {
+    const q = batchSearch.trim().toLowerCase();
+    return q ? BATCH_OPTIONS.filter((b) => b.includes(q)) : BATCH_OPTIONS;
+  }, [batchSearch]);
 
-  const deptOptions = React.useMemo(() => {
-    const set = new Set();
-    profiles.forEach((p) => { if (p.department) set.add(p.department); });
-    return [...set].sort();
-  }, [profiles]);
+  const filteredDeptOptions = React.useMemo(() => {
+    const q = deptSearch.trim().toLowerCase();
+    return q ? DEPARTMENTS.filter((d) => d.label.toLowerCase().includes(q) || d.value.toLowerCase().includes(q)) : DEPARTMENTS;
+  }, [deptSearch]);
 
-  const locationOptions = React.useMemo(() => {
-    const set = new Set();
-    profiles.forEach((p) => {
-      if (p.region) set.add(p.region);
-      if (p.location) set.add(p.location);
-    });
-    return [...set].sort();
-  }, [profiles]);
+  const filteredLocationOptions = React.useMemo(() => {
+    const q = locationSearch.trim().toLowerCase();
+    return q ? INDIAN_STATES.filter((s) => s.toLowerCase().includes(q)) : INDIAN_STATES;
+  }, [locationSearch]);
 
-  const industryOptions = React.useMemo(() => {
-    const set = new Set();
-    profiles.forEach((p) => { if (p.domain) set.add(p.domain); });
-    return [...set].sort();
-  }, [profiles]);
+  const filteredIndustryOptions = React.useMemo(() => {
+    const q = industrySearch.trim().toLowerCase();
+    return q ? INDUSTRY_OPTIONS.filter((ind) => ind.toLowerCase().includes(q)) : INDUSTRY_OPTIONS;
+  }, [industrySearch]);
 
-  const companyOptions = React.useMemo(() => {
-    const set = new Set();
-    profiles.forEach((p) => { if (p.company) set.add(p.company); });
-    return [...set].sort();
-  }, [profiles]);
+  const filteredCompanyOptions = React.useMemo(() => {
+    const q = companySearch.trim().toLowerCase();
+    return q ? PRE_CURATED_COMPANIES.filter((c) => c.toLowerCase().includes(q)) : PRE_CURATED_COMPANIES;
+  }, [companySearch]);
 
   const toggle = (setter) => (val) =>
     setter((prev) => prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]);
@@ -2205,6 +2309,11 @@ export function DirectoryPage() {
     setSelectedLocations([]);
     setSelectedIndustries([]);
     setSelectedCompanies([]);
+    setBatchSearch('');
+    setDeptSearch('');
+    setLocationSearch('');
+    setIndustrySearch('');
+    setCompanySearch('');
   };
 
   return (
@@ -2231,7 +2340,7 @@ export function DirectoryPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3 text-sm text-white/72">
               <span className="rounded-full border border-white/10 px-3 py-1">{profiles.length} alumni</span>
-              <span className="rounded-full border border-white/10 px-3 py-1">{industryOptions.length} industries</span>
+              <span className="rounded-full border border-white/10 px-3 py-1">{INDUSTRY_OPTIONS.length} industries</span>
               <span className="rounded-full border border-white/10 px-3 py-1">{filteredProfiles.length} matches</span>
             </div>
           </div>
@@ -2268,56 +2377,80 @@ export function DirectoryPage() {
             </div>
 
             {/* Batch */}
-            {batchOptions.length > 0 && (
-              <>
-                <FilterSection title="Batch" expanded={batchExpanded} onToggle={() => setBatchExpanded(!batchExpanded)}>
-                  {batchOptions.map((b) => (
-                    <DirectoryCheckbox
-                      key={b}
-                      label={b}
-                      checked={selectedBatches.includes(b)}
-                      onChange={() => toggle(setSelectedBatches)(b)}
-                    />
-                  ))}
-                </FilterSection>
-                <div className="my-4 border-t border-white/10" />
-              </>
-            )}
-
-            {/* Department */}
-            {deptOptions.length > 0 && (
-              <>
-                <FilterSection title="Department" expanded={deptExpanded} onToggle={() => setDeptExpanded(!deptExpanded)}>
-                  {deptOptions.map((d) => (
-                    <DirectoryCheckbox
-                      key={d}
-                      label={d}
-                      checked={selectedDepts.includes(d)}
-                      onChange={() => toggle(setSelectedDepts)(d)}
-                    />
-                  ))}
-                </FilterSection>
-                <div className="my-4 border-t border-white/10" />
-              </>
-            )}
-
-            {/* Location */}
-            <FilterSection title="Location" expanded={locationExpanded} onToggle={() => setLocationExpanded(!locationExpanded)}>
-              {locationOptions.map((loc) => (
+            <FilterSection
+              title="Batch"
+              expanded={batchExpanded}
+              onToggle={() => setBatchExpanded(!batchExpanded)}
+              searchValue={batchSearch}
+              onSearchChange={setBatchSearch}
+            >
+              {filteredBatchOptions.map((b) => (
                 <DirectoryCheckbox
-                  key={loc}
-                  label={loc}
-                  checked={selectedLocations.includes(loc)}
-                  onChange={() => toggle(setSelectedLocations)(loc)}
+                  key={b}
+                  label={b}
+                  checked={selectedBatches.includes(b)}
+                  onChange={() => toggle(setSelectedBatches)(b)}
                 />
               ))}
+              {filteredBatchOptions.length === 0 && (
+                <p className="text-xs text-white/30 italic">No batches match "{batchSearch}"</p>
+              )}
             </FilterSection>
+            <div className="my-4 border-t border-white/10" />
 
+            {/* Department */}
+            <FilterSection
+              title="Department"
+              expanded={deptExpanded}
+              onToggle={() => setDeptExpanded(!deptExpanded)}
+              searchValue={deptSearch}
+              onSearchChange={setDeptSearch}
+            >
+              {filteredDeptOptions.map((d) => (
+                <DirectoryCheckbox
+                  key={d.value}
+                  label={d.label}
+                  checked={selectedDepts.includes(d.value)}
+                  onChange={() => toggle(setSelectedDepts)(d.value)}
+                />
+              ))}
+              {filteredDeptOptions.length === 0 && (
+                <p className="text-xs text-white/30 italic">No departments match "{deptSearch}"</p>
+              )}
+            </FilterSection>
+            <div className="my-4 border-t border-white/10" />
+
+            {/* Location (Indian States) */}
+            <FilterSection
+              title="Location"
+              expanded={locationExpanded}
+              onToggle={() => setLocationExpanded(!locationExpanded)}
+              searchValue={locationSearch}
+              onSearchChange={setLocationSearch}
+            >
+              {filteredLocationOptions.map((state) => (
+                <DirectoryCheckbox
+                  key={state}
+                  label={state}
+                  checked={selectedLocations.includes(state)}
+                  onChange={() => toggle(setSelectedLocations)(state)}
+                />
+              ))}
+              {filteredLocationOptions.length === 0 && (
+                <p className="text-xs text-white/30 italic">No states match "{locationSearch}"</p>
+              )}
+            </FilterSection>
             <div className="my-4 border-t border-white/10" />
 
             {/* Industry */}
-            <FilterSection title="Industry" expanded={industryExpanded} onToggle={() => setIndustryExpanded(!industryExpanded)}>
-              {industryOptions.map((ind) => (
+            <FilterSection
+              title="Industry"
+              expanded={industryExpanded}
+              onToggle={() => setIndustryExpanded(!industryExpanded)}
+              searchValue={industrySearch}
+              onSearchChange={setIndustrySearch}
+            >
+              {filteredIndustryOptions.map((ind) => (
                 <DirectoryCheckbox
                   key={ind}
                   label={ind}
@@ -2325,13 +2458,21 @@ export function DirectoryPage() {
                   onChange={() => toggle(setSelectedIndustries)(ind)}
                 />
               ))}
+              {filteredIndustryOptions.length === 0 && (
+                <p className="text-xs text-white/30 italic">No industries match "{industrySearch}"</p>
+              )}
             </FilterSection>
-
             <div className="my-4 border-t border-white/10" />
 
             {/* Company */}
-            <FilterSection title="Company" expanded={companyExpanded} onToggle={() => setCompanyExpanded(!companyExpanded)}>
-              {companyOptions.slice(0, 20).map((c) => (
+            <FilterSection
+              title="Company"
+              expanded={companyExpanded}
+              onToggle={() => setCompanyExpanded(!companyExpanded)}
+              searchValue={companySearch}
+              onSearchChange={setCompanySearch}
+            >
+              {filteredCompanyOptions.map((c) => (
                 <DirectoryCheckbox
                   key={c}
                   label={c}
@@ -2339,6 +2480,9 @@ export function DirectoryPage() {
                   onChange={() => toggle(setSelectedCompanies)(c)}
                 />
               ))}
+              {filteredCompanyOptions.length === 0 && (
+                <p className="text-xs text-white/30 italic">No companies match "{companySearch}"</p>
+              )}
             </FilterSection>
 
             {activeFilterCount > 0 && (

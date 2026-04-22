@@ -29,32 +29,6 @@ function initialsFromName(name) {
     .toUpperCase();
 }
 
-const bentoImages = [
-  // Community card – aerial city lights at night, no faces
-  'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1200&q=80',
-  // Mentorship card – grand library hall interior, no faces
-  'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1200&q=80',
-  // Full-width card – dramatic empty concert hall / grand auditorium, no faces
-  'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1800&q=80',
-];
-
-function BentoCard({ children, className = '', delay = '0s', image, imageAlt = '' }) {
-  return (
-    <div
-      className={`dashboard-bento-card ${className}`}
-      style={{ '--glow-delay': delay }}
-    >
-      {image ? (
-        <>
-          <img src={image} alt={imageAlt} className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-black/18" />
-        </>
-      ) : null}
-      <div className="relative z-10 h-full">{children}</div>
-    </div>
-  );
-}
-
 function DashboardContent({
   user,
   discoverPosts,
@@ -66,139 +40,157 @@ function DashboardContent({
 }) {
   const [draft, setDraft] = useState('');
   const featuredPost = discoverPosts[0];
-  const topStory = newsItems[0];
 
   return (
-    <section className="rounded-[18px] bg-[#050505] p-4 md:p-5 space-y-4">
+    <section className="flex h-full flex-col space-y-4">
 
-      {/* ── Section 1: Better connections, now closer ── */}
-      <BentoCard className="min-h-[320px]" delay="0s">
-        <div className="flex h-full flex-col justify-between p-6 text-[#1c1412] md:p-8">
+      {/* ── Card 1: Network Pulse — warm beige/cream ── */}
+      <div className="db-card db-card--beige p-6 md:p-8">
+        <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#7a5c3a]/60">
+          Network pulse
+        </div>
+        <h2 className="mt-4 text-2xl font-bold leading-snug tracking-tight text-[#2c1a0e] md:text-3xl">
+          Better connections, now closer.
+        </h2>
+        <p className="mt-3 max-w-lg text-sm leading-6 text-[#2c1a0e]/50">
+          Browse alumni, follow referral movement, and continue conversations from one live dashboard.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          {/* Count — left */}
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#1c1412] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[#f5eee8]">
-              <Sparkles className="h-3.5 w-3.5" />
-              Network pulse
-            </div>
-            <h2 className="mt-6 max-w-2xl text-4xl font-black leading-none tracking-normal md:text-6xl">
-              Better connections, now closer.
-            </h2>
-            <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#1c1412]/60">
-              Browse alumni, follow referral movement, and continue conversations from one live dashboard.
-            </p>
+            <span className="text-3xl font-black text-[#2c1a0e]">{directoryCount}</span>
+            <span className="ml-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#2c1a0e]/55">Alumni</span>
           </div>
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            {/* Alumni count — espresso */}
-            <div className="rounded-[8px] bg-[#1c1412] px-4 py-3 text-[#f5eee8]">
-              <div className="text-3xl font-black">{directoryCount}</div>
-              <div className="mt-1 text-xs uppercase tracking-[0.18em] text-[#f5eee8]/55">Alumni</div>
-            </div>
-            {/* Open directory — warm sage */}
+          {/* Buttons — right */}
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={onOpenDirectory}
-              className="rounded-[8px] bg-[#3b6b52] px-4 py-3 text-left text-[#f5eee8] transition hover:bg-[#2e5440]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#2c1a0e] px-4 py-2.5 text-sm font-semibold text-[#f0e2cc] transition hover:bg-[#3d2510]"
             >
-              <Users className="h-5 w-5" />
-              <div className="mt-3 text-sm font-bold">Open directory</div>
+              <Users className="h-4 w-4" />
+              Open directory
             </button>
-            {/* Read posts — amber gold */}
             <button
               type="button"
               onClick={onOpenFeed}
-              className="rounded-[8px] bg-[#c17f24] px-4 py-3 text-left text-[#f5eee8] transition hover:bg-[#a86c1a]"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#2c1a0e] px-4 py-2.5 text-sm font-semibold text-[#f0e2cc] transition hover:bg-[#3d2510]"
             >
-              <MessageCircle className="h-5 w-5" />
-              <div className="mt-3 text-sm font-bold">Read posts</div>
+              <MessageCircle className="h-4 w-4" />
+              Read posts
             </button>
           </div>
         </div>
-      </BentoCard>
-
-      {/* ── Section 2: Directory Overview (Community + Latest Signal) ── */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <BentoCard className="min-h-[200px]" delay="2s" image={bentoImages[0]} imageAlt="Alumni networking">
-          <div className="flex h-full items-end p-5">
-            <div className="rounded-[8px] bg-[#1c1412] px-4 py-3 text-[#f5eee8]">
-              <div className="text-xs uppercase tracking-[0.18em] text-[#f5eee8]/50">Community</div>
-              <div className="mt-1 text-xl font-black">People moving together</div>
-            </div>
-          </div>
-        </BentoCard>
-
-        {/* Latest signal — amber gold accent */}
-        <BentoCard className="min-h-[200px]" delay="4s">
-          <div className="flex h-full flex-col justify-between p-6 text-[#1c1412]">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#c17f24]">Latest signal</div>
-              <h3 className="mt-5 text-3xl font-black leading-none tracking-normal">
-                {topStory?.title || 'Fresh alumni updates are loading'}
-              </h3>
-            </div>
-            <button
-              type="button"
-              onClick={onOpenDirectory}
-              className="mt-6 inline-flex w-fit items-center gap-2 rounded-[8px] bg-[#c17f24] px-4 py-2 text-sm font-bold text-[#f5eee8] transition hover:bg-[#a86c1a]"
-            >
-              View all
-              <ArrowUpRight className="h-4 w-4" />
-            </button>
-          </div>
-        </BentoCard>
       </div>
 
-      {/* ── Section 3: Blogs (Start a Post + Mentorship) ── */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <BentoCard className="min-h-[210px]" delay="6s">
-          <div className="flex h-full flex-col justify-between p-6 text-[#1c1412]">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#1c1412]/45">Start a post</div>
-              <textarea
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                rows={4}
-                placeholder="Ask for guidance, share an opening, or start a campus thread..."
-                className="mt-5 w-full resize-none rounded-[8px] border border-[#1c1412]/10 bg-white/65 px-4 py-3 text-sm text-[#1c1412] outline-none placeholder:text-[#1c1412]/35 focus:border-[#c17f24]/40"
-              />
+      {/* ── Card 2: Directory — steel/slate blue ── */}
+      <div className="db-card db-card--steel p-6 md:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">
+              Directory
             </div>
-            {/* Continue in Blogs — warm sage */}
-            <button
-              type="button"
-              onClick={() => onCreatePost(draft)}
-              className="mt-5 inline-flex w-fit items-center gap-2 rounded-[8px] bg-[#3b6b52] px-4 py-2 text-sm font-bold text-[#f5eee8] transition hover:bg-[#2e5440]"
-            >
-              Continue in Blogs
-              <Send className="h-4 w-4" />
-            </button>
-          </div>
-        </BentoCard>
-
-        <BentoCard className="min-h-[210px]" delay="8s" image={bentoImages[1]} imageAlt="Library interior">
-          <div className="flex h-full items-start justify-end p-5">
-            <div className="rounded-[8px] bg-[#f5eee8] px-4 py-3 text-[#1c1412]">
-              <div className="text-xs uppercase tracking-[0.18em] text-[#3b6b52]">Mentorship</div>
-              <div className="mt-1 text-xl font-black">Talk to people who did it</div>
-            </div>
-          </div>
-        </BentoCard>
-      </div>
-
-      {/* ── Section 4: Ask for Referral (full-width community post card) ── */}
-      <BentoCard className="min-h-[260px]" delay="10s" image={bentoImages[2]} imageAlt="Grand auditorium">
-        <div className="flex h-full items-end p-6">
-          <div className="max-w-xl rounded-[8px] bg-[#f5eee8] p-5 text-[#1c1412]">
-            <div className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-[#1c1412]/40">
-              <ThumbsUp className="h-4 w-4" />
-              Community post
-            </div>
-            <h3 className="mt-3 text-2xl font-black tracking-normal">
-              {featuredPost?.title || `${user?.name || 'Member'}, your feed is warming up.`}
+            <h3 className="mt-4 text-xl font-bold leading-snug text-white md:text-2xl">
+              Discover your network
             </h3>
-            <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#1c1412]/58">
-              {featuredPost?.excerpt || 'New conversations from alumni and students will appear here as the network grows.'}
+            <p className="mt-3 max-w-md text-sm leading-6 text-white/55">
+              Search alumni by batch, department, company, or location. Find the right people to connect with.
             </p>
           </div>
+          <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10">
+            <Users className="h-6 w-6 text-white/70" />
+          </div>
         </div>
-      </BentoCard>
+        <div className="mt-6 flex items-center gap-4">
+          <div>
+            <span className="text-2xl font-bold text-white">{directoryCount}</span>
+            <span className="ml-2 text-xs text-white/45">profiles</span>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenDirectory}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/22"
+          >
+            Browse directory
+            <ArrowUpRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Card 3: Blogs — light ice blue ── */}
+      <div className="db-card db-card--ice p-6 md:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#1e3a4f]/50">
+              Blogs
+            </div>
+            <h3 className="mt-4 text-xl font-bold leading-snug text-[#1e3a4f] md:text-2xl">
+              {featuredPost?.title || 'Share insights & stories'}
+            </h3>
+            <p className="mt-3 max-w-md text-sm leading-6 text-[#1e3a4f]/55">
+              {featuredPost?.excerpt || 'Ask for guidance, share an opening, or start a campus thread.'}
+            </p>
+          </div>
+          <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#1e3a4f]/10">
+            <MessageCircle className="h-6 w-6 text-[#1e3a4f]/60" />
+          </div>
+        </div>
+        <textarea
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          rows={3}
+          placeholder="Ask for guidance, share an opening, or start a campus thread..."
+          className="mt-5 w-full resize-none rounded-xl border border-[#1e3a4f]/12 bg-[#1e3a4f]/8 px-4 py-3 text-sm text-[#1e3a4f] outline-none placeholder:text-[#1e3a4f]/35 focus:border-[#1e3a4f]/25 transition"
+        />
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onCreatePost(draft)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1e3a4f] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#162e3e]"
+          >
+            Continue in Blogs
+            <Send className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onOpenFeed}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1e3a4f]/10 px-5 py-2.5 text-sm font-semibold text-[#1e3a4f]/70 transition hover:bg-[#1e3a4f]/18"
+          >
+            View all posts
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* ── Card 4: Referrals — steel blue ── */}
+      <div className="db-card db-card--steel flex flex-1 flex-col p-6 md:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+              Referrals
+            </div>
+            <h3 className="mt-4 text-xl font-bold leading-snug text-white md:text-2xl">
+              Get referred by alumni
+            </h3>
+            <p className="mt-3 max-w-md text-sm leading-6 text-white/60">
+              Connect with alumni at top companies and request referrals. Keep your profile complete to maximize your chances.
+            </p>
+          </div>
+          <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/12">
+            <ThumbsUp className="h-6 w-6 text-white/70" />
+          </div>
+        </div>
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={onOpenDirectory}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/22"
+          >
+            Find alumni to connect
+            <ArrowUpRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
 
     </section>
   );
@@ -289,12 +281,12 @@ export function DashboardPage() {
   );
 
   return (
-    <div className="space-y-8 bg-black">
-      <div className="-m-4 mb-6 md:-m-6 md:mb-6">
+    <div className="min-h-screen bg-black">
+      <div className="-m-4 md:-m-6">
         <HeroSection user={user} stats={heroStats} />
       </div>
 
-      <div className="mx-auto flex max-w-[1600px] flex-col gap-6 lg:items-start lg:flex-row">
+      <div className="mx-auto mt-6 flex max-w-[1600px] flex-col gap-6 lg:flex-row lg:items-stretch">
         {/* Left column – original cards organized into sections */}
         <div className="min-w-0 flex-1">
           <DashboardContent
@@ -309,7 +301,7 @@ export function DashboardPage() {
         </div>
 
         {/* Right column – referral requests, top-aligned with first card */}
-        <div className="w-full flex-shrink-0 pt-4 md:pt-5 lg:sticky lg:top-6 lg:w-[340px] xl:w-[380px]">
+        <div className="w-full flex-shrink-0 lg:sticky lg:top-6 lg:h-[calc(100vh-24px)] lg:w-[340px] xl:w-[380px]">
           <RightPanel
             user={user}
             profile={profile}
