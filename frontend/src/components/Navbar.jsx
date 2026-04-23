@@ -62,23 +62,34 @@ export function Navbar({ onLoginClick, onRegisterClick, className }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (location.pathname !== '/') {
-      return;
-    }
-    const key = (location.hash || '').replace(/^#/, '');
-    const next = HASH_TO_TAB[key];
-    if (next) {
-      setActiveTab(next);
-    }
-  }, [location.pathname, location.hash]);
-
   const navItems = [
     { name: 'Home', hash: 'home', icon: Home },
     { name: 'About', hash: 'about', icon: User },
     { name: 'Features', hash: 'features', icon: Briefcase },
     { name: 'Hall of Fame', hash: 'hall-of-fame', icon: FileText },
   ];
+
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      return;
+    }
+    const handleScrollSpy = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 3;
+      let currentSection = navItems[0].name;
+
+      for (const item of navItems) {
+        const section = document.getElementById(item.hash);
+        if (section && section.offsetTop <= scrollPosition) {
+          currentSection = item.name;
+        }
+      }
+      setActiveTab(currentSection);
+    };
+
+    window.addEventListener('scroll', handleScrollSpy);
+    setTimeout(handleScrollSpy, 100); // trigger after layout paint
+    return () => window.removeEventListener('scroll', handleScrollSpy);
+  }, [location.pathname]);
 
   const scrollToSection = (hash) => {
     const el = document.getElementById(hash);

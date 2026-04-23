@@ -10,6 +10,7 @@ import {
   Mail,
   MapPin,
   MessageSquare,
+  Minus,
   Pencil,
   Plus,
   Save,
@@ -435,7 +436,6 @@ export function ProfilePage() {
   const isAlumniProfile = profile?.role === 'Alumni';
   const canRequestReferral =
     !isOwnProfile &&
-    viewerRole === 'student' &&
     isAlumniProfile &&
     Boolean(profile?.referralTarget?.openings?.length) &&
     Boolean(profile?.alumniUserId);
@@ -745,7 +745,10 @@ export function ProfilePage() {
                     style={{ background: C.cardSub, borderColor: C.cardBorder }}
                   >
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt={profile.name} className="h-full w-full object-cover" />
+                      <>
+                        <img src={avatarUrl} alt={profile.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling.style.display = 'flex'; }} />
+                        <span className="items-center justify-center h-full w-full hidden text-2xl font-semibold" style={{ color: C.text }}>{profile.initials}</span>
+                      </>
                     ) : (
                       <span className="text-2xl font-semibold" style={{ color: C.text }}>{profile.initials}</span>
                     )}
@@ -755,10 +758,29 @@ export function ProfilePage() {
                       type="button"
                       onClick={() => photoInputRef.current?.click()}
                       className="absolute -bottom-1.5 -right-1.5 flex h-8 w-8 items-center justify-center rounded-full border-2 shadow-md transition hover:scale-110"
-                      style={{ background: C.accent, borderColor: C.pageBg, color: '#1a1a1a' }}
+                      style={{ background: C.accent, borderColor: C.pageBg, color: '#1a1a1a', zIndex: 10 }}
                       title="Upload profile photo"
                     >
                       <Camera className="h-3.5 w-3.5" />
+                    </button>
+                  ) : null}
+                  {isOwnProfile && editing && avatarUrl ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await patchMyProfile({ photoUrl: null });
+                          await loadProfile();
+                          pushToast('Profile photo removed!');
+                        } catch (err) {
+                          pushToast(err.message || 'Could not remove photo', 'error');
+                        }
+                      }}
+                      className="absolute -top-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full shadow-md transition hover:scale-110 z-20"
+                      style={{ background: '#ef4444', color: '#ffffff', border: `2px solid ${C.pageBg}` }}
+                      title="Remove profile photo"
+                    >
+                      <Minus className="h-4 w-4 stroke-[3]" />
                     </button>
                   ) : null}
                 </div>

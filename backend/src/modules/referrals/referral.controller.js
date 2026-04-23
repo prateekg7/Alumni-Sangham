@@ -31,7 +31,7 @@ export const createReferral = asyncHandler(async (req, res) => {
   if (!studentUser) {
     throw new ApiError(404, "User not found");
   }
-  const data = await referralService.createStudentReferral(studentUser, req.body);
+  const data = await referralService.createReferralRequest(studentUser, req.body);
   res.status(201).json(new ApiResponse(201, data, "Referral request created"));
 });
 

@@ -2084,7 +2084,11 @@ function ReferralRequestModal({ profile: targetProfile, onClose }) {
   );
 }
 
-const BATCH_OPTIONS = ['2025', '2024', '2023', '2022', '2021'];
+const BATCH_OPTIONS = [];
+const endYearForBatch = new Date().getFullYear() - 5;
+for (let y = endYearForBatch; y >= 2008; y--) {
+  BATCH_OPTIONS.push(String(y));
+}
 
 const INDUSTRY_OPTIONS = [
   'Accounting & Auditing',
@@ -2528,9 +2532,12 @@ export function DirectoryPage() {
                   <div className="flex flex-col items-center px-5 pb-2 -mt-10 relative z-10">
                     <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-xl font-black text-black shadow-lg overflow-hidden">
                       {avatarSrc ? (
-                        <img src={avatarSrc} alt={profile.name} className="h-full w-full object-cover" />
+                        <>
+                          <img src={avatarSrc} alt={profile.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling.style.display = 'flex'; }} />
+                          <span className="items-center justify-center h-full w-full hidden">{initials}</span>
+                        </>
                       ) : (
-                        <span>{initials}</span>
+                        <span className="flex items-center justify-center h-full w-full">{initials}</span>
                       )}
                     </div>
 
@@ -2603,6 +2610,7 @@ export function DirectoryPage() {
 }
 
 export function BlogPage() {
+  const { user } = useOutletContext();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') === 'jobs' ? 'jobs' : 'posts';
@@ -2714,7 +2722,8 @@ export function BlogPage() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
-          <SectionCard title="Create post" subtitle="Write here or arrive from the dashboard composer. Publishing happens from this feed surface.">
+          {user?.role !== 'student' ? (
+            <SectionCard title="Create post" subtitle="Write here or arrive from the dashboard composer. Publishing happens from this feed surface.">
             <div className="flex gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#6C63FF]/15 text-sm font-semibold text-[#6C63FF]">
                 AC
@@ -2790,6 +2799,11 @@ export function BlogPage() {
               </div>
             </div>
           </SectionCard>
+          ) : (
+            <div className="rounded-md border border-[#2A2940] bg-[#0F0E17] p-4 text-sm text-[#9694A8]">
+              Posting is currently restricted to Alumni users. Students may read and follow ongoing discussions.
+            </div>
+          )}
 
           <SectionCard
             title="Sort"

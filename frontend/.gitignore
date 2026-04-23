@@ -30,22 +30,6 @@ dist-ssr
 .env.test.local
 .env.production.local
 
-# Media files / Documents and Personal User Info
-*.pdf
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.webp
-*.mp4
-*.mp3
-*.mov
-*.csv
-*.xlsx
-uploads/
-media/
-public/uploads/
-
 # Coverage and caches
 coverage/
 .nyc_output/

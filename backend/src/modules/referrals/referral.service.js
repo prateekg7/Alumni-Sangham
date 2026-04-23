@@ -85,11 +85,7 @@ export const getReferralById = async (id) => {
   return referral;
 };
 
-export const createStudentReferral = async (studentUser, body) => {
-  if (studentUser.role !== "student") {
-    throw new ApiError(403, "Only students can create referral requests");
-  }
-
+export const createReferralRequest = async (requesterUser, body) => {
   const { alumniUserId, coverNote, targetCompany, targetRole } = body ?? {};
   if (!alumniUserId || !coverNote?.trim()) {
     throw new ApiError(400, "alumniUserId and coverNote are required");
@@ -101,15 +97,15 @@ export const createStudentReferral = async (studentUser, body) => {
   }
 
   const alumniProfile = await Profile.findOne({ userId: alumniUser._id });
-  const studentProfile = await Profile.findOne({ userId: studentUser._id });
+  const requesterProfile = await Profile.findOne({ userId: requesterUser._id });
 
   const requesterYear =
-    studentUser.expectedGradYear ?? studentProfile?.currentYear ?? new Date().getFullYear();
+    requesterUser.expectedGradYear ?? requesterUser.gradYear ?? requesterProfile?.currentYear ?? new Date().getFullYear();
 
   const referral = await ReferralRequest.create({
-    requesterId: studentUser._id,
-    requesterName: `${studentUser.firstName} ${studentUser.lastName}`.trim(),
-    requesterDept: studentProfile?.department || studentUser.department || "—",
+    requesterId: requesterUser._id,
+    requesterName: `${requesterUser.firstName} ${requesterUser.lastName}`.trim(),
+    requesterDept: requesterProfile?.department || requesterUser.department || "—",
     requesterYear,
     alumniId: alumniUser._id,
     alumniName: `${alumniUser.firstName} ${alumniUser.lastName}`.trim(),

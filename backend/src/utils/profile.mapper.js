@@ -88,6 +88,8 @@ export function toDirectoryCard(profile, user) {
     avatarTone: profile.avatarTone || "from-[#8f7cff] to-[#4d82ff]",
     photoUrl: profile.photoUrl || null,
     avatarUrl: profile.photoUrl || null,
+    batch: user?.gradYear || user?.expectedGradYear || profile.batch || "",
+    department: profile.department || "",
   };
 }
 

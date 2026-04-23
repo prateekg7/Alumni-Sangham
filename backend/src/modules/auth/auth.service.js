@@ -64,7 +64,7 @@ async function createAndSendOtp(email, purpose) {
 
   // Send email (fail gracefully with clear message if mail envs are not configured)
   if (!env.mailConfigured) {
-    console.warn("⚠️  SMTP not configured — OTP for", normalizedEmail, "is:", otp);
+    console.warn("  SMTP not configured — OTP for", normalizedEmail, "is:", otp);
     return; // In dev, log OTP to console instead of sending email
   }
 
