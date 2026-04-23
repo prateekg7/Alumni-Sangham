@@ -9,10 +9,10 @@ export function initialsFromName(fullName = "") {
 
 function displayLocation(profile) {
   const city = profile.city?.trim();
+  const state = profile.state?.trim();
   const country = profile.country?.trim();
-  if (city && country) return `${city}, ${country}`;
-  if (city) return city;
-  if (country) return country;
+  const parts = [city, state, country].filter(Boolean);
+  if (parts.length > 0) return parts.join(", ");
   return "—";
 }
 
@@ -287,6 +287,7 @@ export function toFullProfile(profile, user, { isOwner = false, profileCompleteO
     referralTarget,
     resumeLink: profile.resumeLink || null,
     externalLinks: Array.isArray(profile.externalLinks) ? profile.externalLinks : [],
+    batchYear: profile.batchYear || null,
   };
 }
 

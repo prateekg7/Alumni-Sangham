@@ -48,6 +48,7 @@ export const updateMyProfile = async (userId, payload) => {
     "linkedinUrl",
     "portfolioUrl",
     "city",
+    "state",
     "country",
     "showEmail",
     "showInDirectory",
@@ -77,12 +78,21 @@ export const updateMyProfile = async (userId, payload) => {
     "yearsExperience",
     "resumeLink",
     "externalLinks",
+    "batchYear",
   ];
 
   const update = {};
   for (const key of allowed) {
     if (payload[key] !== undefined) {
       update[key] = payload[key];
+    }
+  }
+
+  if (update.batchYear !== undefined && update.batchYear !== null) {
+    const year = Number(update.batchYear);
+    const currentYear = new Date().getFullYear();
+    if (isNaN(year) || year < 2008 || year > currentYear + 5) {
+      throw new ApiError(400, `Batch year must be between 2008 and ${currentYear + 5}`);
     }
   }
 

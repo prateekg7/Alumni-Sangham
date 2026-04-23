@@ -302,6 +302,10 @@ export async function fetchReferralBoard() {
   return apiRequest('/api/referrals/board');
 }
 
+export async function fetchPendingReferralCount() {
+  return apiRequest('/api/referrals/pending-count');
+}
+
 export async function createReferralRequest(body) {
   return apiRequest('/api/referrals', {
     method: 'POST',

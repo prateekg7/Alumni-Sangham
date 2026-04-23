@@ -8,6 +8,7 @@ import LogOut from 'lucide-react/dist/esm/icons/log-out.js';
 import { Sidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { Home } from 'lucide-react';
+import { fetchPendingReferralCount } from '@/lib/api';
 
 const navLinks = [
   {
@@ -39,8 +40,21 @@ const navLinks = [
 export function SidePanel({ isDesktop, sidebarOpen, onClose, user, onLogout }) {
   const location = useLocation();
   const [hovered, setHovered] = React.useState(false);
+  const [pendingReferrals, setPendingReferrals] = React.useState(0);
   const expanded = hovered || (!isDesktop && sidebarOpen);
   const showLabels = expanded || !isDesktop;
+
+  React.useEffect(() => {
+    let cancelled = false;
+    fetchPendingReferralCount()
+      .then((data) => {
+        if (!cancelled && typeof data?.count === 'number') {
+          setPendingReferrals(data.count);
+        }
+      })
+      .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [location.pathname]);
 
   return (
     <Sidebar
@@ -83,11 +97,16 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user, onLogout }) {
               >
                 <div
                   className={cn(
-                    'flex-shrink-0 transition-colors',
+                    'relative flex-shrink-0 transition-colors',
                     active ? 'text-white' : 'text-white/60 group-hover:text-white',
                   )}
                 >
                   <Icon size={22} />
+                  {item.label === 'Referrals' && pendingReferrals > 0 && !expanded ? (
+                    <span className="absolute -top-1.5 -right-2 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white shadow">
+                      {pendingReferrals > 9 ? '9+' : pendingReferrals}
+                    </span>
+                  ) : null}
                 </div>
                 <span
                   className={cn(
@@ -97,6 +116,11 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user, onLogout }) {
                   )}
                 >
                   {item.label}
+                  {item.label === 'Referrals' && pendingReferrals > 0 && expanded ? (
+                    <span className="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                      {pendingReferrals > 9 ? '9+' : pendingReferrals}
+                    </span>
+                  ) : null}
                 </span>
               </Link>
             );

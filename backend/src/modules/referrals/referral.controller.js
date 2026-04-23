@@ -44,3 +44,8 @@ export const updateReferralById = asyncHandler(async (req, res) => {
   );
   res.status(200).json(new ApiResponse(200, data, "Referral updated"));
 });
+
+export const getPendingReferralCount = asyncHandler(async (req, res) => {
+  const count = await referralService.getPendingReferralCount(req.user.id, req.user.role);
+  res.status(200).json(new ApiResponse(200, { count }, "Pending referral count"));
+});

@@ -26,6 +26,8 @@ import {
 } from '../lib/api';
 import { CompanyAutocomplete } from '../components/ui/CompanyAutocomplete';
 import { DepartmentDropdown } from '../components/ui/DepartmentDropdown';
+import { StateDropdown } from '../components/ui/StateDropdown';
+import { IndustryDropdown } from '../components/ui/IndustryDropdown';
 import { DEPARTMENTS } from '../lib/departments';
 
 /* ── colour tokens (profile page only) ── */
@@ -155,24 +157,33 @@ function splitCommaString(value) {
 
 function splitLocation(location) {
   if (!location) {
-    return { city: '', country: '' };
+    return { city: '', state: '', country: '' };
   }
   const parts = String(location)
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
-  return {
-    city: parts[0] || '',
-    country: parts.slice(1).join(', ') || '',
-  };
+  
+  if (parts.length === 1) {
+    return { city: parts[0], state: '', country: '' };
+  } else if (parts.length === 2) {
+    return { city: parts[0], state: '', country: parts[1] };
+  } else {
+    return {
+      city: parts[0],
+      state: parts[1],
+      country: parts.slice(2).join(', '),
+    };
+  }
 }
 
 function buildFormFromProfile(profile) {
-  const { city, country } = splitLocation(profile.location);
+  const { city, state, country } = splitLocation(profile.location);
   return {
     fullName: profile.name || '',
     phone: fieldByLabel(profile.personalFields, 'Phone'),
     city,
+    state,
     country,
     linkedinUrl: fieldByLabel(profile.personalFields, 'LinkedIn'),
     portfolioUrl: fieldByLabel(profile.personalFields, 'Portfolio'),
@@ -185,6 +196,7 @@ function buildFormFromProfile(profile) {
     currentJobTitle: fieldByLabel(profile.roleFields, 'Current role'),
     yearsExperience: fieldByLabel(profile.roleFields, 'Experience'),
     department: profile.department || '',
+    batch: profile.batchYear || '',
     focus: fieldByLabel(profile.roleFields, 'Focus areas'),
     domain: profile.domain || '',
     chapter: profile.chapter || '',
@@ -527,6 +539,7 @@ export function ProfilePage() {
       const payload = {
         fullName: form.fullName.trim(),
         city: form.city.trim() || null,
+        state: form.state?.trim() || null,
         country: form.country.trim() || null,
         linkedinUrl: form.linkedinUrl.trim() || null,
         portfolioUrl: form.portfolioUrl.trim() || null,
@@ -547,6 +560,7 @@ export function ProfilePage() {
           currentJobTitle: form.currentJobTitle.trim() || null,
           yearsExperience: form.yearsExperience.trim() || null,
           department: form.department.trim() || null,
+          batchYear: form.batch ? Number(form.batch) : null,
           focus: form.focus.trim() || null,
           domain: form.domain.trim() || null,
           chapter: form.chapter.trim() || null,
@@ -557,6 +571,7 @@ export function ProfilePage() {
       } else {
         Object.assign(payload, {
           department: form.department?.trim() || null,
+          batchYear: form.batch ? Number(form.batch) : null,
           program: form.program.trim() || null,
           cgpa: form.cgpa.trim() || null,
           targetRoles: form.targetRoles.trim() || null,
@@ -893,6 +908,7 @@ export function ProfilePage() {
                 <InputField label="Phone" value={form.phone} onChange={(e) => updateForm('phone', e.target.value)} />
                 <InputField label="Headline" value={form.headline} onChange={(e) => updateForm('headline', e.target.value)} fullWidth />
                 <InputField label="City" value={form.city} onChange={(e) => updateForm('city', e.target.value)} />
+                <StateDropdown label="State" value={form.state} onChange={(val) => updateForm('state', val)} />
                 <InputField label="Country" value={form.country} onChange={(e) => updateForm('country', e.target.value)} />
                 <InputField label="LinkedIn URL" value={form.linkedinUrl} onChange={(e) => updateForm('linkedinUrl', e.target.value)} fullWidth error={formErrors.linkedinUrl} />
                 <InputField label="Portfolio URL" value={form.portfolioUrl} onChange={(e) => updateForm('portfolioUrl', e.target.value)} fullWidth error={formErrors.portfolioUrl} />
@@ -1054,7 +1070,8 @@ export function ProfilePage() {
                 {isAlumniProfile ? (
                   <>
                     <DepartmentDropdown label="Department" value={form.department} onChange={(val) => updateForm('department', val)} theme="dark" />
-                    <InputField label="Domain" value={form.domain} onChange={(e) => updateForm('domain', e.target.value)} />
+                    <IndustryDropdown label="Domain" value={form.domain} onChange={(val) => updateForm('domain', val)} theme="dark" />
+                    <InputField label="Batch" value={form.batch} onChange={(e) => updateForm('batch', e.target.value)} inputMode="numeric" />
                     <CompanyAutocomplete value={form.currentCompany} onChange={(val) => updateForm('currentCompany', val)} />
                     <InputField label="Current role" value={form.currentJobTitle} onChange={(e) => updateForm('currentJobTitle', e.target.value)} />
                     <InputField label="Experience" value={form.yearsExperience} onChange={(e) => updateForm('yearsExperience', e.target.value)} />
@@ -1084,6 +1101,7 @@ export function ProfilePage() {
                   <>
                     <DepartmentDropdown label="Department" value={form.department} onChange={(val) => updateForm('department', val)} theme="dark" />
                     <InputField label="Program" value={form.program} onChange={(e) => updateForm('program', e.target.value)} />
+                    <InputField label="Batch" value={form.batch} onChange={(e) => updateForm('batch', e.target.value)} inputMode="numeric" />
                     <InputField label="Graduation year" value={form.expectedGradYear} onChange={(e) => updateForm('expectedGradYear', e.target.value)} inputMode="numeric" />
                     <InputField label="CGPA" value={form.cgpa} onChange={(e) => updateForm('cgpa', e.target.value)} />
                     <InputField label="Target roles" value={form.targetRoles} onChange={(e) => updateForm('targetRoles', e.target.value)} />

@@ -67,7 +67,13 @@ export function CompanyAutocomplete({ value, onChange, fullWidth, theme = 'dark'
   const isLight = theme === 'light';
   
   const lightInputClass = "w-full rounded-xl border border-white/55 bg-white/58 px-4 py-3 text-sm text-[#24181e] transition-all placeholder:text-[#8b737d] focus:border-[#e8528d] focus:outline-none focus:ring-1 focus:ring-[#e8528d]/45";
-  const darkInputClass = "w-full rounded-[6px] border border-white/10 bg-[#17181f] px-4 py-2.5 text-sm text-white outline-none transition focus:border-white/40";
+  const darkInputClass = "w-full rounded-[6px] border px-3 py-2.5 text-sm outline-none transition";
+  
+  const darkInputStyle = {
+    background: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    color: '#f0f0f0',
+  };
   
   return (
     <div ref={wrapperRef} className={`relative ${fullWidth ? 'md:col-span-2' : ''}`}>
@@ -79,18 +85,19 @@ export function CompanyAutocomplete({ value, onChange, fullWidth, theme = 'dark'
           onChange={handleChange}
           onFocus={() => { if (typeof query === 'string' && query.trim().length >= 2) setIsOpen(true); }}
           className={isLight ? lightInputClass : darkInputClass}
+          style={!isLight ? darkInputStyle : undefined}
           placeholder="Current Company"
         />
       </div>
 
       {isOpen && typeof query === 'string' && query.trim().length >= 2 && suggestions.length > 0 && (
-        <div className={`absolute z-50 w-full mt-1 border rounded-xl shadow-xl max-h-60 overflow-y-auto ${isLight ? 'bg-white/95 backdrop-blur-xl border-white/40 shadow-[0_10px_30px_rgba(0,0,0,0.1)]' : 'bg-[#17181f] border-white/10'}`}>
+        <div className={`absolute z-50 w-full mt-1 border rounded-[6px] shadow-xl max-h-60 overflow-y-auto ${isLight ? 'bg-white/95 backdrop-blur-xl border-white/40 shadow-[0_10px_30px_rgba(0,0,0,0.1)]' : 'bg-[#36454F] border-[rgba(255,255,255,0.08)]'}`}>
           <ul className="py-1">
             {suggestions.map((item, idx) => (
               <li
                 key={`${item}-${idx}`}
                 onClick={() => handleSelect(item)}
-                className={`px-4 py-2 text-sm cursor-pointer transition ${isLight ? 'text-[#24181e] hover:bg-[#e8528d]/10' : 'text-white/86 hover:bg-white/5'}`}
+                className={`px-3 py-2 text-sm cursor-pointer transition ${isLight ? 'text-[#24181e] hover:bg-[#e8528d]/10' : 'text-[#f0f0f0] hover:bg-[rgba(255,255,255,0.06)]'}`}
               >
                 {item}
               </li>

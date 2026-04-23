@@ -59,6 +59,7 @@ const profileSchema = new mongoose.Schema(
     portfolioUrl: { type: String, default: null },
     photoUrl: { type: String, default: null },
     city: { type: String, default: null },
+    state: { type: String, default: null },
     country: { type: String, default: null },
     headline: { type: String, default: null },
     focus: { type: String, default: null },

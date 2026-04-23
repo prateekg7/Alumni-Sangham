@@ -23,6 +23,8 @@ import Plus from 'lucide-react/dist/esm/icons/plus.js';
 import Search from 'lucide-react/dist/esm/icons/search.js';
 import Send from 'lucide-react/dist/esm/icons/send.js';
 import Share2 from 'lucide-react/dist/esm/icons/share-2.js';
+import { INDIAN_STATES } from '../lib/locations';
+import { INDUSTRY_OPTIONS } from '../lib/industries';
 import SlidersHorizontal from 'lucide-react/dist/esm/icons/sliders-horizontal.js';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles.js';
 import SquarePen from 'lucide-react/dist/esm/icons/square-pen.js';
@@ -2090,93 +2092,7 @@ for (let y = endYearForBatch; y >= 2008; y--) {
   BATCH_OPTIONS.push(String(y));
 }
 
-const INDUSTRY_OPTIONS = [
-  'Accounting & Auditing',
-  'Advertising & Marketing',
-  'Aerospace & Defense',
-  'Agriculture & Agribusiness',
-  'Architecture & Planning',
-  'Automotive',
-  'Banking & Financial Services',
-  'Biotechnology',
-  'Chemicals',
-  'Civil Engineering & Construction',
-  'Computer Hardware',
-  'Consulting & Strategy',
-  'Consumer Electronics',
-  'Consumer Goods & FMCG',
-  'Cybersecurity',
-  'Data Analytics & Business Intelligence',
-  'E-Commerce',
-  'Education & EdTech',
-  'Electrical & Electronics',
-  'Energy & Utilities',
-  'Entertainment & Media',
-  'Environmental Services',
-  'Fashion & Apparel',
-  'Food & Beverage',
-  'Gaming',
-  'Government & Public Sector',
-  'Healthcare & Hospitals',
-  'Hospitality & Tourism',
-  'Human Resources & Staffing',
-  'Information Technology & Services',
-  'Insurance',
-  'Internet of Things (IoT)',
-  'Investment Banking & Venture Capital',
-  'Legal Services',
-  'Logistics & Supply Chain',
-  'Machine Learning & AI',
-  'Manufacturing',
-  'Market Research',
-  'Mechanical & Industrial Engineering',
-  'Mining & Metals',
-  'Non-Profit & NGO',
-  'Oil, Gas & Petroleum',
-  'Pharmaceuticals',
-  'Real Estate',
-  'Renewable Energy',
-  'Research & Development',
-  'Retail',
-  'Robotics & Automation',
-  'Semiconductors & VLSI',
-  'Software Development',
-  'Sports & Fitness',
-  'Telecommunications',
-  'Textiles',
-  'Transportation & Mobility',
-];
 
-const INDIAN_STATES = [
-  'Andhra Pradesh',
-  'Arunachal Pradesh',
-  'Assam',
-  'Bihar',
-  'Chhattisgarh',
-  'Goa',
-  'Gujarat',
-  'Haryana',
-  'Himachal Pradesh',
-  'Jharkhand',
-  'Karnataka',
-  'Kerala',
-  'Madhya Pradesh',
-  'Maharashtra',
-  'Manipur',
-  'Meghalaya',
-  'Mizoram',
-  'Nagaland',
-  'Odisha',
-  'Punjab',
-  'Rajasthan',
-  'Sikkim',
-  'Tamil Nadu',
-  'Telangana',
-  'Tripura',
-  'Uttar Pradesh',
-  'Uttarakhand',
-  'West Bengal',
-];
 
 export function DirectoryPage() {
   const [profiles, setProfiles] = React.useState([]);
@@ -2564,23 +2480,30 @@ export function DirectoryPage() {
                       {profile.company ? <p className="text-white/45 truncate">{profile.company}</p> : null}
                     </div>
 
-                    {profile.focus ? (
-                      <div className="mt-4 w-full border-t border-white/10 pt-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/28 text-left">Helps With</p>
-                        <p className="mt-1.5 line-clamp-2 text-xs italic leading-5 text-white/50 text-left">"{profile.focus}"</p>
-                      </div>
-                    ) : null}
+                    <div className="mt-auto w-full">
+                      {profile.focus ? (
+                        <div className="w-full border-t border-white/10 pt-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/28 text-left">Helps With</p>
+                          <p className="mt-1.5 line-clamp-2 text-xs italic leading-5 text-white/50 text-left">"{profile.focus}"</p>
+                        </div>
+                      ) : (
+                        <div className="w-full border-t border-white/10 pt-3 opacity-0 pointer-events-none select-none">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-left">Helps With</p>
+                          <p className="mt-1.5 line-clamp-2 text-xs italic leading-5 text-left">-</p>
+                        </div>
+                      )}
 
-                    {/* Actions */}
-                    <div className="mt-auto w-full pt-4">
-                      <button
-                        type="button"
-                        onClick={() => setReferralTarget(profile)}
-                        className="flex w-full items-center justify-center gap-2 rounded-[8px] bg-[#f5eee8] px-4 py-2.5 text-sm font-bold text-black transition hover:bg-white"
-                      >
-                        <Handshake className="h-4 w-4" />
-                        Request Referral
-                      </button>
+                      {/* Actions */}
+                      <div className="w-full pt-4">
+                        <button
+                          type="button"
+                          onClick={() => setReferralTarget(profile)}
+                          className="flex w-full items-center justify-center gap-2 rounded-[8px] bg-[#f5eee8] px-4 py-2.5 text-sm font-bold text-black transition hover:bg-white"
+                        >
+                          <Handshake className="h-4 w-4" />
+                          Request Referral
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

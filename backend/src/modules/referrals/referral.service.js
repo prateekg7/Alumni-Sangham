@@ -188,3 +188,13 @@ export const updateReferralById = async (id, payload, actorUserId, actorRole) =>
 
   return referral;
 };
+
+export const getPendingReferralCount = async (userId, role) => {
+  const filter = { status: "pending" };
+  if (role === "alumni") {
+    filter.alumniId = userId;
+  } else {
+    filter.requesterId = userId;
+  }
+  return ReferralRequest.countDocuments(filter);
+};
