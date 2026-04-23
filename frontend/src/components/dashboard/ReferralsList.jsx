@@ -13,21 +13,23 @@ function statusStyles(status) {
 
 export default function ReferralsList({ requests = [], onOpenReferrals }) {
   return (
-    <div className="flex max-h-[520px] flex-col">
-      <div className="mb-4 flex items-center gap-2">
-        <h3 className="flex-1 text-base font-bold tracking-tight text-white">Referral Requests</h3>
-        <UserPlus className="h-4 w-4 text-white/40" />
+    <div className="flex flex-col">
+      <div className="mb-6 flex items-center justify-between">
+        <h3 className="text-3xl font-bold tracking-tight text-white">Referral Requests</h3>
+        <UserPlus className="h-6 w-6 text-white/30" />
       </div>
 
-      <div className="overflow-y-auto pr-1">
+      <div className="border-t border-white/10" />
+
+      <div className="mt-6 overflow-y-auto">
         {requests.length ? (
           requests.map((referral) => (
             <div
               key={`${referral.name}-${referral.target}`}
-              className="group grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 border-t border-white/10 py-4 last:border-b"
+              className="group grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/10 py-4"
             >
               {/* Avatar */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white">
                 {String(referral.name || '?')
                   .split(/\s+/)
                   .slice(0, 2)
@@ -64,13 +66,11 @@ export default function ReferralsList({ requests = [], onOpenReferrals }) {
             </div>
           ))
         ) : (
-          <div className="border-t border-white/10 py-5 text-sm text-white/40">
+          <div className="py-2 text-[17px] text-white/40">
             No referral activity yet.
           </div>
         )}
       </div>
-
-
     </div>
   );
 }

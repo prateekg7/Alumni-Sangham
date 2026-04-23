@@ -83,8 +83,8 @@ function DashboardContent({
         </div>
       </div>
 
-      {/* ── Card 2: Directory — steel/slate blue ── */}
-      <div className="db-card db-card--steel p-6 md:p-8">
+      {/* ── Card 2: Directory — brown ── */}
+      <div className="db-card db-card--brown p-6 md:p-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">
@@ -117,22 +117,22 @@ function DashboardContent({
         </div>
       </div>
 
-      {/* ── Card 3: Blogs — light ice blue ── */}
-      <div className="db-card db-card--ice p-6 md:p-8">
+      {/* ── Card 3: Blogs — beige ── */}
+      <div className="db-card db-card--beige p-6 md:p-8">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#1e3a4f]/50">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#7a5c3a]/60">
               Blogs
             </div>
-            <h3 className="mt-4 text-xl font-bold leading-snug text-[#1e3a4f] md:text-2xl">
+            <h3 className="mt-4 text-xl font-bold leading-snug text-[#2c1a0e] md:text-2xl">
               {featuredPost?.title || 'Share insights & stories'}
             </h3>
-            <p className="mt-3 max-w-md text-sm leading-6 text-[#1e3a4f]/55">
+            <p className="mt-3 max-w-md text-sm leading-6 text-[#2c1a0e]/55">
               {featuredPost?.excerpt || 'Ask for guidance, share an opening, or start a campus thread.'}
             </p>
           </div>
-          <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#1e3a4f]/10">
-            <MessageCircle className="h-6 w-6 text-[#1e3a4f]/60" />
+          <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#2c1a0e]/10">
+            <MessageCircle className="h-6 w-6 text-[#2c1a0e]/60" />
           </div>
         </div>
         <textarea
@@ -140,13 +140,13 @@ function DashboardContent({
           onChange={(event) => setDraft(event.target.value)}
           rows={3}
           placeholder="Ask for guidance, share an opening, or start a campus thread..."
-          className="mt-5 w-full resize-none rounded-xl border border-[#1e3a4f]/12 bg-[#1e3a4f]/8 px-4 py-3 text-sm text-[#1e3a4f] outline-none placeholder:text-[#1e3a4f]/35 focus:border-[#1e3a4f]/25 transition"
+          className="mt-5 w-full resize-none rounded-xl border border-[#2c1a0e]/12 bg-[#2c1a0e]/8 px-4 py-3 text-sm text-[#2c1a0e] outline-none placeholder:text-[#2c1a0e]/35 focus:border-[#2c1a0e]/25 transition"
         />
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={() => onCreatePost(draft)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1e3a4f] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#162e3e]"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#2c1a0e] px-5 py-2.5 text-sm font-semibold text-[#f0e2cc] transition hover:bg-[#3d2510]"
           >
             Continue in Blogs
             <Send className="h-3.5 w-3.5" />
@@ -154,7 +154,7 @@ function DashboardContent({
           <button
             type="button"
             onClick={onOpenFeed}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#1e3a4f]/10 px-5 py-2.5 text-sm font-semibold text-[#1e3a4f]/70 transition hover:bg-[#1e3a4f]/18"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#2c1a0e]/10 px-5 py-2.5 text-sm font-semibold text-[#2c1a0e]/70 transition hover:bg-[#2c1a0e]/18"
           >
             View all posts
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -162,8 +162,8 @@ function DashboardContent({
         </div>
       </div>
 
-      {/* ── Card 4: Referrals — steel blue ── */}
-      <div className="db-card db-card--steel flex flex-1 flex-col p-6 md:p-8">
+      {/* ── Card 4: Referrals — brown ── */}
+      <div className="db-card db-card--brown flex flex-1 flex-col p-6 md:p-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
@@ -235,20 +235,6 @@ export function DashboardPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const heroStats = useMemo(() => {
-    const acceptedReferrals = referralBoard.requests.filter((item) => /accepted/i.test(item.status)).length;
-    const responseRate = referralBoard.requests.length
-      ? Math.round((acceptedReferrals / referralBoard.requests.length) * 100)
-      : 0;
-    const jobPosts = discussions.filter((post) => /job/i.test(post.tag || '') || /job/i.test(post.community || '')).length;
-
-    return [
-      { label: 'Directory', value: directory.length || 0 },
-      { label: 'Reply rate', value: `${responseRate}%` },
-      { label: 'Referral wins', value: acceptedReferrals },
-      { label: 'Jobs shared', value: jobPosts },
-    ];
-  }, [directory.length, discussions, referralBoard.requests]);
 
   const discoverPosts = useMemo(
     () =>
@@ -283,7 +269,7 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen bg-black">
       <div className="-m-4 md:-m-6">
-        <HeroSection user={user} stats={heroStats} />
+        <HeroSection user={user} />
       </div>
 
       <div className="mx-auto mt-6 flex max-w-[1600px] flex-col gap-6 lg:flex-row lg:items-stretch">

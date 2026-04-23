@@ -191,6 +191,11 @@
     background: rgba(30, 52, 80, 0.70);
   }
 
+  /* Brown Card style */
+  .db-card--brown {
+    background: rgba(80, 52, 28, 0.85);
+  }
+
   .directory-vanish-search canvas {
     filter: invert(1);
   }

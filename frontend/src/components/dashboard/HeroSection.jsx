@@ -29,18 +29,6 @@ export default function HeroSection({ user, stats = [] }) {
           {greeting}, <span className="font-extrabold">{firstName}</span>
         </h1>
 
-        {/* Stats bar — stacked below the greeting at the bottom left */}
-        <div className="flex flex-wrap items-center gap-10 border-t border-white/20 pt-6">
-          {stats.map((item, index) => (
-            <div
-              key={item.label}
-              className="flex flex-col items-start min-w-[80px]"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50 mb-1.5">{item.label}</span>
-              <span className="text-2xl font-black text-white">{item.value}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

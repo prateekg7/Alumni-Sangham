@@ -255,7 +255,7 @@ function renderMarkdownContent(text) {
     const parts = line.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={`${idx}-${i}`} className="text-gray-900 font-semibold">{part.slice(2, -2)}</strong>;
+        return <strong key={`${idx}-${i}`} className="text-white font-bold">{part.slice(2, -2)}</strong>;
       }
       return part;
     });
@@ -264,7 +264,7 @@ function renderMarkdownContent(text) {
   const flushParagraph = () => {
     if (currentParagraph.length > 0) {
       elements.push(
-        <p key={elements.length} className="text-[16px] leading-8 text-gray-700 mb-5">
+        <p key={elements.length} className="text-[17px] leading-8 text-white/80 mb-6">
           {currentParagraph}
         </p>
       );
@@ -284,7 +284,7 @@ function renderMarkdownContent(text) {
     if (trimmed.startsWith('**') && trimmed.endsWith('**') && !trimmed.slice(2, -2).includes('**')) {
       flushParagraph();
       elements.push(
-        <h3 key={elements.length} className="text-xl font-bold text-gray-900 mt-8 mb-4">
+        <h3 key={elements.length} className="text-2xl font-bold text-white mt-10 mb-5">
           {trimmed.slice(2, -2)}
         </h3>
       );
@@ -297,8 +297,8 @@ function renderMarkdownContent(text) {
       const content = trimmed.replace(/^\d+\.\s/, '');
       elements.push(
         <div key={elements.length} className="flex gap-3 py-1.5 pl-2 mb-2">
-          <span className="text-[#eab308] font-bold text-sm mt-0.5">{trimmed.match(/^\d+/)[0]}.</span>
-          <p className="text-[16px] leading-7 text-gray-700">{processInline(content, idx)}</p>
+          <span className="text-[#facc15] font-bold text-sm mt-0.5">{trimmed.match(/^\d+/)[0]}.</span>
+          <p className="text-[17px] leading-7 text-white/80">{processInline(content, idx)}</p>
         </div>
       );
       return;
@@ -310,8 +310,8 @@ function renderMarkdownContent(text) {
       const content = trimmed.slice(2);
       elements.push(
         <div key={elements.length} className="flex gap-3 py-1.5 pl-2 mb-2">
-          <span className="text-[#eab308] font-black mt-0.5">•</span>
-          <p className="text-[16px] leading-7 text-gray-700">{processInline(content, idx)}</p>
+          <span className="text-[#facc15] font-black mt-0.5">•</span>
+          <p className="text-[17px] leading-7 text-white/80">{processInline(content, idx)}</p>
         </div>
       );
       return;
@@ -440,7 +440,7 @@ export function BlogDetailPage() {
     <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-[#101010] text-white font-roboto">
       <div className="flex-1 overflow-y-auto scrollbar-hide">
           {/* Back navigation bar */}
-          <div className="sticky top-0 z-20 bg-[#101010]/90 backdrop-blur-md border-b border-white/5 px-8 pt-4 pb-3 flex items-center justify-between">
+          <div className="sticky top-0 z-20 bg-[#101010]/90 backdrop-blur-md px-8 pt-6 pb-3 flex items-center justify-between">
             <button
               type="button"
               onClick={() => navigate('/blog')}
@@ -448,15 +448,6 @@ export function BlogDetailPage() {
             >
               <ArrowLeft className="h-4 w-4" />
               Back to all posts
-            </button>
-            
-            {/* Quick like button in header */}
-            <button
-               onClick={handleLike}
-               className={`hidden md:inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${hasLiked ? 'border-blue-500 bg-blue-500/10 text-blue-400' : 'border-white/10 hover:bg-white/5 text-white/60'}`}
-            >
-              <ThumbsUp className={`h-4 w-4 ${hasLiked ? 'fill-current' : ''}`} />
-              {hasLiked ? 'Liked' : 'Like'} ({blog.likes?.length || 0})
             </button>
           </div>
 
@@ -468,123 +459,94 @@ export function BlogDetailPage() {
                 <Briefcase className="h-3.5 w-3.5" /> Job Opportunity
               </div>
             ) : (
-              <div className="inline-flex items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/20 text-[#facc15] px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-6">
-                <PenLine className="h-3.5 w-3.5" /> Read Time: {blog.readTime} min
+              <div className="mb-8 flex items-center gap-4">
+                <div className="h-[1px] w-12 bg-[#facc15]/50" />
+                <div className="text-[11px] font-bold tracking-[0.25em] text-[#facc15] uppercase">
+                  Read Time: {blog.readTime} min
+                </div>
               </div>
             )}
 
-            <h1 className="text-3xl font-black tracking-tight text-white md:text-5xl lg:text-[54px] leading-[1.1]">
+            <h1 className="text-5xl font-serif tracking-tight text-white md:text-6xl lg:text-7xl leading-[1.05]">
               {blog.title}
             </h1>
 
             {/* Author / Meta Block */}
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 py-4 border-y border-white/10">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-lg font-bold bg-[#facc15] text-black">
-                  {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
-                </div>
-                <div>
-                  <p className="text-base font-bold text-white">{blog.authorName}</p>
-                  <p className="text-sm font-medium text-white/40">{blog.authorMeta || "Alumni"}</p>
-                </div>
+            <div className="mt-12 flex items-center gap-4">
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xl font-bold bg-[#eab308] text-black">
+                {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
               </div>
-              <div className="text-left sm:text-right">
-                <p className="text-sm text-white/40 font-medium">Published on</p>
-                <p className="text-base font-semibold text-white/80">
-                  {new Date(blog.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </p>
+              <div>
+                <p className="text-[17px] font-bold text-white">{blog.authorName}</p>
+                <div className="mt-1 flex items-center gap-2 text-sm text-white/40">
+                  <span>{blog.authorMeta || "Alumni"}</span>
+                  <span>•</span>
+                  <span>Published on {new Date(blog.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
               </div>
             </div>
 
-            {/* If it's a job, show job info box */}
-            {isJob && (
-              <div className="mt-8 rounded-2xl bg-[#1a1a2e] border border-blue-500/20 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex flex-wrap gap-x-12 gap-y-4">
-                  <div>
-                    <p className="text-[11px] text-white/40 font-bold uppercase tracking-wider mb-1.5">Company</p>
-                    <p className="text-[17px] font-bold text-white flex items-center gap-2"><Briefcase className="w-4 h-4 text-white/40"/> {blog.company}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-white/40 font-bold uppercase tracking-wider mb-1.5">Location</p>
-                    <p className="text-[17px] font-bold text-white flex items-center gap-2"><MapPin className="w-4 h-4 text-white/40"/> {blog.location}</p>
-                  </div>
-                </div>
-                {blog.applyLink && (
-                  <a 
-                    href={blog.applyLink} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="flex-shrink-0 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-[0_4px_12px_rgba(37,99,235,0.2)] hover:shadow-[0_6px_16px_rgba(37,99,235,0.3)]"
-                  >
-                    Apply Externally <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            )}
+            <div className="mt-12 h-[1px] w-full bg-white/5" />
 
-            {/* White article card for body */}
-            <div className="mt-8 rounded-3xl bg-white p-8 md:p-12 text-black shadow-xl">
-              <div className="blog-detail-body">
+            {/* Article body - now integrated into dark theme */}
+            <div className="mt-12">
+              <div className="blog-detail-body max-w-none">
                 {renderMarkdownContent(blog.body)}
               </div>
               
               {/* Bottom Like Section */}
-              <div className="mt-12 pt-6 border-t border-gray-200 flex items-center justify-between">
+              <div className="mt-16 flex items-center justify-between">
                 <button
                    onClick={handleLike}
-                   className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[15px] font-bold transition-all border-2 ${hasLiked ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 hover:border-gray-300 text-gray-500 hover:text-gray-700'}`}
+                   className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-[14px] font-bold transition-all border ${hasLiked ? 'border-[#eab308] bg-[#eab308]/10 text-[#eab308]' : 'border-white/10 hover:border-white/25 text-white/60'}`}
                 >
-                  <ThumbsUp className={`h-5 w-5 ${hasLiked ? 'fill-current' : ''}`} />
-                  {blog.likes?.length || 0} Likes
+                   <ThumbsUp className={`h-4 w-4 ${hasLiked ? 'fill-current' : ''}`} />
+                   {blog.likes?.length || 0} Likes
                 </button>
               </div>
             </div>
 
             {/* Comments Section */}
-            <div className="mt-12 rounded-2xl bg-[#1a1a2e] border border-white/10 p-6 md:p-8">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-[#facc15]" /> Comments ({blog.commentsCount || 0})
+            <div className="mt-16">
+              <h2 className="text-3xl font-serif text-[#eab308] mb-10 text-center">
+                Comments ({blog.commentsCount || 0})
               </h2>
 
               {/* Comment Composer */}
-              <div className="mb-8">
+              <div className="mb-10">
                 {userCommentCount >= 2 ? (
-                  <div className="p-4 bg-white/5 disabled border border-white/10 rounded-xl text-center">
+                  <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-center">
                     <p className="text-sm text-white/60 font-medium">You have reached the maximum of 2 comments per post.</p>
                   </div>
                 ) : (blog.comments?.length >= 100) ? (
-                  <div className="p-4 bg-white/5 disabled border border-white/10 rounded-xl text-center">
+                  <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-center">
                     <p className="text-sm text-white/60 font-medium">This post has reached the maximum of 100 comments.</p>
                   </div>
                 ) : (
-                  <div className="bg-[#101010] border border-white/10 rounded-xl p-4 focus-within:border-[#facc15]/40 transition-colors">
+                  <div className="bg-[#101010] border border-white/10 rounded-2xl p-6 focus-within:border-[#eab308]/40 transition-colors">
                     <textarea 
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder="Share your thoughts... (Max 200 words)"
-                      spellCheck={false}
-                      autoCorrect="off"
-                      autoCapitalize="off"
-                      autoComplete="off"
-                      className="w-full bg-transparent text-white placeholder-white/30 text-[15px] leading-relaxed resize-none h-24 outline-none"
+                      className="w-full bg-transparent text-white placeholder-white/20 text-[16px] leading-relaxed resize-none h-32 outline-none"
                     />
                     {commentError && (
-                      <p className="text-red-400 text-sm mt-2 flex items-center gap-1"><AlertCircle className="w-4 h-4"/> {commentError}</p>
+                      <p className="text-red-400 text-sm mt-3 flex items-center gap-1"><AlertCircle className="w-4 h-4"/> {commentError}</p>
                     )}
-                    <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
-                      <div className="text-xs font-semibold">
-                        <span className={wordCount > 200 ? 'text-red-400' : 'text-white/40'}>
+                    <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-4">
+                      <div className="text-[11px] font-bold uppercase tracking-widest text-white/30">
+                        <span className={wordCount > 200 ? 'text-red-400' : ''}>
                           {wordCount}/200 words
                         </span>
-                        <span className="mx-2 text-white/20">•</span>
-                        <span className="text-white/40">
-                          {2 - userCommentCount} comment(s) left for you
+                        <span className="mx-3 text-white/10">•</span>
+                        <span>
+                          {2 - userCommentCount} comment(s) left
                         </span>
                       </div>
                       <button
                         onClick={handleCommentSubmit}
                         disabled={!commentText.trim() || wordCount > 200 || submittingComment}
-                        className="bg-[#facc15] hover:bg-[#e0bb00] disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-1.5 px-4 rounded-lg flex items-center gap-2 text-sm transition-colors"
+                        className="bg-[#eab308] hover:bg-[#eab308]/90 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-2 px-6 rounded-xl flex items-center gap-2 text-sm transition-all"
                       >
                         {submittingComment ? 'Posting...' : 'Post Comment'} <Send className="w-3.5 h-3.5" />
                       </button>
@@ -594,23 +556,32 @@ export function BlogDetailPage() {
               </div>
 
               {/* Comment List */}
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-8">
                 {!blog.comments || blog.comments.length === 0 ? (
-                  <p className="text-center text-white/40 text-sm py-4">No comments yet. Be the first!</p>
+                  <p className="text-center text-white/30 text-sm py-10 italic">No comments yet. Be the first!</p>
                 ) : (
                   [...(blog.comments)].reverse().map((cmd, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-base font-bold bg-white/10 text-white">
+                    <div key={i} className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-base font-bold bg-[#eab308]/20 text-[#eab308] border border-[#eab308]/10 ring-4 ring-transparent group-hover:ring-[#eab308]/5 transition-all">
                         {cmd.userName ? cmd.userName[0].toUpperCase() : 'A'}
                       </div>
-                      <div className="flex-1 bg-[#101010] border border-white/5 rounded-2xl rounded-tl-none p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-bold text-white">{cmd.userName}</p>
-                          <p className="text-[11px] text-white/40 font-medium tracking-wide">
-                            {new Date(cmd.createdAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}
-                          </p>
+                      <div className="flex-1">
+                        <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl rounded-tl-none p-5 transition-all hover:bg-white/[0.06] hover:border-white/10 shadow-sm">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <p className="text-[14px] font-bold text-white group-hover:text-[#eab308] transition-colors">{cmd.userName}</p>
+                              <p className="text-[11px] text-white/30 font-semibold uppercase tracking-wider">{cmd.userMeta || "Alumni Member"}</p>
+                            </div>
+                            <p className="text-[11px] text-white/20 font-medium whitespace-nowrap ml-4">
+                              {new Date(cmd.createdAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
+                            </p>
+                          </div>
+                          <p className="text-[15px] text-white/70 leading-relaxed font-normal">{cmd.text}</p>
                         </div>
-                        <p className="text-[15px] text-white/80 leading-relaxed whitespace-pre-wrap">{cmd.text}</p>
+                        <div className="flex items-center gap-4 mt-2 ml-1">
+                          <button className="text-[11px] font-bold text-white/30 hover:text-[#eab308] transition-colors uppercase tracking-widest">Like</button>
+                          <button className="text-[11px] font-bold text-white/30 hover:text-[#eab308] transition-colors uppercase tracking-widest">Reply</button>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -619,41 +590,45 @@ export function BlogDetailPage() {
             </div>
 
             {/* Next/Prev Navigation */}
-            <div className="mt-12 border-t border-white/10 pt-10 flex flex-col sm:flex-row gap-6 justify-between">
+            <div className="mt-20 border-t border-white/5 pt-12 flex flex-col sm:flex-row gap-6 justify-between">
               {adjacent?.previous ? (
-                <Link to={`/blog/${adjacent.previous.slug}`} className="flex-1 block group rounded-2xl bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="flex items-center gap-1.5 bg-blue-500 text-white px-3 py-1 rounded-full text-[11px] font-bold tracking-wider">
+                <Link to={`/blog/${adjacent.previous.slug}`} className="flex-1 block group rounded-2xl bg-white/5 border border-white/5 p-6 transition-all duration-300 hover:bg-white/[0.08] hover:-translate-y-0.5 min-w-0">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <span className="flex items-center gap-1.5 text-[#eab308] text-[11px] font-bold tracking-[0.15em] uppercase">
                       <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" /> Previous Post
                     </span>
-                    <span className="text-[12px] text-gray-400 font-medium tracking-wide">
-                      {new Date(adjacent.previous.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
+                    {adjacent.previous.createdAt && (
+                      <span className="text-[11px] text-white/20 font-medium uppercase tracking-wider">
+                        {new Date(adjacent.previous.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 leading-snug group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+                  <h3 className="text-xl font-serif text-white leading-snug group-hover:text-[#eab308] transition-colors duration-200 line-clamp-2">
                     {adjacent.previous.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-500 line-clamp-2">
-                    {adjacent.previous.body ? adjacent.previous.body.substring(0, 100) + '...' : "Read article..."}
+                  <p className="mt-3 text-sm leading-relaxed text-white/40 line-clamp-2">
+                    Read article...
                   </p>
                 </Link>
               ) : <div className="flex-1"></div>}
               
               {adjacent?.next ? (
-                <Link to={`/blog/${adjacent.next.slug}`} className="flex-1 block group rounded-2xl bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_24px_rgba(0,0,0,0.12)] hover:-translate-y-0.5 min-w-0">
-                  <div className="flex items-center justify-end gap-3 mb-3">
-                    <span className="text-[12px] text-gray-400 font-medium tracking-wide">
-                      {new Date(adjacent.next.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-emerald-500 text-white px-3 py-1 rounded-full text-[11px] font-bold tracking-wider">
+                <Link to={`/blog/${adjacent.next.slug}`} className="flex-1 block group rounded-2xl bg-white/5 border border-white/5 p-6 transition-all duration-300 hover:bg-white/[0.08] hover:-translate-y-0.5 min-w-0">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    {adjacent.next.createdAt && (
+                      <span className="text-[11px] text-white/20 font-medium uppercase tracking-wider">
+                        {new Date(adjacent.next.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1.5 text-[#eab308] text-[11px] font-bold tracking-[0.15em] uppercase">
                       Next Post <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </span>
                   </div>
-                  <h3 className="text-xl font-black text-gray-900 leading-snug group-hover:text-emerald-600 transition-colors duration-200 line-clamp-2 text-right">
+                  <h3 className="text-xl font-serif text-white leading-snug group-hover:text-[#eab308] transition-colors duration-200 line-clamp-2 text-right">
                     {adjacent.next.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-500 line-clamp-2 text-right">
-                    {adjacent.next.body ? adjacent.next.body.substring(0, 100) + '...' : "Read article..."}
+                  <p className="mt-3 text-sm leading-relaxed text-white/40 line-clamp-2 text-right">
+                    Read article...
                   </p>
                 </Link>
               ) : <div className="flex-1"></div>}
