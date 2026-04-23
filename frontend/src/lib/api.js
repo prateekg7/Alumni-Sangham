@@ -313,6 +313,13 @@ export async function createReferralRequest(body) {
   });
 }
 
+export async function updateReferralStatus(referralId, { status, responseNote }) {
+  return apiRequest(`/api/referrals/${encodeURIComponent(referralId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, responseNote }),
+  });
+}
+
 export async function fetchHallOfFame() {
   return apiRequest('/api/hall-of-fame');
 }

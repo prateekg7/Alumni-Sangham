@@ -33,7 +33,7 @@ import { DEPARTMENTS } from '../lib/departments';
 /* ── colour tokens (profile page only) ── */
 const C = {
   pageBg: '#000000',
-  card: '#36454F',
+  card: '#131e22ff',
   cardBorder: 'rgba(255,255,255,0.08)',
   cardSub: 'rgba(255,255,255,0.06)',
   accent: '#c19d67ff',
@@ -163,7 +163,7 @@ function splitLocation(location) {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
-  
+
   if (parts.length === 1) {
     return { city: parts[0], state: '', country: '' };
   } else if (parts.length === 2) {

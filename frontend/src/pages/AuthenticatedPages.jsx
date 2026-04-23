@@ -1950,7 +1950,8 @@ function ReferralRequestModal({ profile: targetProfile, onClose }) {
     try {
       await createReferralRequest({
         alumniUserId: targetProfile?.alumniUserId || targetProfile?.id,
-        coverNote: note + (driveLink ? `\n\nResume Drive Link: ${driveLink}` : ''),
+        coverNote: note,
+        resumeUrl: driveLink || null,
         targetRole: targetProfile?.title || targetProfile?.headline || 'Referral',
         targetCompany: targetProfile?.company || 'See referral note',
       });
