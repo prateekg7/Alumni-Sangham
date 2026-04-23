@@ -20,7 +20,11 @@ export const getPostById = asyncHandler(async (req, res) => {
 });
 
 export const createPost = asyncHandler(async (req, res) => {
-  const data = await postService.createPost(req.body);
+  const authorUser = await User.findById(req.user.id);
+  if (!authorUser) {
+    throw new ApiError(404, "User not found");
+  }
+  const data = await postService.createPost(authorUser, req.body);
   res.status(201).json(new ApiResponse(201, data, "Post created"));
 });
 
@@ -34,12 +38,12 @@ export const createDiscussion = asyncHandler(async (req, res) => {
 });
 
 export const updatePostById = asyncHandler(async (req, res) => {
-  const data = await postService.updatePostById(req.params.id, req.body);
+  const data = await postService.updatePostById(req.params.id, req.body, req.user);
   res.status(200).json(new ApiResponse(200, data, "Post updated"));
 });
 
 export const deletePostById = asyncHandler(async (req, res) => {
-  const data = await postService.deletePostById(req.params.id);
+  const data = await postService.deletePostById(req.params.id, req.user);
   res.status(200).json(new ApiResponse(200, data, "Post deleted"));
 });
 

@@ -11,15 +11,43 @@ export const getUserById = async (id) => {
   return user;
 };
 
-export const updateUserById = async (id, payload, allowPrivilegedFields = false) => {
-  const disallowed = ["passwordHash", "refreshTokens"];
-  const safe = { ...payload };
-  for (const key of disallowed) {
-    delete safe[key];
+const SELF_UPDATE_FIELDS = [
+  "firstName",
+  "lastName",
+  "phone",
+  "department",
+  "expectedGradYear",
+  "gradYear",
+  "currentCompany",
+];
+
+const PRIVILEGED_UPDATE_FIELDS = [
+  ...SELF_UPDATE_FIELDS,
+  "email",
+  "role",
+  "batchLabel",
+  "isVerified",
+  "verificationStatus",
+  "verificationDocUrl",
+  "isActive",
+];
+
+function pickAllowedFields(payload = {}, allowedFields = []) {
+  const update = {};
+  for (const key of allowedFields) {
+    if (payload[key] !== undefined) {
+      update[key] = typeof payload[key] === "string" ? payload[key].trim() : payload[key];
+    }
   }
-  if (!allowPrivilegedFields) {
-    delete safe.role;
-    delete safe.email;
+  return update;
+}
+
+export const updateUserById = async (id, payload, allowPrivilegedFields = false) => {
+  const allowedFields = allowPrivilegedFields ? PRIVILEGED_UPDATE_FIELDS : SELF_UPDATE_FIELDS;
+  const safe = pickAllowedFields(payload, allowedFields);
+
+  if (!Object.keys(safe).length) {
+    throw new ApiError(400, "No allowed fields to update");
   }
 
   const user = await User.findByIdAndUpdate(id, safe, {

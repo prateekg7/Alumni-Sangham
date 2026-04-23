@@ -562,6 +562,10 @@ export function BlogDetailPage() {
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       placeholder="Share your thoughts... (Max 200 words)"
+                      spellCheck={false}
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      autoComplete="off"
                       className="w-full bg-transparent text-white placeholder-white/30 text-[15px] leading-relaxed resize-none h-24 outline-none"
                     />
                     {commentError && (

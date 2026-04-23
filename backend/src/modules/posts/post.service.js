@@ -15,7 +15,31 @@ export const getPostById = async (id) => {
   return post;
 };
 
-export const createPost = async (payload) => Post.create(payload);
+export const createPost = async (authorUser, body) => createDiscussionPost(authorUser, body);
+
+function ensurePostOwnerOrAdmin(post, actor) {
+  const isAdmin = actor?.role === "admin";
+  const isOwner = String(post.authorId) === String(actor?.id);
+  if (!isAdmin && !isOwner) {
+    throw new ApiError(403, "Only the author can modify this post");
+  }
+}
+
+function pickPostUpdate(payload = {}, postType) {
+  const allowed = ["title", "body", "community", "tag"];
+  if (postType === "job") {
+    allowed.push("company", "location", "isRemote", "jobType", "salaryMin", "salaryMax", "description", "applyLink", "expiresAt");
+  }
+
+  const update = {};
+  for (const key of allowed) {
+    if (payload[key] !== undefined) {
+      update[key] = typeof payload[key] === "string" ? payload[key].trim() : payload[key];
+    }
+  }
+
+  return update;
+}
 
 export const createDiscussionPost = async (authorUser, body) => {
   const { title, body: text, community, tag } = body ?? {};
@@ -46,19 +70,32 @@ export const createDiscussionPost = async (authorUser, body) => {
   });
 };
 
-export const updatePostById = async (id, payload) => {
-  const post = await Post.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+export const updatePostById = async (id, payload, actor) => {
+  const existing = await Post.findById(id);
+  if (!existing) {
+    throw new ApiError(404, "Post not found");
+  }
+  ensurePostOwnerOrAdmin(existing, actor);
+
+  const update = pickPostUpdate(payload, existing.postType);
+  if (!Object.keys(update).length) {
+    throw new ApiError(400, "No allowed fields to update");
+  }
+
+  const post = await Post.findByIdAndUpdate(id, update, { new: true, runValidators: true });
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
   return post;
 };
 
-export const deletePostById = async (id) => {
-  const deleted = await Post.findByIdAndDelete(id);
-  if (!deleted) {
+export const deletePostById = async (id, actor) => {
+  const existing = await Post.findById(id);
+  if (!existing) {
     throw new ApiError(404, "Post not found");
   }
+  ensurePostOwnerOrAdmin(existing, actor);
+  await Post.deleteOne({ _id: id });
   return { id };
 };
 

@@ -86,6 +86,10 @@ export const getReferralById = async (id) => {
 };
 
 export const createReferralRequest = async (requesterUser, body) => {
+  if (requesterUser.role !== "student") {
+    throw new ApiError(403, "Only students can create referral requests");
+  }
+
   const { alumniUserId, coverNote, targetCompany, targetRole } = body ?? {};
   if (!alumniUserId || !coverNote?.trim()) {
     throw new ApiError(400, "alumniUserId and coverNote are required");
@@ -114,7 +118,7 @@ export const createReferralRequest = async (requesterUser, body) => {
     targetRole: targetRole?.trim() || "Referral",
     resumeUrl: null,
     coverNote: coverNote.trim(),
-    linkedinUrl: studentProfile?.linkedinUrl || null,
+    linkedinUrl: requesterProfile?.linkedinUrl || null,
     status: "pending",
   });
 
@@ -145,19 +149,30 @@ export const updateReferralById = async (id, payload, actorUserId, actorRole) =>
     throw new ApiError(403, "Only the receiving alumni or an admin can update this referral");
   }
 
+  const allowedStatuses = isAdmin ? ["pending", "accepted", "declined"] : ["accepted", "declined"];
+  const nextStatus = payload?.status;
+  if (!allowedStatuses.includes(nextStatus)) {
+    throw new ApiError(400, `status must be one of: ${allowedStatuses.join(", ")}`);
+  }
+
+  const update = {
+    status: nextStatus,
+    respondedAt: nextStatus === "pending" ? null : new Date(),
+  };
+
   const prevStatus = existing.status;
-  const referral = await ReferralRequest.findByIdAndUpdate(id, payload, {
+  const referral = await ReferralRequest.findByIdAndUpdate(id, update, {
     new: true,
     runValidators: true,
   });
 
-  if (payload.status && payload.status !== prevStatus && referral) {
+  if (nextStatus !== prevStatus && referral) {
     const statusNote =
-      payload.status === "accepted"
+      nextStatus === "accepted"
         ? "accepted"
-        : payload.status === "declined"
+        : nextStatus === "declined"
           ? "declined"
-          : `set status to ${payload.status}`;
+          : `set status to ${nextStatus}`;
     try {
       await Notification.create({
         userId: referral.requesterId,

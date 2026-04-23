@@ -1,12 +1,9 @@
 import { Router } from "express";
 import {
-  createPost,
   createDiscussion,
-  deletePostById,
   getDiscussionFeed,
   getPostById,
   getPosts,
-  updatePostById,
   createBlog,
   getBlogFeed,
   getBlogBySlug,
@@ -32,8 +29,5 @@ router.get("/blogs/:id/adjacent", getAdjacentBlogs);
 // --- LEGACY GENERIC POST ROUTES ---
 router.get("/", getPosts);
 router.get("/:id", getPostById);
-router.post("/", authGuard, createPost);
-router.patch("/:id", authGuard, updatePostById);
-router.delete("/:id", authGuard, deletePostById);
 
 export default router;
