@@ -3,6 +3,7 @@ import User from "../auth/user.model.js";
 import Profile from "../profiles/profile.model.js";
 import Notification from "../notifications/notification.model.js";
 import ApiError from "../../utils/ApiError.js";
+import { sendReferralAcceptedEmail } from "../../utils/email.service.js";
 
 const STUDENT_BOARD = {
   title: "My referral requests",
@@ -28,51 +29,97 @@ const ALUMNI_BOARD = {
   ],
 };
 
-const statusLabel = (status) => {
-  if (status === "pending") return "Under review";
-  if (status === "accepted") return "Accepted";
-  if (status === "declined") return "Declined";
-  return status;
-};
-
 export const getReferralBoard = async (userId, role) => {
   const user = await User.findById(userId);
   if (!user) {
     throw new ApiError(404, "User not found");
   }
 
-  if (role === "student") {
-    const rows = await ReferralRequest.find({ requesterId: userId }).sort({ createdAt: -1 }).limit(50);
-    const requests = rows.map((r) => ({
-      name: r.alumniName,
-      target: `${r.targetRole} · ${r.targetCompany}`,
-      status: statusLabel(r.status),
-      meta: r.coverNote?.slice(0, 120) || "Referral request",
-    }));
-    return { ...STUDENT_BOARD, requests };
-  }
+  const boardMeta = role === "alumni" ? ALUMNI_BOARD : STUDENT_BOARD;
+  const requests = [];
 
-  if (role === "alumni") {
-    const rows = await ReferralRequest.find({ alumniId: userId }).sort({ createdAt: -1 }).limit(50);
-    const requesterIds = rows.map((row) => row.requesterId);
-    const requesterProfiles = await Profile.find({ userId: { $in: requesterIds } }).select("userId displaySlug");
-    const profileKeyByRequesterId = new Map(
-      requesterProfiles.map((profile) => [
-        String(profile.userId),
-        profile.displaySlug || String(profile.userId),
-      ])
+  // --- Sent requests (every user can send) ---
+  const sentRows = await ReferralRequest.find({ requesterId: userId }).sort({ createdAt: -1 }).limit(50);
+  if (sentRows.length) {
+    const alumniIds = sentRows.map((row) => row.alumniId);
+    const alumniProfiles = await Profile.find({ userId: { $in: alumniIds } }).select("userId displaySlug");
+    const alumniProfileKeyMap = new Map(
+      alumniProfiles.map((p) => [String(p.userId), p.displaySlug || String(p._id)])
     );
-    const requests = rows.map((r) => ({
-      profileKey: profileKeyByRequesterId.get(String(r.requesterId)) || String(r.requesterId),
-      name: r.requesterName,
-      target: `${r.targetRole} · ${r.targetCompany}`,
-      status: statusLabel(r.status),
-      meta: r.coverNote?.slice(0, 120) || "Referral request",
-    }));
-    return { ...ALUMNI_BOARD, requests };
+    for (const r of sentRows) {
+      const profileKey = alumniProfileKeyMap.get(String(r.alumniId)) || null;
+      requests.push({
+        _id: String(r._id),
+        direction: "sent",
+        alumniId: String(r.alumniId),
+        alumniName: r.alumniName,
+        alumniCompany: r.alumniCompany,
+        alumniProfileKey: profileKey,
+        // backward-compat fields for dashboard ReferralsList
+        name: r.alumniName,
+        target: `${r.targetRole} · ${r.targetCompany}`,
+        meta: r.coverNote?.slice(0, 120) || "Referral request",
+        profileKey,
+        targetRole: r.targetRole,
+        targetCompany: r.targetCompany,
+        coverNote: r.coverNote,
+        resumeUrl: r.resumeUrl,
+        status: r.status,
+        responseNote: r.responseNote,
+        createdAt: r.createdAt,
+        respondedAt: r.respondedAt,
+      });
+    }
   }
 
-  return { title: "Referrals", description: "", checklist: [], requests: [] };
+  // --- Received requests (only alumni receive) ---
+  if (role === "alumni") {
+    const receivedRows = await ReferralRequest.find({ alumniId: userId }).sort({ createdAt: -1 }).limit(50);
+    if (receivedRows.length) {
+      const requesterIds = receivedRows.map((row) => row.requesterId);
+      const requesterProfiles = await Profile.find({ userId: { $in: requesterIds } }).select(
+        "userId displaySlug department headline skills cgpa"
+      );
+      const profileByRequesterId = new Map(
+        requesterProfiles.map((p) => [String(p.userId), p])
+      );
+      for (const r of receivedRows) {
+        const rProfile = profileByRequesterId.get(String(r.requesterId));
+        const reqProfileKey = rProfile?.displaySlug || (rProfile ? String(rProfile._id) : null);
+        requests.push({
+          _id: String(r._id),
+          direction: "received",
+          requesterId: String(r.requesterId),
+          requesterName: r.requesterName,
+          requesterDept: r.requesterDept,
+          requesterYear: r.requesterYear,
+          requesterEmail: r.requesterEmail,
+          profileKey: reqProfileKey,
+          // backward-compat fields for dashboard ReferralsList
+          name: r.requesterName,
+          target: `${r.targetRole} · ${r.targetCompany}`,
+          meta: r.coverNote?.slice(0, 120) || "Referral request",
+          requesterHeadline: rProfile?.headline || null,
+          requesterSkills: rProfile?.skills || [],
+          requesterCgpa: rProfile?.cgpa || null,
+          targetRole: r.targetRole,
+          targetCompany: r.targetCompany,
+          coverNote: r.coverNote,
+          resumeUrl: r.resumeUrl,
+          linkedinUrl: r.linkedinUrl,
+          status: r.status,
+          responseNote: r.responseNote,
+          createdAt: r.createdAt,
+          respondedAt: r.respondedAt,
+        });
+      }
+    }
+  }
+
+  // Sort all requests by createdAt descending
+  requests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  return { ...boardMeta, requests };
 };
 
 export const getReferrals = async () => ReferralRequest.find().sort({ createdAt: -1 });
@@ -85,12 +132,10 @@ export const getReferralById = async (id) => {
   return referral;
 };
 
-export const createReferralRequest = async (requesterUser, body) => {
-  if (requesterUser.role !== "student") {
-    throw new ApiError(403, "Only students can create referral requests");
-  }
+const COOLDOWN_DAYS = 15;
 
-  const { alumniUserId, coverNote, targetCompany, targetRole } = body ?? {};
+export const createReferralRequest = async (requesterUser, body) => {
+  const { alumniUserId, coverNote, targetCompany, targetRole, resumeUrl } = body ?? {};
   if (!alumniUserId || !coverNote?.trim()) {
     throw new ApiError(400, "alumniUserId and coverNote are required");
   }
@@ -99,6 +144,44 @@ export const createReferralRequest = async (requesterUser, body) => {
   if (!alumniUser || alumniUser.role !== "alumni") {
     throw new ApiError(400, "Invalid alumni user");
   }
+
+  // --- Block duplicate pending requests (within 15-day window) ---
+  const pendingCutoff = new Date(Date.now() - COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
+  const existingPending = await ReferralRequest.findOne({
+    requesterId: requesterUser._id,
+    alumniId: alumniUser._id,
+    status: "pending",
+    createdAt: { $gte: pendingCutoff },
+  });
+  if (existingPending) {
+    const retryDate = new Date(existingPending.createdAt.getTime() + COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
+    const daysLeft = Math.ceil((retryDate - Date.now()) / (24 * 60 * 60 * 1000));
+    throw new ApiError(
+      429,
+      `You already have a pending request to this alumni. ${daysLeft > 0 ? `You can send another in ${daysLeft} day${daysLeft !== 1 ? "s" : ""} if it remains unanswered.` : "Please wait for a response."}`
+    );
+  }
+
+  // --- 15-day cooldown after decline ---
+  const cooldownCutoff = new Date(Date.now() - COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
+  const recentDecline = await ReferralRequest.findOne({
+    requesterId: requesterUser._id,
+    alumniId: alumniUser._id,
+    status: "declined",
+    respondedAt: { $gte: cooldownCutoff },
+  });
+  if (recentDecline) {
+    const retryDate = new Date(recentDecline.respondedAt.getTime() + COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
+    const daysLeft = Math.ceil((retryDate - Date.now()) / (24 * 60 * 60 * 1000));
+    throw new ApiError(
+      429,
+      `Your previous request to this alumni was declined. You can send another request in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}.`
+    );
+  }
+
+  // --- 15-day cooldown for ignored/pending requests older than 15 days ---
+  // If there was an old pending request that expired (>15 days), allow resending.
+  // But block if there's a pending request within the last 15 days already (handled above).
 
   const alumniProfile = await Profile.findOne({ userId: alumniUser._id });
   const requesterProfile = await Profile.findOne({ userId: requesterUser._id });
@@ -111,12 +194,13 @@ export const createReferralRequest = async (requesterUser, body) => {
     requesterName: `${requesterUser.firstName} ${requesterUser.lastName}`.trim(),
     requesterDept: requesterProfile?.department || requesterUser.department || "—",
     requesterYear,
+    requesterEmail: requesterUser.email,
     alumniId: alumniUser._id,
     alumniName: `${alumniUser.firstName} ${alumniUser.lastName}`.trim(),
     alumniCompany: alumniProfile?.currentCompany || alumniUser.currentCompany || "—",
     targetCompany: targetCompany?.trim() || alumniProfile?.currentCompany || "Open opportunity",
     targetRole: targetRole?.trim() || "Referral",
-    resumeUrl: null,
+    resumeUrl: resumeUrl?.trim() || null,
     coverNote: coverNote.trim(),
     linkedinUrl: requesterProfile?.linkedinUrl || null,
     status: "pending",
@@ -127,7 +211,7 @@ export const createReferralRequest = async (requesterUser, body) => {
       userId: alumniUser._id,
       type: "referral_request",
       text: `${referral.requesterName} sent a referral request (${referral.targetRole} · ${referral.targetCompany}).`,
-      link: "/profile/me?tab=referrals",
+      link: "/referrals",
       isRead: false,
     });
   } catch (err) {
@@ -160,6 +244,11 @@ export const updateReferralById = async (id, payload, actorUserId, actorRole) =>
     respondedAt: nextStatus === "pending" ? null : new Date(),
   };
 
+  // Store optional response note (only on accept — alumni may include referral code)
+  if (nextStatus === "accepted" && typeof payload?.responseNote === "string" && payload.responseNote.trim()) {
+    update.responseNote = payload.responseNote.trim();
+  }
+
   const prevStatus = existing.status;
   const referral = await ReferralRequest.findByIdAndUpdate(id, update, {
     new: true,
@@ -167,6 +256,7 @@ export const updateReferralById = async (id, payload, actorUserId, actorRole) =>
   });
 
   if (nextStatus !== prevStatus && referral) {
+    // --- In-app notification ---
     const statusNote =
       nextStatus === "accepted"
         ? "accepted"
@@ -178,11 +268,27 @@ export const updateReferralById = async (id, payload, actorUserId, actorRole) =>
         userId: referral.requesterId,
         type: "referral_response",
         text: `${referral.alumniName} ${statusNote} your referral request (${referral.targetRole}).`,
-        link: "/profile/me?tab=referrals",
+        link: "/referrals",
         isRead: false,
       });
     } catch (err) {
       console.error("Failed to create referral response notification:", err?.message);
+    }
+
+    // --- Send email ONLY on acceptance ---
+    if (nextStatus === "accepted" && referral.requesterEmail) {
+      try {
+        await sendReferralAcceptedEmail(
+          referral.requesterEmail,
+          referral.requesterName,
+          referral.alumniName,
+          referral.alumniCompany,
+          referral.targetRole,
+          referral.responseNote || null,
+        );
+      } catch (err) {
+        console.error("Failed to send referral acceptance email:", err?.message);
+      }
     }
   }
 
