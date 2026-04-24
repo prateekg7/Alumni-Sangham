@@ -247,6 +247,7 @@ export function DashboardPage() {
         id: post._id,
         author: post.authorName,
         avatar: initialsFromName(post.authorName),
+        authorPhotoUrl: post.authorPhotoUrl || null,
         title: post.title,
         excerpt: post.body,
         upvotes: post.upvotes ?? 0,

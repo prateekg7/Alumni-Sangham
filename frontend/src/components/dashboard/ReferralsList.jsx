@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, UserPlus } from 'lucide-react';
+import { resolvePublicAssetUrl } from '../../lib/api';
 
 function statusStyles(status) {
   if (/accepted/i.test(status)) {
@@ -29,13 +30,23 @@ export default function ReferralsList({ requests = [], onOpenReferrals }) {
               className="group grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/10 py-4"
             >
               {/* Avatar */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white">
-                {String(referral.name || '?')
-                  .split(/\s+/)
-                  .slice(0, 2)
-                  .map((part) => part[0] || '')
-                  .join('')
-                  .toUpperCase()}
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white overflow-hidden">
+                {referral.photoUrl ? (
+                  <img
+                    src={resolvePublicAssetUrl(referral.photoUrl)}
+                    alt={referral.name}
+                    className="h-full w-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }}
+                  />
+                ) : null}
+                <span className={`items-center justify-center h-full w-full ${referral.photoUrl ? 'hidden' : 'flex'}`}>
+                  {String(referral.name || '?')
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((part) => part[0] || '')
+                    .join('')
+                    .toUpperCase()}
+                </span>
               </div>
 
               {/* Name + meta */}

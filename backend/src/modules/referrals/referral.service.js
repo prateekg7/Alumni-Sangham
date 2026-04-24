@@ -42,12 +42,13 @@ export const getReferralBoard = async (userId, role) => {
   const sentRows = await ReferralRequest.find({ requesterId: userId }).sort({ createdAt: -1 }).limit(50);
   if (sentRows.length) {
     const alumniIds = sentRows.map((row) => row.alumniId);
-    const alumniProfiles = await Profile.find({ userId: { $in: alumniIds } }).select("userId displaySlug");
-    const alumniProfileKeyMap = new Map(
-      alumniProfiles.map((p) => [String(p.userId), p.displaySlug || String(p._id)])
+    const alumniProfiles = await Profile.find({ userId: { $in: alumniIds } }).select("userId displaySlug photoUrl");
+    const alumniProfileMap = new Map(
+      alumniProfiles.map((p) => [String(p.userId), p])
     );
     for (const r of sentRows) {
-      const profileKey = alumniProfileKeyMap.get(String(r.alumniId)) || null;
+      const aProf = alumniProfileMap.get(String(r.alumniId));
+      const profileKey = aProf?.displaySlug || (aProf ? String(aProf._id) : null);
       requests.push({
         _id: String(r._id),
         direction: "sent",
@@ -55,10 +56,12 @@ export const getReferralBoard = async (userId, role) => {
         alumniName: r.alumniName,
         alumniCompany: r.alumniCompany,
         alumniProfileKey: profileKey,
+        alumniPhotoUrl: aProf?.photoUrl || null,
         // backward-compat fields for dashboard ReferralsList
         name: r.alumniName,
         target: `${r.targetRole} · ${r.targetCompany}`,
         meta: r.coverNote?.slice(0, 120) || "Referral request",
+        photoUrl: aProf?.photoUrl || null,
         profileKey,
         targetRole: r.targetRole,
         targetCompany: r.targetCompany,
@@ -78,7 +81,7 @@ export const getReferralBoard = async (userId, role) => {
     if (receivedRows.length) {
       const requesterIds = receivedRows.map((row) => row.requesterId);
       const requesterProfiles = await Profile.find({ userId: { $in: requesterIds } }).select(
-        "userId displaySlug department headline skills cgpa"
+        "userId displaySlug photoUrl department headline skills cgpa"
       );
       const profileByRequesterId = new Map(
         requesterProfiles.map((p) => [String(p.userId), p])
@@ -95,10 +98,12 @@ export const getReferralBoard = async (userId, role) => {
           requesterYear: r.requesterYear,
           requesterEmail: r.requesterEmail,
           profileKey: reqProfileKey,
+          requesterPhotoUrl: rProfile?.photoUrl || null,
           // backward-compat fields for dashboard ReferralsList
           name: r.requesterName,
           target: `${r.targetRole} · ${r.targetCompany}`,
           meta: r.coverNote?.slice(0, 120) || "Referral request",
+          photoUrl: rProfile?.photoUrl || null,
           requesterHeadline: rProfile?.headline || null,
           requesterSkills: rProfile?.skills || [],
           requesterCgpa: rProfile?.cgpa || null,

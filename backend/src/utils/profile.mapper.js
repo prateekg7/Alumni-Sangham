@@ -322,6 +322,7 @@ export function toSessionUser(user, profile) {
     role: user.role,
     batchLabel,
     initials: initialsFromName(name),
+    profilePhoto: profile?.photoUrl || null,
     profileComplete: Boolean(profile?.profileComplete),
     profileProgress,
     isVerified: Boolean(user.isVerified),

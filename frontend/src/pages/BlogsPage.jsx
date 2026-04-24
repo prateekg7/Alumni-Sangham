@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { fetchBlogFeed, fetchBlogBySlug, createBlogPost, toggleBlogLike, addBlogComment, fetchAdjacentPosts } from '../lib/api';
+import { fetchBlogFeed, fetchBlogBySlug, createBlogPost, toggleBlogLike, addBlogComment, fetchAdjacentPosts, resolvePublicAssetUrl } from '../lib/api';
 import blogHero from '../assets/blogHero.svg';
 
 /* ───────────────────── recent posts helpers ───────────────────── */
@@ -39,7 +39,7 @@ function getRecentPosts() {
 
 function addRecentPost(blog) {
   const existing = getRecentPosts().filter((p) => p.slug !== blog.slug);
-  const entry = { slug: blog.slug, title: blog.title, author: blog.authorName, date: new Date(blog.createdAt).toLocaleDateString(), visitedAt: Date.now() };
+  const entry = { slug: blog.slug, title: blog.title, author: blog.authorName, authorPhotoUrl: blog.authorPhotoUrl || null, date: new Date(blog.createdAt).toLocaleDateString(), visitedAt: Date.now() };
   const updated = [entry, ...existing].slice(0, 15);
   localStorage.setItem(RECENT_POSTS_KEY, JSON.stringify(updated));
   return updated;
@@ -192,12 +192,21 @@ function BlogCard({ blog, onLike, currentUserId }) {
 
         {/* author row */}
         <div className="mt-5 flex items-center gap-3">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0f0f0f] text-sm font-bold text-[#f5eee8]">
-            {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#0f0f0f] text-sm font-bold text-[#f5eee8] overflow-hidden">
+            {blog.authorPhotoUrl ? (
+              <img src={resolvePublicAssetUrl(blog.authorPhotoUrl)} alt={blog.authorName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+            ) : null}
+            <span className={`items-center justify-center h-full w-full ${blog.authorPhotoUrl ? 'hidden' : 'flex'}`}>
+              {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
+            </span>
           </div>
           <div className="min-w-0 flex-1 flex items-center justify-between">
             <div>
-              <p className="truncate text-sm font-semibold text-gray-800">{blog.authorName}</p>
+              {blog.authorProfileKey ? (
+                <Link to={`/profile/${blog.authorProfileKey}`} className="truncate text-sm font-semibold text-gray-800 hover:text-[#8e6cf3] transition">{blog.authorName}</Link>
+              ) : (
+                <p className="truncate text-sm font-semibold text-gray-800">{blog.authorName}</p>
+              )}
               <p className="text-xs text-gray-400">{blog.authorMeta || 'Alumni'}</p>
             </div>
             {!isJob && (
@@ -473,11 +482,20 @@ export function BlogDetailPage() {
 
             {/* Author / Meta Block */}
             <div className="mt-12 flex items-center gap-4">
-              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xl font-bold bg-[#eab308] text-black">
-                {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xl font-bold bg-[#eab308] text-black overflow-hidden">
+                {blog.authorPhotoUrl ? (
+                  <img src={resolvePublicAssetUrl(blog.authorPhotoUrl)} alt={blog.authorName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+                ) : null}
+                <span className={`items-center justify-center h-full w-full ${blog.authorPhotoUrl ? 'hidden' : 'flex'}`}>
+                  {blog.authorName ? blog.authorName[0].toUpperCase() : 'A'}
+                </span>
               </div>
               <div>
-                <p className="text-[17px] font-bold text-white">{blog.authorName}</p>
+                {blog.authorProfileKey ? (
+                  <Link to={`/profile/${blog.authorProfileKey}`} className="text-[17px] font-bold text-white hover:text-[#eab308] transition">{blog.authorName}</Link>
+                ) : (
+                  <p className="text-[17px] font-bold text-white">{blog.authorName}</p>
+                )}
                 <div className="mt-1 flex items-center gap-2 text-sm text-white/40">
                   <span>{blog.authorMeta || "Alumni"}</span>
                   <span>•</span>
@@ -705,8 +723,11 @@ function CreatePostComposer({ user, onPost }) {
         onClick={() => setExpanded(true)}
         className="flex w-full items-center gap-4 border-y border-white/10 py-5 text-left transition hover:border-[#f5eee8]/45"
       >
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-sm font-bold text-black">
-          {user.initials || user.name?.[0] || 'A'}
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-sm font-bold text-black overflow-hidden">
+          {user.profilePhoto ? (
+            <img src={resolvePublicAssetUrl(user.profilePhoto)} alt={user.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+          ) : null}
+          <span className={`items-center justify-center h-full w-full ${user.profilePhoto ? 'hidden' : 'flex'}`}>{user.initials || user.name?.[0] || 'A'}</span>
         </div>
         <span className="text-[15px] font-medium text-white/50">Share an insightful article or a job opportunity...</span>
         <PenLine className="ml-auto h-5 w-5 text-[#f5eee8]/55" />
@@ -719,8 +740,11 @@ function CreatePostComposer({ user, onPost }) {
       <div className="mb-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-sm font-bold text-black">
-              {user.initials || user.name?.[0] || 'A'}
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-sm font-bold text-black overflow-hidden">
+              {user.profilePhoto ? (
+                <img src={resolvePublicAssetUrl(user.profilePhoto)} alt={user.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+              ) : null}
+              <span className={`items-center justify-center h-full w-full ${user.profilePhoto ? 'hidden' : 'flex'}`}>{user.initials || user.name?.[0] || 'A'}</span>
             </div>
             <div>
               <p className="text-[15px] font-bold tracking-wide text-white">{user.name}</p>
@@ -901,13 +925,18 @@ function RecentPostsSidebar() {
               to={`/blog/${post.slug}`}
               className="group grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 border-t border-white/10 py-4 last:border-b"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f5eee8] text-xs font-black text-black">
-                {String(post.author || '?')
-                  .split(/\s+/)
-                  .slice(0, 2)
-                  .map((part) => part[0] || '')
-                  .join('')
-                  .toUpperCase()}
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f5eee8] text-xs font-black text-black overflow-hidden">
+                {post.authorPhotoUrl ? (
+                  <img src={resolvePublicAssetUrl(post.authorPhotoUrl)} alt={post.author} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+                ) : null}
+                <span className={`items-center justify-center h-full w-full ${post.authorPhotoUrl ? 'hidden' : 'flex'}`}>
+                  {String(post.author || '?')
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((part) => part[0] || '')
+                    .join('')
+                    .toUpperCase()}
+                </span>
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-white transition group-hover:text-[#f5eee8]">

@@ -8,7 +8,7 @@ import LogOut from 'lucide-react/dist/esm/icons/log-out.js';
 import { Sidebar } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { Home } from 'lucide-react';
-import { fetchPendingReferralCount } from '@/lib/api';
+import { fetchPendingReferralCount, resolvePublicAssetUrl } from '@/lib/api';
 
 const navLinks = [
   {
@@ -136,8 +136,11 @@ export function SidePanel({ isDesktop, sidebarOpen, onClose, user, onLogout }) {
               expanded ? "gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 hover:bg-white/[0.08]" : "hover:opacity-70"
             )}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
-              {user?.initials || 'A'}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white overflow-hidden">
+              {user?.profilePhoto ? (
+                <img src={resolvePublicAssetUrl(user.profilePhoto)} alt={user?.name} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+              ) : null}
+              <span className={`items-center justify-center h-full w-full ${user?.profilePhoto ? 'hidden' : 'flex'}`}>{user?.initials || 'A'}</span>
             </div>
             <div
               className={cn(

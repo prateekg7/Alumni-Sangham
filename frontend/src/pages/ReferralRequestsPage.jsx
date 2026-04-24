@@ -14,7 +14,7 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import { fetchReferralBoard, updateReferralStatus } from '../lib/api';
+import { fetchReferralBoard, updateReferralStatus, resolvePublicAssetUrl } from '../lib/api';
 
 const referralHeroBanner =
   'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1800&q=80';
@@ -145,8 +145,11 @@ function ReviewModal({ request, onClose, onStatusUpdate }) {
         <div className="p-6 md:p-8">
           {/* Header */}
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-lg font-black text-black">
-              {initials(request.requesterName)}
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-lg font-black text-black overflow-hidden">
+              {request.requesterPhotoUrl ? (
+                <img src={resolvePublicAssetUrl(request.requesterPhotoUrl)} alt={request.requesterName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+              ) : null}
+              <span className={`items-center justify-center h-full w-full ${request.requesterPhotoUrl ? 'hidden' : 'flex'}`}>{initials(request.requesterName)}</span>
             </div>
             <div>
               <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35">
@@ -431,8 +434,11 @@ function SentDetailModal({ request, onClose }) {
         <div className="p-6 md:p-8">
           {/* Header */}
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-lg font-black text-black">
-              {initials(request.alumniName)}
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f5eee8] text-lg font-black text-black overflow-hidden">
+              {request.alumniPhotoUrl ? (
+                <img src={resolvePublicAssetUrl(request.alumniPhotoUrl)} alt={request.alumniName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+              ) : null}
+              <span className={`items-center justify-center h-full w-full ${request.alumniPhotoUrl ? 'hidden' : 'flex'}`}>{initials(request.alumniName)}</span>
             </div>
             <div>
               <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/35">
@@ -550,8 +556,11 @@ function ReceivedCard({ request, onReview }) {
       </div>
 
       <div className="flex flex-col items-center px-5 pb-2 -mt-8 relative z-10">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-sm font-black text-black shadow-lg">
-          {initials(request.requesterName)}
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-sm font-black text-black shadow-lg overflow-hidden">
+          {request.requesterPhotoUrl ? (
+            <img src={resolvePublicAssetUrl(request.requesterPhotoUrl)} alt={request.requesterName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+          ) : null}
+          <span className={`items-center justify-center h-full w-full ${request.requesterPhotoUrl ? 'hidden' : 'flex'}`}>{initials(request.requesterName)}</span>
         </div>
       </div>
 
@@ -606,8 +615,11 @@ function SentCard({ request, onView }) {
       </div>
 
       <div className="flex flex-col items-center px-5 pb-2 -mt-8 relative z-10">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-sm font-black text-black shadow-lg">
-          {initials(request.alumniName)}
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#181818] bg-[#f5eee8] text-sm font-black text-black shadow-lg overflow-hidden">
+          {request.alumniPhotoUrl ? (
+            <img src={resolvePublicAssetUrl(request.alumniPhotoUrl)} alt={request.alumniName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+          ) : null}
+          <span className={`items-center justify-center h-full w-full ${request.alumniPhotoUrl ? 'hidden' : 'flex'}`}>{initials(request.alumniName)}</span>
         </div>
       </div>
 

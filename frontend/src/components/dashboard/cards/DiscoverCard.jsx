@@ -1,4 +1,5 @@
 import { MessageCircle, ThumbsUp, ArrowUpRight } from 'lucide-react';
+import { resolvePublicAssetUrl } from '../../../lib/api';
 
 export default function DiscoverCard({ posts = [], onOpenFeed }) {
   return (
@@ -20,8 +21,11 @@ export default function DiscoverCard({ posts = [], onOpenFeed }) {
           posts.map((post) => (
             <div key={post.id} className="bg-gray-50 rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-all">
               <div className="flex items-start gap-3 mb-4">
-                <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <span className="text-sm font-bold text-black">{post.avatar}</span>
+                <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden">
+                  {post.authorPhotoUrl ? (
+                    <img src={resolvePublicAssetUrl(post.authorPhotoUrl)} alt={post.author} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+                  ) : null}
+                  <span className={`text-sm font-bold text-black items-center justify-center h-full w-full ${post.authorPhotoUrl ? 'hidden' : 'flex'}`}>{post.avatar}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-black leading-tight">{post.author}</p>

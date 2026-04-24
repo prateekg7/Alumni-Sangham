@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
 import ReferralsList from './ReferralsList';
+import { resolvePublicAssetUrl } from '../../lib/api';
 
 export default function RightPanel({
   user,
@@ -11,6 +12,8 @@ export default function RightPanel({
   const displayName = profile?.name || user?.name || 'Member';
   const headline = profile?.headline || user?.email || 'Alumni Sangham';
   const banner = '/profile_banner_v2.jpg';
+
+  const photoUrl = profile?.photoUrl || profile?.avatarUrl || user?.profilePhoto || null;
 
   return (
     <aside className="flex h-full w-full flex-col gap-8">
@@ -25,14 +28,19 @@ export default function RightPanel({
           />
         </div>
         <div className="relative px-2">
-          {/* Avatar — light cream background, dark initials, overlapping banner */}
-          <div className="absolute -top-12 left-6 flex h-24 w-24 items-center justify-center rounded-full border-[6px] border-black bg-[#fef4e8] text-2xl font-black text-black">
-            {initials}.
+          {/* Avatar — light cream background, overlapping banner */}
+          <div className="absolute -top-12 left-6 flex h-24 w-24 items-center justify-center rounded-full border-[6px] border-black bg-[#fef4e8] text-2xl font-black text-black overflow-hidden">
+            {photoUrl ? (
+              <img src={resolvePublicAssetUrl(photoUrl)} alt={displayName} className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling && (e.currentTarget.nextElementSibling.style.display = 'flex'); }} />
+            ) : null}
+            <span className={`items-center justify-center h-full w-full ${photoUrl ? 'hidden' : 'flex'}`}>{initials}</span>
           </div>
           
           <div className="mt-16">
-            <h3 className="text-3xl font-bold tracking-tight text-white">{displayName} .</h3>
-            <p className="mt-2 text-sm text-white/60">{headline} · sd</p>
+            <h3 className="text-3xl font-bold tracking-tight text-white">{displayName}</h3>
+            <p className="mt-2 text-sm text-white/60">
+              {[user?.role, profile?.company || profile?.headline, profile?.department].filter(Boolean).join(' · ') || headline}
+            </p>
             
             <div className="mt-5 inline-flex rounded-full border border-white/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
               {user?.role || 'STUDENT'}

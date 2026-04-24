@@ -1,11 +1,29 @@
 import Post from "./post.model.js";
+import Profile from "../profiles/profile.model.js";
 import ApiError from "../../utils/ApiError.js";
 import { nanoid } from "nanoid";
 
+/** Batch-enrich an array of Post docs with author photoUrl + profileKey from Profile */
+async function enrichPostsWithAuthorProfile(posts) {
+  if (!posts.length) return posts;
+  const authorIds = [...new Set(posts.map((p) => String(p.authorId)))];
+  const profiles = await Profile.find({ userId: { $in: authorIds } }).select("userId displaySlug photoUrl");
+  const profileMap = new Map(profiles.map((p) => [String(p.userId), p]));
+  return posts.map((p) => {
+    const prof = profileMap.get(String(p.authorId));
+    const obj = typeof p.toObject === "function" ? p.toObject() : { ...p };
+    obj.authorPhotoUrl = prof?.photoUrl || null;
+    obj.authorProfileKey = prof?.displaySlug || (prof ? String(prof._id) : null);
+    return obj;
+  });
+}
+
 export const getPosts = async (filter = {}) => Post.find(filter).sort({ createdAt: -1 });
 
-export const getDiscussionPosts = async () =>
-  Post.find({ postType: "discussion", isPublished: true }).sort({ createdAt: -1 });
+export const getDiscussionPosts = async () => {
+  const posts = await Post.find({ postType: "discussion", isPublished: true }).sort({ createdAt: -1 });
+  return enrichPostsWithAuthorProfile(posts);
+};
 
 export const getPostById = async (id) => {
   const post = await Post.findById(id);
@@ -180,7 +198,8 @@ export const getBlogFeed = async (query = {}) => {
     }
   }
 
-  return Post.find(filter).sort({ createdAt: -1 });
+  const posts = await Post.find(filter).sort({ createdAt: -1 });
+  return enrichPostsWithAuthorProfile(posts);
 };
 
 export const getBlogBySlug = async (slug) => {
@@ -188,7 +207,9 @@ export const getBlogBySlug = async (slug) => {
   if (!post) {
     throw new ApiError(404, "Blog post not found");
   }
-  return post;
+  // Enrich with author profile info
+  const enriched = await enrichPostsWithAuthorProfile([post]);
+  return enriched[0];
 };
 
 export const toggleLike = async (postId, userId) => {

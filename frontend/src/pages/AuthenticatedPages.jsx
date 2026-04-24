@@ -211,9 +211,25 @@ function RedditPostCard({ post }) {
 
         <div className="min-w-0 flex-1 p-5">
           <div className="flex flex-wrap items-center gap-2 text-xs text-[#5D5B71]">
+            {post.authorPhotoUrl ? (
+              <img
+                src={resolvePublicAssetUrl(post.authorPhotoUrl)}
+                alt={post.author}
+                className="h-6 w-6 rounded-full object-cover"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ) : (
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#6C63FF]/15 text-[9px] font-bold text-[#6C63FF]">
+                {(post.author || '?').split(/\s+/).slice(0, 2).map((n) => n[0]).join('').toUpperCase()}
+              </div>
+            )}
             <span className="font-medium text-[#E8E6F0]">{post.community}</span>
             <span>•</span>
-            <span>{post.author}</span>
+            {post.authorProfileKey ? (
+              <Link to={`/profile/${post.authorProfileKey}`} className="hover:text-[#E8E6F0] hover:underline transition">{post.author}</Link>
+            ) : (
+              <span>{post.author}</span>
+            )}
             <span>•</span>
             <span>{post.authorMeta}</span>
             <span>•</span>
@@ -2467,7 +2483,7 @@ export function DirectoryPage() {
 
                   {/* Card body */}
                   <div className="flex flex-1 flex-col items-center px-5 pt-2 pb-5 text-center">
-                    <h3 className="text-base font-bold text-white transition group-hover:text-[#f5eee8]">{profile.name}</h3>
+                    <Link to={`/profile/${profile.id}`} className="text-base font-bold text-white transition group-hover:text-[#f5eee8] hover:underline cursor-pointer">{profile.name}</Link>
                     <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
                       {profile.role || 'Alumni'}
                     </p>
@@ -2567,6 +2583,8 @@ export function BlogPage() {
           community: p.community || 'r/alumni-network',
           author: p.authorName,
           authorMeta: p.authorMeta || '',
+          authorPhotoUrl: p.authorPhotoUrl || null,
+          authorProfileKey: p.authorProfileKey || null,
           time: formatRelativeTime(p.createdAt),
           title: p.title,
           body: p.body,
@@ -2699,6 +2717,8 @@ export function BlogPage() {
                               community: p.community || 'r/alumni-network',
                               author: p.authorName,
                               authorMeta: p.authorMeta || '',
+                              authorPhotoUrl: p.authorPhotoUrl || null,
+                              authorProfileKey: p.authorProfileKey || null,
                               time: formatRelativeTime(p.createdAt),
                               title: p.title,
                               body: p.body,
