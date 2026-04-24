@@ -2104,8 +2104,8 @@ function ReferralRequestModal({ profile: targetProfile, onClose }) {
 }
 
 const BATCH_OPTIONS = [];
-const endYearForBatch = new Date().getFullYear() - 5;
-for (let y = endYearForBatch; y >= 2008; y--) {
+const endYearForBatch = new Date().getFullYear() - 1;
+for (let y = endYearForBatch; y >= 2012; y--) {
   BATCH_OPTIONS.push(String(y));
 }
 
@@ -2233,7 +2233,7 @@ export function DirectoryPage() {
   const activeFilterCount =
     selectedBatches.length + selectedDepts.length + selectedLocations.length + selectedIndustries.length + selectedCompanies.length;
   const searchPlaceholders = [
-    'Search alumni by company, city, role, or skill',
+    'Search alumni by company, state, role, department or industry',
     'Find product alumni in Bengaluru',
     'Search machine learning, Stripe, London',
     'Look for referral-open alumni',
@@ -2473,12 +2473,6 @@ export function DirectoryPage() {
                         <span className="flex items-center justify-center h-full w-full">{initials}</span>
                       )}
                     </div>
-
-                    {profile.referralOpen && (
-                      <span className="mt-2 rounded-full border border-white/12 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#f5eee8]">
-                        Referral open
-                      </span>
-                    )}
                   </div>
 
                   {/* Card body */}
@@ -2666,83 +2660,83 @@ export function BlogPage() {
         <div className="space-y-4">
           {user?.role !== 'student' ? (
             <SectionCard title="Create post" subtitle="Write here or arrive from the dashboard composer. Publishing happens from this feed surface.">
-            <div className="flex gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#6C63FF]/15 text-sm font-semibold text-[#6C63FF]">
-                AC
-              </div>
-              <div className="flex-1 space-y-3">
-                <textarea
-                  value={composerText}
-                  onChange={(event) => setComposerText(event.target.value)}
-                  rows={4}
-                  className="auth-input min-h-[112px] resize-none"
-                  placeholder="Create a post for the alumni network..."
-                />
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Pill>
-                      <LayoutGrid className="h-3.5 w-3.5" />
-                      Text
-                    </Pill>
-                    <Pill>
-                      <FileText className="h-3.5 w-3.5" />
-                      Resume-aware
-                    </Pill>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {postError ? <div className="text-xs text-red-400">{postError}</div> : null}
-                    <Button
-                      type="button"
-                      disabled={posting}
-                      onClick={async () => {
-                        setPostError('');
-                        const text = composerText.trim();
-                        if (!text) {
-                          return;
-                        }
-                        setPosting(true);
-                        try {
-                          const firstLine = text.split('\n').find((line) => line.trim()) || 'Post';
-                          await createDiscussionPost({
-                            title: firstLine.slice(0, 200),
-                            body: text,
-                            community: 'r/alumni-network',
-                            tag: 'Update',
-                          });
-                          setComposerText('');
-                          const data = await fetchDiscussionFeed();
-                          if (Array.isArray(data)) {
-                            const mapped = data.map((p) => ({
-                              id: p._id,
-                              community: p.community || 'r/alumni-network',
-                              author: p.authorName,
-                              authorMeta: p.authorMeta || '',
-                              authorPhotoUrl: p.authorPhotoUrl || null,
-                              authorProfileKey: p.authorProfileKey || null,
-                              time: formatRelativeTime(p.createdAt),
-                              title: p.title,
-                              body: p.body,
-                              upvotes: p.upvotes ?? 0,
-                              comments: p.commentsCount ?? 0,
-                              tag: p.tag || 'Update',
-                            }));
-                            setFeedPosts(mapped.length ? mapped : communityPosts);
+              <div className="flex gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#6C63FF]/15 text-sm font-semibold text-[#6C63FF]">
+                  AC
+                </div>
+                <div className="flex-1 space-y-3">
+                  <textarea
+                    value={composerText}
+                    onChange={(event) => setComposerText(event.target.value)}
+                    rows={4}
+                    className="auth-input min-h-[112px] resize-none"
+                    placeholder="Create a post for the alumni network..."
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Pill>
+                        <LayoutGrid className="h-3.5 w-3.5" />
+                        Text
+                      </Pill>
+                      <Pill>
+                        <FileText className="h-3.5 w-3.5" />
+                        Resume-aware
+                      </Pill>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      {postError ? <div className="text-xs text-red-400">{postError}</div> : null}
+                      <Button
+                        type="button"
+                        disabled={posting}
+                        onClick={async () => {
+                          setPostError('');
+                          const text = composerText.trim();
+                          if (!text) {
+                            return;
                           }
-                        } catch (e) {
-                          setPostError(e?.message || 'Could not publish');
-                        } finally {
-                          setPosting(false);
-                        }
-                      }}
-                      className="auth-btn-primary h-10 px-4 disabled:opacity-60"
-                    >
-                      {posting ? 'Posting…' : 'Post'}
-                    </Button>
+                          setPosting(true);
+                          try {
+                            const firstLine = text.split('\n').find((line) => line.trim()) || 'Post';
+                            await createDiscussionPost({
+                              title: firstLine.slice(0, 200),
+                              body: text,
+                              community: 'r/alumni-network',
+                              tag: 'Update',
+                            });
+                            setComposerText('');
+                            const data = await fetchDiscussionFeed();
+                            if (Array.isArray(data)) {
+                              const mapped = data.map((p) => ({
+                                id: p._id,
+                                community: p.community || 'r/alumni-network',
+                                author: p.authorName,
+                                authorMeta: p.authorMeta || '',
+                                authorPhotoUrl: p.authorPhotoUrl || null,
+                                authorProfileKey: p.authorProfileKey || null,
+                                time: formatRelativeTime(p.createdAt),
+                                title: p.title,
+                                body: p.body,
+                                upvotes: p.upvotes ?? 0,
+                                comments: p.commentsCount ?? 0,
+                                tag: p.tag || 'Update',
+                              }));
+                              setFeedPosts(mapped.length ? mapped : communityPosts);
+                            }
+                          } catch (e) {
+                            setPostError(e?.message || 'Could not publish');
+                          } finally {
+                            setPosting(false);
+                          }
+                        }}
+                        className="auth-btn-primary h-10 px-4 disabled:opacity-60"
+                      >
+                        {posting ? 'Posting…' : 'Post'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </SectionCard>
+            </SectionCard>
           ) : (
             <div className="rounded-md border border-[#2A2940] bg-[#0F0E17] p-4 text-sm text-[#9694A8]">
               Posting is currently restricted to Alumni users. Students may read and follow ongoing discussions.
