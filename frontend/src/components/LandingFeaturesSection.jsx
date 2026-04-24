@@ -5,6 +5,15 @@ import ScrollStack, { ScrollStackItem } from './ui/scroll-stack';
 
 const featureCards = [
   {
+    name: 'Dashboard & Insights',
+    description:
+      'A personalized hub that surfaces network activity, referral progress, community discussions, and recognition — turning scattered alumni energy into actionable signal.',
+    image:
+      'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80',
+    overlay:
+      'linear-gradient(135deg, rgba(8,64,82,0.88) 0%, rgba(16,16,16,0.52) 46%, rgba(12,50,61,0.65) 100%)',
+  },
+  {
     name: 'Alumni Directory',
     description:
       'Discover and connect with alumni across batches, companies, and cities — filter by domain, referral availability, and more to find the right people, fast.',
@@ -14,6 +23,15 @@ const featureCards = [
       'linear-gradient(135deg, rgba(8,64,82,0.92) 0%, rgba(12,50,61,0.65) 48%, rgba(16,16,16,0.35) 100%)',
   },
   {
+    name: 'Blogs & Jobs',
+    description:
+    'A unified feed where alumni share career stories, job openings, and practical guidance — keeping the network alive and valuable between direct interactions.',
+    image:
+    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80',
+    overlay:
+    'linear-gradient(135deg, rgba(16,16,16,0.88) 0%, rgba(8,64,82,0.7) 50%, rgba(12,50,61,0.3) 100%)',
+  },
+  {
     name: 'Referral Requests',
     description:
       'Students can send structured referral requests to alumni with context and intent, while alumni get a calm, organized view of who needs help and why.',
@@ -21,24 +39,6 @@ const featureCards = [
       'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80',
     overlay:
       'linear-gradient(135deg, rgba(12,50,61,0.94) 0%, rgba(5,21,28,0.68) 45%, rgba(16,16,16,0.32) 100%)',
-  },
-  {
-    name: 'Blogs & Jobs',
-    description:
-      'A unified feed where alumni share career stories, job openings, and practical guidance — keeping the network alive and valuable between direct interactions.',
-    image:
-      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80',
-    overlay:
-      'linear-gradient(135deg, rgba(16,16,16,0.88) 0%, rgba(8,64,82,0.7) 50%, rgba(12,50,61,0.3) 100%)',
-  },
-  {
-    name: 'Dashboard & Insights',
-    description:
-      'A personalized hub that surfaces network activity, referral progress, community discussions, and recognition — turning scattered alumni energy into actionable signal.',
-    image:
-      'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80',
-    overlay:
-      'linear-gradient(135deg, rgba(8,64,82,0.88) 0%, rgba(16,16,16,0.52) 46%, rgba(12,50,61,0.65) 100%)',
   },
 ];
 

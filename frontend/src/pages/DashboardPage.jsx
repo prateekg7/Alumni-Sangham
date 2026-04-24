@@ -4,6 +4,7 @@ import { ArrowUpRight, MessageCircle, Send, Sparkles, ThumbsUp, Users } from 'lu
 import HeroSection from '../components/dashboard/HeroSection';
 import RightPanel from '../components/dashboard/RightPanel';
 import {
+  fetchBlogFeed,
   fetchDirectory,
   fetchDiscussionFeed,
   fetchHallOfFame,
@@ -31,7 +32,7 @@ function initialsFromName(name) {
 
 function DashboardContent({
   user,
-  discoverPosts,
+  topBlog,
   newsItems,
   directoryCount,
   onOpenFeed,
@@ -39,7 +40,6 @@ function DashboardContent({
   onCreatePost,
 }) {
   const [draft, setDraft] = useState('');
-  const featuredPost = discoverPosts[0];
 
   return (
     <section className="flex h-full flex-col space-y-4">
@@ -125,10 +125,10 @@ function DashboardContent({
               Blogs
             </div>
             <h3 className="mt-4 text-xl font-bold leading-snug text-[#2c1a0e] md:text-2xl">
-              {featuredPost?.title || 'Share insights & stories'}
+              {topBlog?.title || 'Share insights & stories'}
             </h3>
             <p className="mt-3 max-w-md text-sm leading-6 text-[#2c1a0e]/55">
-              {featuredPost?.excerpt || 'Ask for guidance, share an opening, or start a campus thread.'}
+              {topBlog?.body ? topBlog.body.slice(0, 160) : 'Ask for guidance, share an opening, or start a campus thread.'}
             </p>
           </div>
           <div className="hidden sm:flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#2c1a0e]/10">
@@ -204,6 +204,7 @@ export function DashboardPage() {
   const [hallOfFame, setHallOfFame] = useState([]);
   const [referralBoard, setReferralBoard] = useState({ title: '', description: '', requests: [] });
   const [profile, setProfile] = useState(null);
+  const [topBlog, setTopBlog] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,11 +216,12 @@ export function DashboardPage() {
         fetchHallOfFame(),
         fetchReferralBoard(),
         fetchMyProfile(),
+        fetchBlogFeed(),
       ]);
 
       if (cancelled) return;
 
-      const [directoryResult, discussionsResult, hofResult, referralResult, profileResult] = results;
+      const [directoryResult, discussionsResult, hofResult, referralResult, profileResult, blogResult] = results;
 
       setDirectory(directoryResult.status === 'fulfilled' && Array.isArray(directoryResult.value) ? directoryResult.value : []);
       setDiscussions(discussionsResult.status === 'fulfilled' && Array.isArray(discussionsResult.value) ? discussionsResult.value : []);
@@ -230,6 +232,9 @@ export function DashboardPage() {
           : { title: '', description: '', requests: [] },
       );
       setProfile(profileResult.status === 'fulfilled' ? profileResult.value : null);
+      if (blogResult.status === 'fulfilled' && Array.isArray(blogResult.value) && blogResult.value.length > 0) {
+        setTopBlog(blogResult.value[0]);
+      }
     })();
 
     return () => { cancelled = true; };
@@ -277,7 +282,7 @@ export function DashboardPage() {
         <div className="min-w-0 flex-1">
           <DashboardContent
             user={user}
-            discoverPosts={discoverPosts}
+            topBlog={topBlog}
             newsItems={newsItems}
             directoryCount={directory.length}
             onOpenFeed={() => navigate('/blog?tab=posts')}
