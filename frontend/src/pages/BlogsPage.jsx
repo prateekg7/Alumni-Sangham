@@ -464,8 +464,21 @@ export function BlogDetailPage() {
           <div className="px-5 py-8 md:px-10 lg:px-12 max-w-[850px] mx-auto">
             
             {isJob ? (
-              <div className="inline-flex items-center gap-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-6">
-                <Briefcase className="h-3.5 w-3.5" /> Job Opportunity
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="inline-flex w-max items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-blue-400">
+                  <Briefcase className="h-3.5 w-3.5" /> Job Opportunity
+                </div>
+                {blog.applyLink ? (
+                  <a
+                    href={blog.applyLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex w-max items-center gap-2 rounded-xl border border-[#eab308]/35 bg-[#eab308] px-5 py-2.5 text-sm font-black text-black shadow-[0_14px_45px_rgba(234,179,8,0.16)] transition-all hover:-translate-y-0.5 hover:bg-[#facc15] hover:shadow-[0_18px_55px_rgba(234,179,8,0.24)]"
+                  >
+                    Apply now
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                ) : null}
               </div>
             ) : (
               <div className="mb-8 flex items-center gap-4">
@@ -883,20 +896,20 @@ function CreatePostComposer({ user, onPost }) {
 /* ───────────── recent posts sidebar ───────────── */
 
 function RecentPostsSidebar() {
-  const [recentPosts, setRecentPosts] = useState([]);
+  const [recentPosts, setRecentPosts] = useState(() => getRecentPosts());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    setRecentPosts(getRecentPosts());
-
     // Listen for storage changes 
     const interval = setInterval(() => {
+      setNow(Date.now());
       setRecentPosts(getRecentPosts());
     }, 2000);
     return () => clearInterval(interval);
   }, []);
 
   const formatVisitedTime = (ts) => {
-    const diff = Date.now() - ts;
+    const diff = now - ts;
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Just now';
     if (mins < 60) return `${mins}m ago`;
