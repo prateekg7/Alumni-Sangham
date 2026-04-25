@@ -1,239 +1,113 @@
-# Alumni Sangham
+# Alumni Sangham - IIT Patna Alumni Network
 
-Alumni Sangham is a full-stack alumni network platform for IIT Patna. It gives students, alumni, and admins a shared space to discover people, manage profiles, send structured referral requests, publish jobs and stories, and keep the community active beyond one-off introductions.
+Alumni Sangham is a premium, full-stack ecosystem designed to bridge the gap between students and alumni at **IIT Patna**. It provides a structured space for networking, mentorship, referrals, and community growth.
 
-## Table of Contents
+![IITP Banner](images/about2.png)
 
-- [What the project does](#what-the-project-does)
-- [Why the project is useful](#why-the-project-is-useful)
-- [Tech stack](#tech-stack)
-- [Repository layout](#repository-layout)
-- [How users can get started](#how-users-can-get-started)
-- [Usage examples](#usage-examples)
-- [Where users can get help](#where-users-can-get-help)
-- [Who maintains and contributes](#who-maintains-and-contributes)
+## Key Features
 
-## What the project does
+- **Smart Directory:** Deep-filter alumni by batch, department, location, industry, and company.
+- **Referral Engine:** A structured workflow for students to request referrals and alumni to manage incoming asks with ease.
+- **Pro Profiles:** Rich profiles including dynamic external links, resume management, and role-specific highlights.
+- **Community Content:** Dedicated spaces for blogs, job postings, and discussions to keep the network vibrant.
+- **Hall of Fame:** Recognizing outstanding achievements within the IIT Patna community.
+- **Secure Onboarding:** OTP-based verification for both students and alumni to ensure a verified network.
 
-Alumni Sangham combines a React frontend and an Express/MongoDB backend to support the core workflows of a modern alumni community:
+---
 
-- Role-aware onboarding for students and alumni, with OTP-based verification and password reset flows.
-- Public and private profiles, including resume uploads and role-specific profile fields.
-- A searchable alumni directory with filters for location, domain, and referral openness.
-- Referral request workflows so students can send structured asks and alumni can review incoming requests.
-- A content layer for blogs, jobs, and discussion posts to keep the network active between direct requests.
-- Notifications, Hall of Fame entries, and admin-facing college record verification routes.
-
-## Why the project is useful
-
-- It centralizes alumni discovery instead of scattering networking across spreadsheets, DMs, and informal groups.
-- It makes referral requests more actionable by attaching profile context and resume visibility to the request flow.
-- It supports both relationship-building and content-sharing, so the platform stays useful even when users are not actively asking for help.
-- It keeps the experience role-aware: students, alumni, and admins each have different responsibilities and surfaces.
-- It includes seed and smoke-test scripts, which makes local onboarding much easier for new contributors.
-
-## Tech stack
+## Tech Stack
 
 ### Frontend
-
-- React 19
-- Vite 8
-- React Router 7
-- Tailwind CSS
-- Framer Motion, GSAP, OGL, Lucide, Font Awesome
+- **Framework:** React 19 + Vite 8
+- **Styling:** Tailwind CSS (Custom Design System)
+- **Animations:** Framer Motion, GSAP, OGL
+- **Icons:** Lucide React, Font Awesome
 
 ### Backend
+- **Runtime:** Node.js + Express 5
+- **Database:** MongoDB + Mongoose
+- **Auth:** JWT (Access + Refresh Token flow)
+- **Communication:** Nodemailer (SMTP OTP Service)
+- **Storage:** Multer & Cloudinary (Integrated)
 
-- Node.js with Express 5
-- MongoDB with Mongoose
-- JWT-based auth with refresh-token flow
-- Nodemailer for OTP emails
-- Multer for resume uploads
+---
 
-## Repository layout
-
-```text
-.
-├── backend/                  # Express API, MongoDB models, seed and smoke scripts
-│   ├── scripts/
-│   └── src/
-│       ├── config/
-│       ├── middlewares/
-│       ├── modules/
-│       └── utils/
-├── frontend/                 # Vite + React client
-│   ├── public/
-│   └── src/
-│       ├── components/
-│       ├── layouts/
-│       ├── lib/
-│       └── pages/
-└── README.md
-```
-
-Useful entry points:
-
-- Frontend routes: [`frontend/src/App.jsx`](frontend/src/App.jsx)
-- Frontend API client: [`frontend/src/lib/api.js`](frontend/src/lib/api.js)
-- Backend app wiring: [`backend/src/app.js`](backend/src/app.js)
-- Backend environment config: [`backend/src/config/env.js`](backend/src/config/env.js)
-
-## How users can get started
+## Getting Started
 
 ### Prerequisites
+- Node.js 20+
+- MongoDB (Local or Atlas)
 
-- Node.js 20 or newer
-- npm
-- A MongoDB instance
-
-### 1. Install dependencies
-
+### 1. Installation
 ```bash
-cd backend
-npm install
+# Clone the repository
+git clone https://github.com/prateekg7/Alumni-Sangham.git
+cd Alumni-Sangham
 
-cd ../frontend
-npm install
+# Install Backend dependencies
+cd backend && npm install
+
+# Install Frontend dependencies
+cd ../frontend && npm install
 ```
 
-### 2. Configure the backend environment
-
-Create `backend/.env` with the required values below:
-
+### 2. Environment Setup
+Create a `.env` file in the `backend/` directory:
 ```env
 PORT=8000
-NODE_ENV=development
-MONGO_URI=mongodb://127.0.0.1:27017/alumni-network
-JWT_SECRET=replace-with-a-long-random-string
-JWT_REFRESH_SECRET=replace-with-a-second-long-random-string
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
 
-# Optional in development; useful in production for credentialed requests
-CORS_ORIGIN=http://127.0.0.1:5173,http://127.0.0.1:5174
-
-# Optional mail config for OTP emails
-SMTP_SERVICE=
+# SMTP Config (Optional for local testing)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM=
-SMTP_FROM_NAME=Alumni Sangham
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
 ```
 
-Notes:
-
-- `MONGO_URI`, `JWT_SECRET`, and `JWT_REFRESH_SECRET` are required for the backend to start.
-- If SMTP is not configured, OTPs are logged to the backend console in development instead of being emailed.
-- The backend listens on port `8000` by default.
-
-### 3. Start the backend
-
+### 3. Run Locally
 ```bash
-cd backend
-npm run dev
+# Terminal 1 (Backend)
+cd backend && npm run dev
+
+# Terminal 2 (Frontend)
+cd frontend && npm run dev
 ```
 
-### 4. Start the frontend
+---
 
-```bash
-cd frontend
-npm run dev
-```
+## Contributing
 
-Open the app at `http://127.0.0.1:5173`. If that port is already in use, Vite will automatically choose the next available port, typically `5174`.
+We welcome contributions from the community! To maintain code quality, please follow these steps:
 
-Local development does not require a frontend `.env` file if you use the default Vite proxy. The frontend proxies `/api` and `/uploads` to `http://127.0.0.1:8000`.
+1.  **Fork** the repository.
+2.  **Create a Branch:** `git checkout -b feature/amazing-feature`.
+3.  **Commit Changes:** `git commit -m 'Add some amazing feature'`.
+4.  **Push:** `git push origin feature/amazing-feature`.
+5.  **Open a Pull Request:** Describe your changes in detail and include screenshots if it's a UI update.
 
-If you need to point the frontend at a different backend, create `frontend/.env` with:
+### Guidelines:
+- Keep pull requests small and focused.
+- Ensure your code follows the existing style patterns.
+- Run the smoke test (`npm run smoke` in backend) before submitting.
 
-```env
-VITE_API_BASE_URL=http://127.0.0.1:8000
-```
+---
 
-### 5. Seed demo data (optional)
+## The Team
 
-The backend includes a seed script for demo alumni, Hall of Fame entries, notifications, and posts.
+Meet the minds behind Alumni Sangham:
 
-```bash
-cd backend
-npm run seed
-```
+- **Prateek Gupta**
+- **Nakshtra Goyal**
+- **Ansh Goyal**
+- **Vaibhavi Parmar**
+- **Vaishnavy**
 
-Optional seed variable:
+---
 
-```env
-SEED_DEMO_PASSWORD=Demo@1234
-```
+## License
+This project is for internal use and community growth at IIT Patna. Contact the maintainers for licensing inquiries.
 
-### 6. Run the smoke test (optional)
-
-The backend includes a lightweight integration smoke test that exercises registration, login, `/me`, and the directory endpoint.
-
-```bash
-cd backend
-npm run smoke
-```
-
-The smoke test expects the backend to already be running. You can override the default API base with:
-
-```env
-SMOKE_BASE_URL=http://127.0.0.1:8000
-```
-
-## Usage examples
-
-### Check the API health endpoint
-
-```bash
-curl http://127.0.0.1:8000/
-```
-
-### Fetch directory entries
-
-```bash
-curl http://127.0.0.1:8000/api/directory
-```
-
-### Typical local development loop
-
-1. Start MongoDB.
-2. Run `npm run dev` in `backend/`.
-3. Run `npm run dev` in `frontend/`.
-4. Optionally run `npm run seed` in `backend/`.
-5. Visit the landing page, register as a student or alumni user, then explore the dashboard, directory, profile, blog, and referral flows.
-
-## Where users can get help
-
-Start with the source files that define the main platform behavior:
-
-- [`backend/src/app.js`](backend/src/app.js) for mounted API modules and route groups
-- [`backend/scripts/smoke-test.js`](backend/scripts/smoke-test.js) for a minimal end-to-end verification path
-- [`backend/scripts/seed.js`](backend/scripts/seed.js) for demo data setup
-- [`frontend/src/App.jsx`](frontend/src/App.jsx) for route structure
-- [`frontend/src/lib/api.js`](frontend/src/lib/api.js) for client-side API calls and auth token handling
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) for contributor workflow expectations
-
-If you need help beyond the local docs, open an issue or a pull request in this repository so the discussion stays close to the code.
-
-## Who maintains and contributes
-
-This project is maintained by the repository owner and active contributors to the Alumni Sangham codebase.
-
-Recent contributors visible in the git history include:
-
-- `prateekg7`
-- `Ansh1084`
-- `Prateek Gupta`
-- `Vaibhavi Parmar`
-- `Naksh2006`
-- `Vaishanvy-dot`
-- `Vaishnavy`
-- `Nakshtra Goyal`
-
-To contribute:
-
-- Read [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- Keep pull requests focused and easy to review
-- Run the relevant local checks before opening a PR
-- Include screenshots or short recordings for UI changes when possible
+---
+*Built for the IIT Patna Community.*
