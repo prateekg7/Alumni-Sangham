@@ -208,7 +208,10 @@ function splitLocation(location) {
 }
 
 function buildFormFromProfile(profile) {
-  const { city, state, country } = splitLocation(profile.location);
+  const { city, state, country } = profile.city !== undefined || profile.state !== undefined || profile.country !== undefined
+    ? { city: profile.city || '', state: profile.state || '', country: profile.country || '' }
+    : splitLocation(profile.location);
+
   return {
     fullName: profile.name || '',
     phone: fieldByLabel(profile.personalFields, 'Phone'),

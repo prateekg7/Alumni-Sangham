@@ -2305,7 +2305,7 @@ export function DirectoryPage() {
       <div className="grid grid-cols-1 gap-8 pb-16 lg:grid-cols-4">
         {/* Sidebar Filters */}
         <div className="lg:col-span-1">
-          <div className="sticky top-6 p-2 font-mono">
+          <div className="sticky top-6 p-2 font-mono max-h-[calc(100vh-3rem)] overflow-y-auto scrollbar-hide">
             <div className="mb-6">
               <div className="text-[11px] font-bold uppercase tracking-[0.26em] text-white/35">Filters</div>
               <div className="mt-2 text-sm text-white/56">

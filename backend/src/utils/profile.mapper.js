@@ -88,7 +88,7 @@ export function toDirectoryCard(profile, user) {
     avatarTone: profile.avatarTone || "from-[#8f7cff] to-[#4d82ff]",
     photoUrl: profile.photoUrl || null,
     avatarUrl: profile.photoUrl || null,
-    batch: user?.gradYear || user?.expectedGradYear || profile.batch || "",
+    batch: user?.gradYear || user?.expectedGradYear || profile.batchYear || "",
     department: profile.department || "",
   };
 }
@@ -259,6 +259,9 @@ export function toFullProfile(profile, user, { isOwner = false, profileCompleteO
         ? `Student · ${batchLabel || ""} · ${profile.department || ""}`.replace(/\s+·\s*$/, "")
         : `Alumni · ${batchLabel || ""} · ${profile.department || "IIT Patna"}`.replace(/\s+·\s*$/, ""),
     location,
+    city: profile.city || "",
+    state: profile.state || "",
+    country: profile.country || "",
     memberCode: profile.memberCode || (role === "student" ? "STD-MEMBER" : "ALM-MEMBER"),
     memberSince: profile.memberSinceLabel || "Member",
     baseLabel: profile.baseLabel || (role === "student" ? "Campus" : "Chapter"),
